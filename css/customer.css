@@ -1,0 +1,115 @@
+/* Reset Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Search Bar */
+.search-container {
+    display: flex;
+    gap: 10px;
+    background: #E0E0E0;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-btn,
+.clear-btn {
+    background: #6B8E5E;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.clear-btn {
+    background: #A3A3A3;
+}
+
+/* Table Controls - Move buttons to the right */
+.table-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    justify-content: flex-end; /* Align buttons to the right */
+}
+
+
+.create-btn,
+.edit-btn,
+.delete-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.create-btn {
+    background: #6B8E5E;
+    color: white;
+}
+
+.edit-btn {
+    background: #FFD700;
+    color: black;
+}
+
+.delete-btn {
+    background: #FF6347;
+    color: white;
+}
+
+/* Table */
+.customer-table {
+    background: #F5F5F5;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #E6C200;
+}
+
+thead th {
+    padding: 10px;
+    text-align: left;
+}
+
+tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+tbody tr:hover {
+    background: #EFEFEF;
+}

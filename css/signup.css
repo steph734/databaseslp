@@ -1,0 +1,141 @@
+/* General Page Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(to bottom, #3e5e3e, #d4d8c0);
+}
+
+/* Signup Container */  
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    height: 80vh;
+    background: linear-gradient(to bottom, #153b13, #a5b88e);
+    border-radius: 10px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Signup Box */
+.signup-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 50px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 400px; /* Adjust width */
+    height: auto;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Signup Title */
+.signup-title {
+    font-size: 22px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Input Fields - One per Line */
+.input-group {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.input-group input, 
+.input-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    text-align: left;
+}
+
+
+
+/* Button */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #324c32;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px; /* Add space above the button */
+}
+
+button:hover {
+    background-color: #1f341f;
+}
+/* Signup Banner */
+.signup-banner {
+    flex: 1;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 50px;
+}
+
+/* Signup Banner */
+.signup-banner {
+    flex: 1;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 50px;
+}
+
+.signup-banner h1 {
+    font-size: 45px;
+    font-weight: bold;
+}
+
+.signup-banner p {
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+
+
+/* Background Shapes */
+.container::before,
+.container::after {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+.container::before {
+    top: -30px;
+    left: -30px;
+}
+
+.container::after {
+    bottom: -30px;
+    right: -30px;
+}
