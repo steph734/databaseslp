@@ -69,21 +69,6 @@ header {
     font-weight: bold;
 }
 
-.create-btn {
-    background: #6B8E5E;
-    color: white;
-}
-
-.edit-btn {
-    background: #FFD700;
-    color: black;
-}
-
-.delete-btn {
-    background: #FF6347;
-    color: white;
-}
-
 /* Table */
 .customer-table {
     background: #F5F5F5;

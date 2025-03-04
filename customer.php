@@ -1,3 +1,8 @@
+<?php
+include 'database/db.php';
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +13,7 @@
     <link rel="stylesheet" href="css/customer.css"> 
     <link rel="stylesheet" href="css/sales.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
 </head>
 <body>
@@ -39,19 +45,78 @@
         </header>
 
         <div class="search-container">
-            <input type="text" placeholder="Customer ID">
-            <input type="text" placeholder="Name">
-            <input type="text" placeholder="Contact">
-            <input type="text" placeholder="Address">
-            <button class="search-btn">SEARCH</button>
-            <button class="clear-btn">CLEAR</button>
+
+        <div class="search">
+        <input type="text" placeholder="" style="width: 300px;">
+            <button class="btn btn-success">SEARCH</button>
+            <button class="btn btn-primary">CLEAR</button>
+
+        </div>
+        
         </div>
 
         <div class="customer-table">
             <div class="table-controls">
-                <button class="create-btn">CREATE NEW <span>+</span></button>
-                <button class="edit-btn">EDIT <span>✏️</span></button>
-                <button class="delete-btn">DELETE <span>🗑️</span></button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createmodal">CREATE NEW <span>+</span></button>
+                <div class="modal" id="createmodal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Add New Customer</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                   <div class="mb-3">
+                                   <label class="form-label">Firstname</label>
+                                    <input type="text"  class="form-control">
+                                   </div>
+
+                                   <div class="mb-3">
+                                   <label class="form-label">Middlename</label>
+                                    <input type="text"  class="form-control">
+                                   </div>
+
+                                   <div class="mb-3">
+                                   <label class="form-label">Lastname</label>
+                                    <input type="text"  class="form-control">
+                                   </div>
+
+                                   <div class="mb-3">
+                                   <label class="form-label">Contact</label>
+                                    <input type="text"  class="form-control">
+                                   </div>
+
+                                   <div class="mb-3">
+                                   <label class="form-label">Address</label>
+                                    <input type="text"  class="form-control">
+                                   </div>
+                                   <div class="mb-3">
+                            <label class="form-label">Customer Type</label>
+                         <div class="dropdown">
+                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">Customer Type
+                        </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="#">Regular Customer</a></li>
+                     <li><a class="dropdown-item" href="#">Walk-in Customer</a></li>
+                     <li><a class="dropdown-item" href="#">Member</a></li>
+                </ul>
+            </div>
+            </div>
+                                </form>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success">Submit</button>
+                                <button type="clear" class="btn btn-primary">Clear  </button>
+                                <button type="cancel" class="btn btn-danger">Cancel</button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editmodal">EDIT <span>✏️</span></button>
+                   
+                <button class="btn btn-danger">DELETE <span>🗑️</span></button>
             </div>
             <table>
                 <thead>
@@ -72,4 +137,6 @@
         </div>
     </div>
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </html>
