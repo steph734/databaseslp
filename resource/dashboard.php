@@ -1,23 +1,24 @@
 <?php
-    session_start();
-    if (!isset($_SESSION['username'])) {
-        header("Location: login.php");
-        exit();
-    }
-    $username = $_SESSION['username'];
-    $username = ucfirst($username);
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+$username = $_SESSION['username'];
+$username = ucfirst($username);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="../design/css/dashboard.css">
-
+    <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 </head>
+
 <body>
     <div class="sidebar">
         <ul>
@@ -35,14 +36,20 @@
             <li><a href="login.php"><i class="fa fa-sign-out-alt"></i> Log Out</a></li>
         </ul>
     </div>
-    
+
 
     <div class="main-content">
         <header>
             <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
             <div class="search-profile">
-                <input type="text" placeholder="Search...">
-                <img src="profile.jpg" alt="Profile">
+                <form action="">
+                    <div class="search-container">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Search...">
+
+                    </div>
+                </form>
+                <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
             </div>
         </header>
 
@@ -58,4 +65,5 @@
         </div>
     </div>
 </body>
+
 </html>
