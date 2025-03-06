@@ -1,7 +1,7 @@
 /* Sales Page Specific Styles */
 
 /* Search Bars */
-.search-container {
+.search-container-sales {
   display: flex;
   gap: 10px;
   background: #d3d3d3;
@@ -10,7 +10,7 @@
   margin: 20px 0;
 }
 
-.search-container input {
+.search-container-sales input {
   flex: 1;
   padding: 8px;
   border: 1px solid #aaa;

@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<pre>";
             var_dump($_SESSION);
             echo "</pre>";
-            header("Location: ../resource/dashboard.php");
+            header("Location: ../resource/layout/web-layout.php");
             exit();
         } else {
             echo "Invalid password.";
