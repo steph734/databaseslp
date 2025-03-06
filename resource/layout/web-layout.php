@@ -23,7 +23,7 @@ $username = ucfirst($_SESSION['username']);
     <link rel="stylesheet" href="../css/supplier.css">
     <link rel="stylesheet" href="../css/products.css">
     <link rel="stylesheet" href="../css/returns.css">
-
+    <link rel="stylesheet" href="../css/sidebar.css">
     <!-- css -->
     <link rel="stylesheet" href="../../statics/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -33,8 +33,6 @@ $username = ucfirst($_SESSION['username']);
 <body>
 
     <?php include __DIR__ . '/../views/sidebar.php'; ?>
-
-
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 

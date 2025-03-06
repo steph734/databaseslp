@@ -2,8 +2,8 @@
     <header>
         <h1>Suppliers</h1>
         <div class="search-profile">
-            <input type="text" placeholder="Search...">
-            <img src="profile.jpg" alt="Profile">
+            <?php include __DIR__ . '/searchbar.php'; ?>
+            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
         </div>
     </header>
 

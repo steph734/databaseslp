@@ -2,13 +2,7 @@
     <header>
         <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
         <div class="search-profile">
-            <form action="">
-                <div class="search-container-dash">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" placeholder="Search...">
-                    <!-- update -->
-                </div>
-            </form>
+            <?php include __DIR__ . '/searchbar.php'; ?>
             <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
         </div>
     </header>
@@ -133,4 +127,4 @@
         </div>
     </div>
 </div>
-<script src="../../js/dashboard.js"></script>
+<script src="../js/dashboard.js"></script>
