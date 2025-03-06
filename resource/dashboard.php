@@ -46,7 +46,7 @@ $username = ucfirst($username);
                     <div class="search-container">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input type="text" placeholder="Search...">
-
+                        <!-- update -->
                     </div>
                 </form>
                 <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
