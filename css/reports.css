@@ -1,86 +1,86 @@
 /* Sales Page Specific Styles */
 
-/* Search Bar */
+/* Search Bars */
 .search-container {
-    display: flex;
-    gap: 10px;
-    background: #D3D3D3;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  background: #d3d3d3;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
 }
 
 .search-container input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #aaa;
-    border-radius: 5px;
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
 }
 
 .search-btn,
 .clear-btn {
-    background: #6B8E5E;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
+  background: #6b8e5e;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .clear-btn {
-    background: #A3A3A3;
+  background: #a3a3a3;
 }
 
 /* Table Controls */
 .table-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    justify-content: flex-end;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  justify-content: flex-end;
 }
 
 .create-btn {
-    background: #6B8E5E;
-    color: white;
+  background: #6b8e5e;
+  color: white;
 }
 
 .edit-btn {
-    background: #FFD700;
-    color: black;
+  background: #ffd700;
+  color: black;
 }
 
 .delete-btn {
-    background: #FF6347;
-    color: white;
+  background: #ff6347;
+  color: white;
 }
 
 /* Sales Table */
 .sales-table {
-    background: #F5F5F5;
-    padding: 15px;
-    border-radius: 10px;
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 10px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 thead {
-    background: #E6C200;
+  background: #e6c200;
 }
 
 thead th {
-    padding: 10px;
-    text-align: left;
+  padding: 10px;
+  text-align: left;
 }
 
 tbody td {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
 }
 
 tbody tr:hover {
-    background: #EFEFEF;
+  background: #efefef;
 }
