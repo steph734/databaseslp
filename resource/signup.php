@@ -7,7 +7,7 @@
     <title>Sign Up</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="../statics/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/signup.css">
+    <link rel="stylesheet" href="css/signup.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
