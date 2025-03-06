@@ -1,4 +1,12 @@
 <div class="main-content">
+    <?php if ($login == "valid") : ?>
+        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
+            Login Successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+
     <header>
         <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
         <div class="search-profile">
@@ -128,3 +136,12 @@
     </div>
 </div>
 <script src="../js/dashboard.js"></script>
+<script>
+    setTimeout(function() {
+        let alert = document.querySelector(".floating-alert");
+        if (alert) {
+            alert.style.opacity = "0";
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 4000);
+</script>

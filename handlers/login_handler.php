@@ -20,24 +20,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['admin_id'] = $admin_id;
             $_SESSION['username'] = $username;
             $_SESSION['role'] = $role;
+            $_SESSION['login'] = "valid";
 
-            // Debugging: Check session data
             echo "<pre>";
             var_dump($_SESSION);
             echo "</pre>";
             header("Location: ../resource/layout/web-layout.php");
             exit();
         } else {
-            echo "Invalid password.";
-            header("Location: ../resource/login.php?error=invalid"); // More specific error
+            $_SESSION['error'] = "invalid";
+            header("Location: ../resource/login.php?error=invalid");
             exit();
         }
     } else {
+        $_SESSION['error'] = "notfound";
         echo "User not found.";
         header("Location: ../resource/login.php?error=notfound");
         exit();
     }
 } else {
+    $_SESSION['error'] = "method";
     echo "Invalid request method.";
 }
 

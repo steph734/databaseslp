@@ -5,6 +5,10 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 $username = ucfirst($_SESSION['username']);
+
+$login = isset($_SESSION['login']) ? $_SESSION['login'] : '';
+unset($_SESSION['login']);
+
 ?>
 
 <!DOCTYPE html>
@@ -33,6 +37,8 @@ $username = ucfirst($_SESSION['username']);
 <body>
 
     <?php include __DIR__ . '/../views/sidebar.php'; ?>
+
+    <!-- main content -->
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 

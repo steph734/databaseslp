@@ -1,5 +1,9 @@
 <?php
+session_start();
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['error']); // Clear error after displaying
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +39,6 @@
 
         .custom-login-btn i {
             color: white;
-            /* Default icon color */
             transition: color 0.3s ease-in-out;
         }
 
@@ -51,10 +54,27 @@
     </style>
 </head>
 
-
 <body>
     <div class="login-container">
         <h2>ADMIN LOGIN</h2>
+
+        <?php if ($error == "invalid") : ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
+                Incorrect password. Please try again.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php elseif ($error == "notfound") : ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
+                User not found. Please check your username.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php elseif ($error == "method") : ?>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size:12px;">
+                Invalid request method.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <form action="../handlers/login_handler.php" method="POST">
             <div class="input-group">
                 <span class="icon"><i class="fa-solid fa-user"></i></span>
@@ -69,20 +89,20 @@
                 <label for="remember-me">Remember me</label>
                 <a href="#">Forgot password?</a>
             </div>
+
             <div class="button-container">
                 <button type="submit" class="custom-login-btn">
                     <i class="fa-solid fa-right-to-bracket"></i> Login
                 </button>
             </div>
-
-
         </form>
+
         <div class="mt-3">
             <p>Don't have an account? <a href="signup.php">Sign up here.</a></p>
         </div>
     </div>
 
+    <script src="../statics/js/bootstrap.bundle.min.js"></script>
 </body>
-
 
 </html>
