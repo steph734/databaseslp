@@ -1,11 +1,35 @@
 <?php
-
 include '../../database/database.php';
-
 $query = "SELECT product_id, product_name, quantity, price, unitofmeasurement, 
                  category_id, supplier_id, createdbyid, createdate, updatedbyid, updatedate 
           FROM Product";
 $result = $conn->query($query);
+// Query to get all suppliers for the dropdowns
+$supplier_query = "SELECT supplier_id, supplier_name FROM Supplier";
+$supplier_result = $conn->query($supplier_query);
+$suppliers = [];
+while ($supplier = $supplier_result->fetch_assoc()) {
+    $suppliers[$supplier['supplier_id']] = $supplier['supplier_name'];
+}
+
+$category_query = "SELECT category_id, category_name FROM Category";
+$category_result = $conn->query($category_query);
+$categories = [];
+while ($category = $category_result->fetch_assoc()) {
+    $categories[$category['category_id']] = $category['category_name'];
+}
+// Define unit of measurement options
+$units = [
+    'pcs' => 'Pieces (pcs)',
+    'kg' => 'Kilograms (kg)',
+    'g' => 'Grams (g)',
+    'l' => 'Liters (l)',
+    'ml' => 'Milliliters (ml)',
+    'm' => 'Meters (m)',
+    'can' => 'Canned Goods (can)',
+    'box' => 'Box',
+    'pack' => 'Pack'
+];
 ?>
 
 <style>
@@ -113,7 +137,6 @@ $result = $conn->query($query);
         border-collapse: collapse;
     }
 
-
     th {
         background-color: #e6c200 !important;
         color: white !important;
@@ -207,6 +230,83 @@ $result = $conn->query($query);
             text-align: center;
         }
     }
+
+    .supplier-dropdown {
+        width: 100%;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    .supplier-dropdown:disabled {
+        background-color: #f9f9f9;
+        opacity: 1;
+        color: #333;
+    }
+
+    .category-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .category-table th,
+    .category-table td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .category-table th {
+        background-color: #e6c200;
+        color: white;
+    }
+
+    .category-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .category-table {
+        width: 100%;
+        /* Adjust width as needed */
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .category-table th,
+    .category-table td {
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+        /* Center-align text in table cells */
+    }
+
+    .category-table th {
+        background-color: #e6c200;
+        color: white;
+    }
+
+    .category-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Center-align form elements */
+    .modal-body.text-center .form-label {
+        display: block;
+        text-align: center;
+    }
+
+    .modal-body.text-center .form-control {
+        display: block;
+        margin: 0 auto;
+        /* Center the input fields */
+    }
+
+    .modal-body.text-center .btn {
+        display: block;
+        margin: 0 auto;
+    }
 </style>
 
 <div class="main-content">
@@ -229,6 +329,9 @@ $result = $conn->query($query);
 
     <div class="products-table">
         <div class="table-controls">
+            <button class="create-btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                Category <i class="fa-solid fa-gear"></i>
+            </button>
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
                 CREATE NEW <i class="fa-solid fa-add"></i>
             </button>
@@ -271,8 +374,8 @@ $result = $conn->query($query);
                                     <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
                                 </button>
 
-                                <button class="btn btn-sm text-danger"><i class="fa fa-trash"
-                                        style="color:rgb(255, 0, 25);"></i>
+                                <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['product_id'] ?>)"><i
+                                        class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>
                                     Delete</button>
                             </td>
 
@@ -297,21 +400,31 @@ $result = $conn->query($query);
                 <div class="modal-body">
                     <label>Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
-
                     <label>Quantity:</label>
                     <input type="number" name="quantity" class="form-control" required>
-
                     <label>Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
-
                     <label>Unit:</label>
-                    <input type="text" name="unitofmeasurement" class="form-control" required>
-
-                    <label>Category ID:</label>
-                    <input type="text" name="category_id" class="form-control" required>
-
-                    <label>Supplier ID:</label>
-                    <input type="number" name="supplier_id" class="form-control" required>
+                    <select name="unitofmeasurement" class="form-control" required>
+                        <option value="">Select Unit</option>
+                        <?php foreach ($units as $value => $label) : ?>
+                            <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Category:</label>
+                    <select name="category_id" class="form-control" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $id => $name) : ?>
+                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Supplier:</label>
+                    <select name="supplier_id" class="form-control" required>
+                        <option value="">Select Supplier</option>
+                        <?php foreach ($suppliers as $id => $name) : ?>
+                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Add Product</button>
@@ -321,27 +434,8 @@ $result = $conn->query($query);
         </div>
     </div>
 </div>
-
-<!-- DELETE PRODUCT MODAL -->
-<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to delete this product?
-            </div>
-            <div class="modal-footer">
-                <a id="confirmDeleteBtn" href="#" class="btn btn-danger">Yes, Delete</a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- EDIT PRODUCT MODAL -->
+
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -352,27 +446,36 @@ $result = $conn->query($query);
             <form action="../../handlers/editproduct_handler.php" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="product_id">
-
                     <label>Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
-
                     <label>Quantity:</label>
                     <input type="number" name="quantity" class="form-control" required>
-
                     <label>Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
-
                     <label>Unit:</label>
-                    <input type="text" name="unitofmeasurement" class="form-control" required>
-
-                    <label>Category ID:</label>
-                    <input type="text" name="category_id" class="form-control" required>
-
-                    <label>Supplier ID:</label>
-                    <input type="number" name="supplier_id" class="form-control" required>
+                    <select name="unitofmeasurement" class="form-control" required>
+                        <option value="">Select Unit</option>
+                        <?php foreach ($units as $value => $label) : ?>
+                            <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Category:</label>
+                    <select name="category_id" class="form-control" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $id => $name) : ?>
+                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Supplier:</label>
+                    <select name="supplier_id" class="form-control" required>
+                        <option value="">Select Supplier</option>
+                        <?php foreach ($suppliers as $id => $name) : ?>
+                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
@@ -380,9 +483,93 @@ $result = $conn->query($query);
     </div>
 </div>
 
+<!-- CATEGORY MANAGEMENT MODAL -->
 
-<?php if (isset($_SESSION['success'])) : ?>
-    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 600px;">
+        <!-- Custom width instead of modal-lg -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Manage Categories</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Add Category Form -->
+                <form id="addCategoryForm" action="../../handlers/addcategory_handler.php" method="POST">
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category ID:</label>
+                        <input type="text" class="form-control" id="category_id" name="category_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category_name" class="form-label">New Category Name:</label>
+                        <input type="text" class="form-control" id="category_name" name="category_name" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Category</button>
+                </form>
+
+                <!-- Category List -->
+                <table class="category-table">
+                    <thead>
+                        <tr>
+                            <th>Category ID</th>
+                            <th>Category Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                        <?php foreach ($categories as $id => $name) : ?>
+                            <tr class="text-center">
+                                <td><?= $id ?></td>
+                                <td><?= htmlspecialchars($name) ?></td>
+                                <td>
+                                    <button class="btn btn-sm text-warning"
+                                        onclick="loadEditCategory(<?= $id ?>, '<?= htmlspecialchars($name) ?>')"
+                                        data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm text-danger" onclick="confirmDeleteCategory(<?= $id ?>)">
+                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- EDIT CATEGORY MODAL -->
+<!-- EDIT CATEGORY MODAL -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="../../handlers/editcategory_handler.php" method="POST">
+                <div class="modal-body">
+                    <label for="edit_category_id" class="py-3">Category Id:</label>
+                    <input type="text" class="form-control" name="category_id" id="edit_category_id" required>
+                    <label for="edit_category_name" class="py-3">Category Name:</label>
+                    <input type="text" class="form-control" id="edit_category_name" name="category_name" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php if (isset($_docSION['success'])) : ?>
+    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
+        style="width: 290px !important;">
         <?= $_SESSION['success']; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -391,26 +578,35 @@ $result = $conn->query($query);
 <?php endif; ?>
 
 <script>
-    function confirmDelete(productId) {
-        document.getElementById("confirmDeleteBtn").href = "delete_product.php?id=" + productId;
+    function confirmDelete(productid) {
+        if (confirm("Are you sure do you want to delete this supplier?")) {
+            window.location.href = "../../handlers/delete_product_handler.php?id=" + productid;
+        }
     }
 
     function loadEditModal(product) {
         console.log(product);
 
+
         document.querySelector("#editProductModal input[name='product_id']").value = product.product_id;
+
         document.querySelector("#editProductModal input[name='product_name']").value = product.product_name;
         document.querySelector("#editProductModal input[name='quantity']").value = product.quantity;
         document.querySelector("#editProductModal input[name='price']").value = product.price;
-        document.querySelector("#editProductModal input[name='unitofmeasurement']").value = product.unitofmeasurement;
-        document.querySelector("#editProductModal input[name='category_id']").value = product.category_id;
 
-        document.querySelector("#editProductModal input[name='supplier_id']").value = (product.supplier_id === "N/A" ||
-            product.supplier_id === null) ? 0 : product.supplier_id;
+        document.querySelector("#editProductModal select[name='unitofmeasurement']").value =
+            product.unitofmeasurement || '';
+        document.querySelector("#editProductModal select[name='category_id']").value =
+            (product.category_id === "N/A" || product.category_id === null) ? '' : product.category_id;
+
+        document.querySelector("#editProductModal select[name='supplier_id']").value =
+            (product.supplier_id === "N/A" || product.supplier_id === null) ? '' : product.supplier_id;
     }
 
-
-
+    function loadEditCategory(categoryId, categoryName) {
+        document.querySelector("#editCategoryModal input[name='category_id']").value = categoryId;
+        document.querySelector("#editCategoryModal input[name='category_name']").value = categoryName;
+    }
 
     setTimeout(function() {
         let alert = document.querySelector(".floating-alert");

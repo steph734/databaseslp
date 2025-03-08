@@ -124,8 +124,7 @@ $result = $conn->query($query);
         width: 100%;
         margin-top: 10px;
         padding: 8px;
-        border-radius: 5px;
-        border: 1px solid #6b8e5e;
+
     }
 
     .btn-save {
@@ -179,7 +178,7 @@ $result = $conn->query($query);
         align-items: center;
         margin-bottom: 10px;
         font-size: 100px;
-        color: #6b8e5e;
+        color: rgb(191, 195, 190);
     }
 </style>
 
@@ -200,9 +199,9 @@ $result = $conn->query($query);
 
         <h3 style="color: #6b8e5e;">Add New Supplier</h3>
         <form action="../../handlers/addsupplier_handler.php" method="POST">
-            <input type="text" name="supplier_name" placeholder="Supplier Name" required>
-            <input type="text" name="contact_info" placeholder="Contact Info" required>
-            <input type="text" name="address" placeholder="Address" required>
+            <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
+            <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
+            <textarea class="form-control my-3" name="address" placeholder="Address" rows="3" required></textarea>
             <button type="submit" class="btn-save">Save</button>
         </form>
     </div>
@@ -247,8 +246,57 @@ $result = $conn->query($query);
     </div>
 
 </div>
+<!-- Edit Supplier Modal -->
+<div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSupplierModalLabel">Edit Supplier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSupplierForm" action="../../handlers/editsupplier_handler.php" method="POST">
+                    <input type="hidden" id="editSupplierId" name="supplier_id">
+                    <div class="mb-3">
+                        <label for="editSupplierName" class="form-label">Supplier Name</label>
+                        <input type="text" class="form-control" id="editSupplierName" name="supplier_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editContactInfo" class="form-label">Contact Info</label>
+                        <input type="text" class="form-control" id="editContactInfo" name="contact_info" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Address:</label>
+                        <textarea class="form-control" id="editAddress" name="address" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
+<?php if (isset($_SESSION['success'])) : ?>
+    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
+        style="width: 290px !important;">
+        <?= $_SESSION['success']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']);
+    ?>
+<?php endif; ?>
 <script>
+    function loadEditModal(supplier) {
+        document.getElementById("editSupplierId").value = supplier.supplier_id;
+        document.getElementById("editSupplierName").value = supplier.supplier_name;
+        document.getElementById("editContactInfo").value = supplier.contact_info;
+        document.getElementById("editAddress").value = supplier.address;
+
+        var modal = new bootstrap.Modal(document.getElementById("editSupplierModal"));
+        modal.show();
+    }
+
     function toggleAddForm() {
         var form = document.getElementById("addSupplierForm");
         var button = document.querySelector(".btn-add");
@@ -274,17 +322,22 @@ $result = $conn->query($query);
         }
     }
 
-    function loadEditModal(supplier) {
-        document.querySelector("#editSupplierModal input[name='supplier_id']").value = supplier.supplier_id;
-        document.querySelector("#editSupplierModal input[name='supplier_name']").value = supplier.supplier_name;
-        document.querySelector("#editSupplierModal input[name='contact_person']").value = supplier.contact_person;
-        document.querySelector("#editSupplierModal input[name='phone']").value = supplier.phone;
-        document.querySelector("#editSupplierModal input[name='email']").value = supplier.email;
-        document.querySelector("#editSupplierModal input[name='address']").value = supplier.address;
-    }
-
     function toggleInfo(button) {
         var infoBox = button.nextElementSibling; // Get the next element (supplier-info div)
         infoBox.classList.toggle("active");
+    }
+
+    setTimeout(function() {
+        let alert = document.querySelector(".floating-alert");
+        if (alert) {
+            alert.style.opacity = "0";
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 4000);
+
+    function confirmDelete(supplierId) {
+        if (confirm("Are you sure do you want to delete this supplier?")) {
+            window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
+        }
     }
 </script>
