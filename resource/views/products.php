@@ -400,8 +400,11 @@ $result = $conn->query($query);
         document.querySelector("#editProductModal input[name='price']").value = product.price;
         document.querySelector("#editProductModal input[name='unitofmeasurement']").value = product.unitofmeasurement;
         document.querySelector("#editProductModal input[name='category_id']").value = product.category_id;
-        document.querySelector("#editProductModal input[name='supplier_id']").value = product.supplier_id;
+
+        document.querySelector("#editProductModal input[name='supplier_id']").value = (product.supplier_id === "N/A" ||
+            product.supplier_id === null) ? 0 : product.supplier_id;
     }
+
 
 
 
