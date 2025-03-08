@@ -30,8 +30,10 @@ unset($_SESSION['login']);
     <link rel="stylesheet" href="../css/sidebar.css">
     <!-- css -->
     <link rel="stylesheet" href="../../statics/css/bootstrap.min.css">
+    <script src="../../statics/js/bootstrap.bundle.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
