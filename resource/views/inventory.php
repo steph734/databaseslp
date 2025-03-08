@@ -1,4 +1,4 @@
-<?php
+    <?php
 include '../../database/database.php';
 
 $query = "SELECT inventory_id, product_id, price, stock_quantity, total_value, 
@@ -219,8 +219,8 @@ $result = $conn->query($query);
     <div class="search-container">
         <input type="text" id="searchInventoryID" placeholder="Inventory ID">
         <input type="text" id="searchProductID" placeholder="Product ID">
-        <input type="text" id="searchPrice" placeholder="Price">
-        <input type="text" id="searchStock" placeholder="Stock Quantity">
+        <input type="text" id="searchPrice" placeholder="Created Date">
+        <input type="text" id="searchStock" placeholder="Updated Date">
         <button class="search-btn" onclick="filterInventory()">SEARCH</button>
         <button class="clear-btn" onclick="clearFilters()">CLEAR</button>
     </div>
