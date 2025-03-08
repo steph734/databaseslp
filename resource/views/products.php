@@ -113,6 +113,14 @@ $result = $conn->query($query);
         border-collapse: collapse;
     }
 
+
+    th {
+        background-color: #e6c200 !important;
+        color: white !important;
+        text-align: center !important;
+        padding: 10px;
+    }
+
     th,
     td {
         text-align: center;
@@ -120,10 +128,6 @@ $result = $conn->query($query);
         border-bottom: 1px solid #ddd;
     }
 
-    th {
-        background: #007bff;
-        color: white;
-    }
 
     tr:hover {
         background: #f1f1f1;
@@ -213,7 +217,7 @@ $result = $conn->query($query);
             <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
         </div>
     </header>
-
+    <hr>
     <div class="search-container">
         <input type="text" id="searchProductID" placeholder="Product ID">
         <input type="text" id="searchCategoryID" placeholder="Category ID">
@@ -229,7 +233,7 @@ $result = $conn->query($query);
                 CREATE NEW <i class="fa-solid fa-add"></i>
             </button>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive rounded-3">
             <table class="table table-striped">
                 <thead>
                     <tr>

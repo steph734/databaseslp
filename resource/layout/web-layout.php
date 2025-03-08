@@ -2,7 +2,7 @@
 
 session_start();
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    header("Location: ../resource/login.php");
     exit();
 }
 $username = ucfirst($_SESSION['username']);

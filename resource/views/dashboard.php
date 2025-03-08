@@ -1,7 +1,7 @@
 <div class="main-content">
     <?php if ($login == "valid") : ?>
         <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
-            Login Successfully.
+            Login successfully.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
