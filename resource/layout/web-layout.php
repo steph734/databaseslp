@@ -28,10 +28,13 @@ unset($_SESSION['login']);
     <link rel="stylesheet" href="../css/products.css">
     <link rel="stylesheet" href="../css/returns.css">
     <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/membership.css">
     <!-- css -->
     <link rel="stylesheet" href="../../statics/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 </head>
 
 <body>
@@ -42,7 +45,7 @@ unset($_SESSION['login']);
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
-    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports'];
+    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports', 'membership'];
 
     $page_path = __DIR__ . "/../views/{$page}.php";
 
