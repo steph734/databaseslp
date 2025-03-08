@@ -1,7 +1,8 @@
 <?php
+
 session_start();
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    header("Location: ../resource/login.php");
     exit();
 }
 $username = ucfirst($_SESSION['username']);
@@ -28,10 +29,19 @@ unset($_SESSION['login']);
     <link rel="stylesheet" href="../css/products.css">
     <link rel="stylesheet" href="../css/returns.css">
     <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/membership.css">
     <!-- css -->
     <link rel="stylesheet" href="../../statics/css/bootstrap.min.css">
+    <script src="../../statics/js/bootstrap.bundle.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        html,
+        body {
+            overflow-x: hidden;
+        }
+    </style>
 </head>
 
 <body>
@@ -41,9 +51,7 @@ unset($_SESSION['login']);
     <!-- main content -->
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-
-    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports'];
-
+    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports', 'membership'];
     $page_path = __DIR__ . "/../views/{$page}.php";
 
     if (in_array($page, $allowed_pages) && file_exists($page_path)) {

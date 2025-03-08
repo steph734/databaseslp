@@ -9,6 +9,9 @@
         <li class="<?= ($current_page == 'customer') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=customer"><i class="fa fa-user"></i> Customers</a>
         </li>
+        <li class="<?= ($current_page == 'membership') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=membership"><i class="fa-solid fa-id-card"></i> Membership</a>
+        </li>
         <li class="<?= ($current_page == 'sales') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=sales"><i class="fa fa-shopping-cart"></i> Sales</a>
         </li>

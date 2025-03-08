@@ -1,7 +1,7 @@
-/* Sales Page Specific Styles */
+/* Membership Page Specific Styles */
 
-/* Search sBar */
-.search-container {
+/* Search Bar */
+.search-container-membership {
   display: flex;
   gap: 10px;
   background: #d3d3d3;
@@ -10,7 +10,7 @@
   margin: 20px 0;
 }
 
-.search-container input {
+.search-container-membership input {
   flex: 1;
   padding: 8px;
   border: 1px solid #aaa;
@@ -55,8 +55,8 @@
   color: white;
 }
 
-/* Sales Table */
-.sales-table {
+/* Membership Table */
+.membership-table {
   background: #f5f5f5;
   padding: 15px;
   border-radius: 10px;
@@ -69,6 +69,7 @@ table {
 
 thead {
   background: #e6c200;
+  color: white;
 }
 
 thead th {
