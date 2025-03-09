@@ -24,8 +24,8 @@
         <li class="<?= ($current_page == 'supplier') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=supplier"><i class="fa fa-truck"></i> Suppliers</a>
         </li>
-        <li class="<?= ($current_page == 'payments') ? 'active' : '' ?>">
-            <a href="../layout/web-layout.php?page=payments"><i class="fa fa-credit-card"></i> Payments</a>
+        <li class="<?= ($current_page == 'returns') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=returns"><i class="fa fa-undo"></i> Returns</a>
         </li>
         <li class="<?= ($current_page == 'reports') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=reports"><i class="fa fa-chart-bar"></i> Reports</a>

@@ -1,4 +1,4 @@
-    <?php
+<?php
 include '../../database/database.php';
 
 $query = "SELECT inventory_id, product_id, price, stock_quantity, total_value, 
@@ -56,7 +56,7 @@ $result = $conn->query($query);
     .clear-btn {
         padding: 8px 15px;
         border: none;
-        background: #28a745;
+        background: #6b8e5e;
         color: white;
         border-radius: 5px;
         cursor: pointer;
@@ -64,7 +64,7 @@ $result = $conn->query($query);
     }
 
     .clear-btn {
-        background: #dc3545;
+        background: #a3a3a3;
         width: 70px;
     }
 
@@ -216,14 +216,19 @@ $result = $conn->query($query);
         </div>
     </header>
     <hr>
-    <div class="search-container">
-        <input type="text" id="searchInventoryID" placeholder="Inventory ID">
-        <input type="text" id="searchProductID" placeholder="Product ID">
-        <input type="text" id="searchPrice" placeholder="Created Date">
-        <input type="text" id="searchStock" placeholder="Updated Date">
-        <button class="search-btn" onclick="filterInventory()">SEARCH</button>
-        <button class="clear-btn" onclick="clearFilters()">CLEAR</button>
-    </div>
+
+<div class="search-container">
+    <input type="text" id="searchInventoryID" placeholder="Inventory ID">
+    <input type="text" id="searchProductID" placeholder="Product ID">
+    
+    <input type="text" id="searchCreatedDate" placeholder="Created Date" onfocus="(this.type='date')" onblur="(this.type='text')">
+    <input type="text" id="searchUpdatedDate" placeholder="Updated Date" onfocus="(this.type='date')" onblur="(this.type='text')">
+    
+    <button class="search-btn" onclick="filterInventory()">SEARCH</button>
+    <button class="clear-btn" onclick="clearFilters()">CLEAR</button>
+</div>
+
+
 
     <div class="products-table">
         <div class="table-controls">

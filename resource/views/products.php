@@ -81,7 +81,7 @@ $units = [
     .clear-btn {
         padding: 8px 15px;
         border: none;
-        background: #28a745;
+        background: #6b8e5e;
         color: white;
         border-radius: 5px;
         cursor: pointer;
@@ -89,7 +89,7 @@ $units = [
     }
 
     .clear-btn {
-        background: #dc3545;
+        background: #a3a3a3;
         width: 70px;
     }
 

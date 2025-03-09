@@ -24,7 +24,6 @@ unset($_SESSION['login']);
     <link rel="stylesheet" href="../css/inventory.css">
     <link rel="stylesheet" href="../css/customer.css">
     <link rel="stylesheet" href="../css/sales.css">
-    <link rel="stylesheet" href="../css/payment.css">
     <link rel="stylesheet" href="../css/supplier.css">
     <link rel="stylesheet" href="../css/products.css">
     <link rel="stylesheet" href="../css/returns.css">
@@ -51,7 +50,7 @@ unset($_SESSION['login']);
     <!-- main content -->
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports', 'membership'];
+    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports', 'membership'];
     $page_path = __DIR__ . "/../views/{$page}.php";
 
     if (in_array($page, $allowed_pages) && file_exists($page_path)) {
