@@ -251,7 +251,7 @@ $productResult = $conn->query($productQuery);
         <h1>Inventory</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
+            <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
     <hr>

@@ -3,8 +3,7 @@
         <h1>Payments</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
-        </div>
+            <?php include __DIR__ . '/profile.php'; ?>
     </header>
 
     <div class="search-container">
