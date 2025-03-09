@@ -1,9 +1,12 @@
 <?php
 include '../../database/database.php';
-$query = "SELECT product_id, product_name, quantity, price, unitofmeasurement, 
-                 category_id, supplier_id, createdbyid, createdate, updatedbyid, updatedate 
-          FROM Product";
+$query = "SELECT p.product_id, p.product_name, p.quantity, p.price, p.unitofmeasurement, 
+                 p.category_id, p.supplier_id, p.createdbyid, p.createdate, p.updatedbyid, p.updatedate, 
+                 s.supplier_name
+          FROM Product p
+          LEFT JOIN Supplier s ON p.supplier_id = s.supplier_id";
 $result = $conn->query($query);
+
 // Query to get all suppliers for the dropdowns
 $supplier_query = "SELECT supplier_id, supplier_name FROM Supplier";
 $supplier_result = $conn->query($supplier_query);
@@ -330,7 +333,7 @@ $units = [
     <div class="products-table">
         <div class="table-controls">
             <button class="create-btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
-                Category <i class="fa-solid fa-gear"></i>
+                CATEGORY <i class="fa-solid fa-gear"></i>
             </button>
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
                 CREATE NEW <i class="fa-solid fa-add"></i>
@@ -343,7 +346,7 @@ $units = [
                         <th>ID</th>
                         <th>Name</th>
                         <th>Quantity</th>
-                        <th>Price</th>
+                        <th>Price(₱)</th>
                         <th>Unit</th>
                         <th>Category</th>
                         <th>Supplier</th>
@@ -363,13 +366,13 @@ $units = [
                                 <td><?= $row['quantity'] ?></td>
                                 <td><?= number_format($row['price'], 2) ?></td>
                                 <td><?= htmlspecialchars($row['unitofmeasurement']) ?></td>
-                                <td><?= $row['category_id'] ?? 'N/A' ?></td>
-                                <td><?= $row['supplier_id'] ?? 'N/A' ?></td>
-                                <td><?= $row['createdbyid'] ?? 'N/A' ?></td>
+                                <td><?= $row['category_id'] ?? '-' ?></td>
+                                <td><?= htmlspecialchars($row['supplier_name'] ?? '-') ?></td>
+                                <td><?= $row['createdbyid'] ?? '-' ?></td>
                                 <td><?= $row['createdate'] ?></td>
-                                <td><?= $row['updatedbyid'] ?? 'N/A' ?></td>
-                                <td><?= $row['updatedate'] ?? 'N/A' ?></td>
-                                <td class="d-flex gap-2">
+                                <td><?= $row['updatedbyid'] ?? '-' ?></td>
+                                <td><?= $row['updatedate'] ?? '-' ?></td>
+                                <td>
                                     <button class="btn btn-sm text-warning" onclick='loadEditModal(<?= json_encode($row) ?>)'
                                         data-bs-toggle="modal" data-bs-target="#editProductModal">
                                         <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
@@ -385,7 +388,7 @@ $units = [
                     <?php else: ?>
                         <tr>
                             <td colspan="13" style="text-align: center; padding: 20px; color: #666;">
-                                No products found :< </td>
+                                No products found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -493,14 +496,12 @@ $units = [
 <!-- CATEGORY MANAGEMENT MODAL -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 600px;">
-        <!-- Custom width instead of modal-lg -->
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="categoryModalLabel">Manage Categories</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Add Category Form -->
                 <form id="addCategoryForm" action="../../handlers/addcategory_handler.php" method="POST">
                     <div class="mb-3">
                         <label for="category_id" class="form-label">Category ID:</label>
@@ -513,7 +514,6 @@ $units = [
                     <button type="submit" class="btn btn-success">Add Category</button>
                 </form>
 
-                <!-- Category List -->
                 <table class="category-table">
                     <thead>
                         <tr>
@@ -525,15 +525,16 @@ $units = [
                     <tbody id="category-table-body">
                         <?php foreach ($categories as $id => $name) : ?>
                             <tr class="text-center">
-                                <td><?= $id ?></td>
+                                <td><?= htmlspecialchars($id) ?></td>
                                 <td><?= htmlspecialchars($name) ?></td>
                                 <td>
                                     <button class="btn btn-sm text-warning"
-                                        onclick="loadEditCategory(<?= $id ?>, '<?= htmlspecialchars($name) ?>')"
+                                        onclick="loadEditCategory('<?= htmlspecialchars($id) ?>', '<?= htmlspecialchars($name) ?>')"
                                         data-bs-toggle="modal" data-bs-target="#editCategoryModal">
                                         <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
                                     </button>
-                                    <button class="btn btn-sm text-danger" onclick="confirmDeleteCategory(<?= $id ?>)">
+                                    <button class="btn btn-sm text-danger"
+                                        onclick="confirmDeleteCategory('<?= htmlspecialchars($id) ?>')">
                                         <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Delete
                                     </button>
                                 </td>
@@ -560,8 +561,12 @@ $units = [
             </div>
             <form action="../../handlers/editcategory_handler.php" method="POST">
                 <div class="modal-body">
-                    <label for="edit_category_id" class="py-3">Category Id:</label>
+                    <label for="edit_category_id" class="py-3">Current Category ID:</label>
                     <input type="text" class="form-control" name="category_id" id="edit_category_id" required>
+
+                    <label for="new_category_id" class="py-3">New Category ID:</label>
+                    <input type="text" class="form-control" name="new_category_id" id="new_category_id" required>
+
                     <label for="edit_category_name" class="py-3">Category Name:</label>
                     <input type="text" class="form-control" id="edit_category_name" name="category_name" required>
                 </div>
@@ -574,26 +579,34 @@ $units = [
     </div>
 </div>
 <?php if (isset($_SESSION['success'])) : ?>
-    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
-        style="width: 290px !important;">
+    <div class="alert alert-success alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
+        style="width: auto !important; padding-right: 2.5rem !important;">
         <?= $_SESSION['success']; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php unset($_SESSION['success']);
     ?>
 <?php elseif (isset($_SESSION['error'])) : ?>
-    <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
-        style="width: 290px !important;">
-        ID already exist. Please try again.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-danger alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
+        style="width: auto !important; padding-right: 2.5rem !important;">
+        <?= $_SESSION['error']; ?>
+        <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php unset($_SESSION['error']);
     ?>
 <?php endif ?>
+
 <script>
     function confirmDelete(productid) {
         if (confirm("Are you sure do you want to delete this supplier?")) {
             window.location.href = "../../handlers/delete_product_handler.php?id=" + productid;
+        }
+    }
+
+    function confirmDeleteCategory(id) {
+        if (confirm("Are you sure you want to delete the category '" + id +
+                "'? This will also delete all related products.")) {
+            window.location.href = "../../handlers/deletecategory_handler.php?id=" + encodeURIComponent(id);
         }
     }
 

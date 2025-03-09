@@ -37,10 +37,10 @@ unset($_SESSION['login']);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        html,
-        body {
-            overflow-x: hidden;
-        }
+    html,
+    body {
+        overflow-x: hidden;
+    }
     </style>
 </head>
 
@@ -51,7 +51,7 @@ unset($_SESSION['login']);
     <!-- main content -->
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'payments', 'reports', 'membership'];
+    $allowed_pages = ['dashboard', 'customer', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports', 'membership'];
     $page_path = __DIR__ . "/../views/{$page}.php";
 
     if (in_array($page, $allowed_pages) && file_exists($page_path)) {
