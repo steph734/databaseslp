@@ -340,47 +340,54 @@ $units = [
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Product ID</th>
+                        <th>ID</th>
                         <th>Name</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Unit</th>
-                        <th>Category ID</th>
-                        <th>Supplier ID</th>
-                        <th>Created By</th>
+                        <th>Category</th>
+                        <th>Supplier</th>
+                        <th style="width:auto;">Created By</th>
                         <th>Created Date</th>
                         <th>Updated By</th>
                         <th>Updated Date</th>
-                        <th class="text-center">Actions</th>
+                        <th class="text-center w-5">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="products-table-body">
-                    <?php while ($row = $result->fetch_assoc()) : ?>
+                    <?php if ($result->num_rows > 0) : ?>
+                        <?php while ($row = $result->fetch_assoc()) : ?>
+                            <tr>
+                                <td><?= $row['product_id'] ?></td>
+                                <td><?= htmlspecialchars($row['product_name']) ?></td>
+                                <td><?= $row['quantity'] ?></td>
+                                <td><?= number_format($row['price'], 2) ?></td>
+                                <td><?= htmlspecialchars($row['unitofmeasurement']) ?></td>
+                                <td><?= $row['category_id'] ?? 'N/A' ?></td>
+                                <td><?= $row['supplier_id'] ?? 'N/A' ?></td>
+                                <td><?= $row['createdbyid'] ?? 'N/A' ?></td>
+                                <td><?= $row['createdate'] ?></td>
+                                <td><?= $row['updatedbyid'] ?? 'N/A' ?></td>
+                                <td><?= $row['updatedate'] ?? 'N/A' ?></td>
+                                <td class="d-flex gap-2">
+                                    <button class="btn btn-sm text-warning" onclick='loadEditModal(<?= json_encode($row) ?>)'
+                                        data-bs-toggle="modal" data-bs-target="#editProductModal">
+                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
+                                    </button>
+
+                                    <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['product_id'] ?>)"><i
+                                            class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>
+                                        Delete</button>
+                                </td>
+
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?= $row['product_id'] ?></td>
-                            <td><?= htmlspecialchars($row['product_name']) ?></td>
-                            <td><?= $row['quantity'] ?></td>
-                            <td><?= number_format($row['price'], 2) ?></td>
-                            <td><?= htmlspecialchars($row['unitofmeasurement']) ?></td>
-                            <td><?= $row['category_id'] ?? 'N/A' ?></td>
-                            <td><?= $row['supplier_id'] ?? 'N/A' ?></td>
-                            <td><?= $row['createdbyid'] ?? 'N/A' ?></td>
-                            <td><?= $row['createdate'] ?></td>
-                            <td><?= $row['updatedbyid'] ?? 'N/A' ?></td>
-                            <td><?= $row['updatedate'] ?? 'N/A' ?></td>
-                            <td class="d-flex gap-2">
-                                <button class="btn btn-sm text-warning" onclick='loadEditModal(<?= json_encode($row) ?>)'
-                                    data-bs-toggle="modal" data-bs-target="#editProductModal">
-                                    <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
-                                </button>
-
-                                <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['product_id'] ?>)"><i
-                                        class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>
-                                    Delete</button>
-                            </td>
-
+                            <td colspan="13" style="text-align: center; padding: 20px; color: #666;">
+                                No products found :< </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -398,27 +405,27 @@ $units = [
             </div>
             <form action="../../handlers/addproduct_handler.php" method="POST">
                 <div class="modal-body">
-                    <label>Product Name:</label>
+                    <label class="my-2">Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
-                    <label>Quantity:</label>
+                    <label class="my-2">Quantity:</label>
                     <input type="number" name="quantity" class="form-control" required>
-                    <label>Price:</label>
+                    <label class="my-2">Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
-                    <label>Unit:</label>
+                    <label class="my-2">Unit of measurement:</label>
                     <select name="unitofmeasurement" class="form-control" required>
                         <option value="">Select Unit</option>
                         <?php foreach ($units as $value => $label) : ?>
                             <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <label>Category:</label>
+                    <label class="my-2">Category:</label>
                     <select name="category_id" class="form-control" required>
                         <option value="">Select Category</option>
                         <?php foreach ($categories as $id => $name) : ?>
                             <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <label>Supplier:</label>
+                    <label class="my-2">Supplier of product:</label>
                     <select name="supplier_id" class="form-control" required>
                         <option value="">Select Supplier</option>
                         <?php foreach ($suppliers as $id => $name) : ?>
@@ -484,7 +491,6 @@ $units = [
 </div>
 
 <!-- CATEGORY MANAGEMENT MODAL -->
-
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 600px;">
         <!-- Custom width instead of modal-lg -->
@@ -567,7 +573,7 @@ $units = [
         </div>
     </div>
 </div>
-<?php if (isset($_docSION['success'])) : ?>
+<?php if (isset($_SESSION['success'])) : ?>
     <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
         style="width: 290px !important;">
         <?= $_SESSION['success']; ?>
@@ -575,8 +581,15 @@ $units = [
     </div>
     <?php unset($_SESSION['success']);
     ?>
-<?php endif; ?>
-
+<?php elseif (isset($_SESSION['error'])) : ?>
+    <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
+        style="width: 290px !important;">
+        ID already exist. Please try again.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']);
+    ?>
+<?php endif ?>
 <script>
     function confirmDelete(productid) {
         if (confirm("Are you sure do you want to delete this supplier?")) {

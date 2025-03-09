@@ -22,6 +22,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // Check if the category ID already exists
+    $checkStmt = $conn->prepare("SELECT category_id FROM Category WHERE category_id = ?");
+    $checkStmt->bind_param("s", $category_id);
+    $checkStmt->execute();
+    $checkStmt->store_result();
+
+    if ($checkStmt->num_rows > 0) {
+        $_SESSION['error'] = "ID already exist. Please try again.";
+        header("Location: ../resource/layout/web-layout.php?page=products");
+        $checkStmt->close();
+        exit();
+    }
+    $checkStmt->close();
+
+    // Insert new category
     $stmt = $conn->prepare("INSERT INTO Category (category_id, category_name, createdbyid) VALUES (?, ?, ?)");
     $stmt->bind_param("ssi", $category_id, $category_name, $createdbyid);
 
