@@ -13,7 +13,11 @@
     <!-- Custom CSS -->
 
 </head>
-
+<style>
+    body{
+        font-size: 12px !important;
+    }
+</style>
 <body>
     <div class="container-custom">
         <div class="row align-items-center">

@@ -15,9 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ssssii", $name, $contact, $address, $is_member, $type_id, $createdbyid);
 
         if ($stmt->execute()) {
-            $_SESSION['success'] = "Customer added successfully!";
+            $_SESSION['success_customer'] = "Customer added successfully!";
         } else {
-            $_SESSION['error'] = "Error adding customer.";
+            $_SESSION['error_customer'] = "Error adding customer.";
         }
 
         $stmt->close();

@@ -96,7 +96,7 @@ table {
 }
 
 thead {
-  background: rgb(227, 241, 224) !important;
+  background: rgb(246, 247, 246) !important;
 }
 
 thead th {
@@ -112,8 +112,4 @@ tbody td {
 
 tbody tr:hover {
   background: #efefef;
-}
-
-th{
-  
 }

@@ -49,6 +49,8 @@ $productResult = $conn->query($productQuery);
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
+        background: url('../../path/to/your/image.jpg') no-repeat center center fixed; /* Replace with your image path */
+        background-size: cover; /* Ensures the image covers the entire viewport */
     }
 
     /* Main Content */
@@ -126,7 +128,7 @@ $productResult = $conn->query($productQuery);
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        transition: all 0.1s ease-in-out;
+        transition: all 0.3s ease-in-out;
     }
 
     .create-btn:hover {
@@ -140,11 +142,12 @@ $productResult = $conn->query($productQuery);
         max-width: 100%;
         overflow-x: auto;
     }
-
-
+    thead{
+        background: rgb(255, 255, 255) !important;
+    }
     th {
-        background-color: rgb(227, 241, 224) !important;
-        color: #34502b !important;
+       
+        color:rgb(22, 21, 21) !important; 
         text-align: center !important;
         padding: 10px;
         font-size: 14px !important;
@@ -291,7 +294,7 @@ $productResult = $conn->query($productQuery);
                 UPDATE INVENTORY <i class="fa-solid fa-pen"></i>
             </button>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive rounded-3">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -338,11 +341,11 @@ $productResult = $conn->query($productQuery);
                                     <button class="btn btn-sm text-warning action-btn"
                                         onclick='loadEditModal(<?= json_encode($row) ?>)' data-bs-toggle="modal"
                                         data-bs-target="#editInventoryModal">
-                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
+                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Update
                                     </button>
                                     <button class="btn btn-sm text-danger action-btn"
                                         onclick="confirmDelete(<?= $row['inventory_id'] ?>)">
-                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Delete
+                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Remove
                                     </button>
                                 </td>
                             </tr>

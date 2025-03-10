@@ -129,8 +129,7 @@ $result = $conn->query($query);
     }
 
     th {
-        background-color: #e6c200 !important;
-        color: white !important;
+        color:rgb(41, 40, 40)!important;
         text-align: center !important;
         padding: 10px;
     }

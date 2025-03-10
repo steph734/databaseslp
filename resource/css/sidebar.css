@@ -1,4 +1,7 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 .sidebar {
+  font-family: 'Poppins', sans-serif !important;
   width: 250px;
   height: 100vh;
   background: #34502b;
@@ -7,26 +10,35 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
+  box-shadow: -59px -19px 164px -60px rgba(0,0,0,0.39) inset;
+  -webkit-box-shadow: -59px -19px 164px -60px rgba(0,0,0,0.39) inset;
+  -moz-box-shadow: -59px -19px 164px -60px rgba(0,0,0,0.39) inset;
   position: fixed; /* Keeps it fixed in place */
   top: 0;
   left: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-arrow-color: #34502b;
+  scrollbar-color: #3e5e33 #34502b;
 }
 
 .sidebar ul {
   list-style: none;
   margin-top: 20px;
+  font-size: 14px;
 }
 
 .sidebar ul li {
   padding: 15px;
   transition: 0.3s;
+  font-size: 14px;
 }
 
 .sidebar ul li a {
   text-decoration: none;
   color: white;
   display: block;
+  font-size: 14px;
 }
 
 .sidebar ul li.active,
@@ -37,11 +49,13 @@
 
 .logout {
   padding: 15px;
+  font-size: 14px;
 }
 
 .logout a {
   text-decoration: none;
   color: white;
+  font-size: 14px;
 }
 
 .sidebar ul li.active {
@@ -52,6 +66,7 @@
 .sidebar ul li.active a {
   color: #34502b !important;
   font-weight: bold;
+  font-size: 14px;
 }
 
 .sidebar {
@@ -73,8 +88,5 @@
   margin-top: 20px;
   position: relative;
   padding-left: 0;
-<<<<<<< HEAD
+  font-size: 14px;
 }
-=======
-}
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12

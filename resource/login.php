@@ -16,6 +16,9 @@ unset($_SESSION['error']); // Clear error after displaying
     <link rel="stylesheet" href="../statics/css/bootstrap.min.css">
 
     <style>
+        body{
+            font-size: 16px !important;
+        }
         .button-container {
             display: flex;
             justify-content: center;
@@ -45,7 +48,7 @@ unset($_SESSION['error']); // Clear error after displaying
         .custom-login-btn:hover {
             background-color: rgb(253, 255, 253);
             color: #3a5d39;
-            border: 2px solid #3a5d39;
+            border: 1px solid #3a5d39;
         }
 
         .custom-login-btn:hover i {
@@ -91,7 +94,7 @@ unset($_SESSION['error']); // Clear error after displaying
             </div>
 
             <div class="button-container">
-                <button type="submit" class="custom-login-btn">
+                <button type="submit" class="custom-login-btn" style="font-size: 16px;">
                     <i class="fa-solid fa-right-to-bracket"></i> Login
                 </button>
             </div>

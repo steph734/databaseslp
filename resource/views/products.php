@@ -113,20 +113,20 @@ $units = [
     }
 
     .create-btn {
-        background: #6b8e5e;
+        background: #34502b;
         color: white;
         padding: 8px 12px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        transition: all 0.5s ease-in-out;
+        transition: all 0.3s ease-in-out;
     }
 
     .create-btn:hover {
         background: white;
-        color: #6b8e5e;
-        border: 1px solid #6b8e5e;
-        transform: translateY(-5px);
+        color:  #34502b;
+        border: 1px solid #34502b;
+        transform: translateY(-1px);
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -141,8 +141,7 @@ $units = [
     }
 
     th {
-        background-color: #e6c200 !important;
-        color: white !important;
+        color:rgb(22, 21, 21) !important; 
         text-align: center !important;
         padding: 10px;
     }
@@ -176,7 +175,9 @@ $units = [
     }
 
     .btn-primary {
-        background: #007bff;
+        background: white!important;
+        border: 1px solid  #34502b !important;
+        color: #34502b;
     }
 
     /* Modal Styling */

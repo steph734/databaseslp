@@ -44,6 +44,7 @@ unset($_SESSION['login']);
     html,
     body {
         overflow-x: hidden;
+        font-size: 14px !important;
     }
     </style>
 </head>

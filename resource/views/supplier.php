@@ -17,7 +17,7 @@ $result = $conn->query($query);
         position: relative;
         background: white;
         border-radius: 10px;
-        border: 2px solid #34502b;
+        border: 1px solid #34502b;
         padding: 20px;
         transition: 0.3s;
         min-height: 200px;
