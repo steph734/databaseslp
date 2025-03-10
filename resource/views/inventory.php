@@ -30,8 +30,8 @@ $query = "SELECT
     i.updatedate,
     CASE 
         WHEN (i.stock_quantity - i.damage_stock) <= 0 THEN 'Out of Stock'
-        WHEN (i.stock_quantity - i.damage_stock) <= 115 THEN 'Low Stock'
-        WHEN (i.stock_quantity - i.damage_stock) <= 280 THEN 'Reorder Needed'
+        WHEN (i.stock_quantity - i.damage_stock) <= 30 THEN 'Low Stock'
+        WHEN (i.stock_quantity - i.damage_stock) <= 50 THEN 'Reorder Needed'
         ELSE 'In Stock'
     END AS stock_level
 FROM Inventory i
@@ -90,7 +90,7 @@ $productResult = $conn->query($productQuery);
     .clear-btn {
         padding: 8px 15px;
         border: none;
-        background: #28a745;
+        background: #34502b;
         color: white;
         border-radius: 5px;
         cursor: pointer;
@@ -98,8 +98,10 @@ $productResult = $conn->query($productQuery);
     }
 
     .clear-btn {
-        background: #dc3545;
+        background: rgb(255, 255, 255);
         width: 70px;
+        color: #34502b;
+        border: 1px solid #34502b;
     }
 
     /* Table Styling */
@@ -118,20 +120,19 @@ $productResult = $conn->query($productQuery);
     }
 
     .create-btn {
-        background: #6b8e5e;
+        background: #34502b;
         color: white;
         padding: 8px 12px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        transition: all 0.5s ease-in-out;
+        transition: all 0.1s ease-in-out;
     }
 
     .create-btn:hover {
         background: white;
-        color: #6b8e5e;
-        border: 1px solid #6b8e5e;
-        transform: translateY(-5px);
+        color: #34502b;
+        border: 1px solid #34502b;
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -140,16 +141,13 @@ $productResult = $conn->query($productQuery);
         overflow-x: auto;
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
 
     th {
-        background-color: #e6c200 !important;
-        color: white !important;
+        background-color: rgb(227, 241, 224) !important;
+        color: #34502b !important;
         text-align: center !important;
         padding: 10px;
+        font-size: 14px !important;
     }
 
     th,
@@ -157,10 +155,7 @@ $productResult = $conn->query($productQuery);
         text-align: center;
         padding: 10px;
         border-bottom: 1px solid #ddd;
-    }
-
-    tr:hover {
-        background: #f1f1f1;
+        font-size: 14px;
     }
 
     /* Buttons */
@@ -190,15 +185,13 @@ $productResult = $conn->query($productQuery);
     }
 
     .modal-header {
-        background: rgb(24, 152, 47);
-        color: white;
+        color: #34502b;
         padding: 15px;
         border-radius: 5px 5px 0 0;
     }
 
     .modal-footer {
         display: flex;
-        justify-content: space-between;
     }
 
     /* Validation Message */
@@ -298,10 +291,11 @@ $productResult = $conn->query($productQuery);
                 UPDATE INVENTORY <i class="fa-solid fa-pen"></i>
             </button>
         </div>
-        <div class="table-responsive rounded-3">
+        <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th><input type="checkbox"></th>
                         <th>ID</th>
                         <th>Product</th>
                         <th>Price</th>
@@ -322,6 +316,7 @@ $productResult = $conn->query($productQuery);
                     <?php if ($result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
+                                <td> <input type="checkbox"></td>
                                 <td><?= $row['inventory_id'] ?></td>
                                 <td><?= htmlspecialchars($row['product_name']) ?></td>
                                 <td><?= number_format($row['price'], 2) ?></td>
@@ -354,7 +349,7 @@ $productResult = $conn->query($productQuery);
                         <?php endwhile; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="13" style="text-align: center; padding: 20px; color: #666;">
+                            <td colspan="14" style="text-align: center; padding: 20px; color: #666;">
                                 No inventory records found
                             </td>
                         </tr>
@@ -396,8 +391,10 @@ $productResult = $conn->query($productQuery);
                     <input type="date" name="received_date" class="form-control" value="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Update Inventory</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn" style="color: white; background-color: #34502b;">Update
+                    </button>
+                    <button type="button" class="btn" data-bs-dismiss="modal"
+                        style="color: #34502b; background-color:rgb(255, 255, 255); border: 1px solid #34502b;">Cancel</button>
                 </div>
             </form>
         </div>
