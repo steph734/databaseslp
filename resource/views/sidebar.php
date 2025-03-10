@@ -1,4 +1,7 @@
 <div class="sidebar">
+    <div class="">
+
+    </div>
     <ul>
         <?php
         $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
@@ -25,7 +28,11 @@
             <a href="../layout/web-layout.php?page=supplier"><i class="fa fa-truck"></i> Suppliers</a>
         </li>
         <li class="<?= ($current_page == 'returns') ? 'active' : '' ?>">
+<<<<<<< HEAD
             <a href="../layout/web-layout.php?page=returns"><i class="fa fa-undo"></i> Returns</a>
+=======
+            <a href="../layout/web-layout.php?page=returns"><i class="fa-solid fa-right-left"></i> Returns</a>
+>>>>>>> 2fbec378724fa20bea82d684e948bc4edecb67a8
         </li>
         <li class="<?= ($current_page == 'reports') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=reports"><i class="fa fa-chart-bar"></i> Reports</a>

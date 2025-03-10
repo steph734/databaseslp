@@ -36,10 +36,10 @@ unset($_SESSION['login']);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        html,
-        body {
-            overflow-x: hidden;
-        }
+    html,
+    body {
+        overflow-x: hidden;
+    }
     </style>
 </head>
 

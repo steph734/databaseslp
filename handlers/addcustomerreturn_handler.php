@@ -1,4 +1,5 @@
 <?php
+session_start(); // Start the session for storing success/error messages
 include '../../database/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -29,15 +30,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $updatedate, $return_id
     );
 
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: ../returns.php?success=Customer return updated successfully");
-        exit();
+    if ($stmt->execute()) { 
+        $_SESSION['success'] = "Customer return updated successfully!";
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['error'] = "Error: " . $stmt->error;
     }
 
-    mysqli_stmt_close($stmt);
-}
+    $stmt->close();
+    $conn->close();
 
-mysqli_close($conn);
+    header("Location: ../returns.php"); // Redirect to returns page
+    exit();
+}
 ?>

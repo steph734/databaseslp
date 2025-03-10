@@ -1,6 +1,17 @@
+<<<<<<< HEAD
 <?php
 include '../../database/database.php';
 ?>
+=======
+   <div class="main-content">
+       <header>
+           <h1>Returns</h1>
+           <div class="search-profile">
+               <?php include __DIR__ . '/searchbar.php'; ?>
+               <?php include __DIR__ . '/profile.php'; ?>
+           </div>
+       </header>
+>>>>>>> 2fbec378724fa20bea82d684e948bc4edecb67a8
 
 <style>
     /* Styling for Customer and Supplier Tabs */

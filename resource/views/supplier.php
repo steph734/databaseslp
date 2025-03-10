@@ -17,7 +17,7 @@ $result = $conn->query($query);
         position: relative;
         background: white;
         border-radius: 10px;
-        border: 1px solid rgb(227, 209, 8);
+        border: 2px solid #34502b;
         padding: 20px;
         transition: 0.3s;
         min-height: 200px;
@@ -63,7 +63,7 @@ $result = $conn->query($query);
 
     .supplier-card h3 {
         margin-bottom: 10px;
-        color: rgb(255, 174, 0);
+        color: #34502b;
     }
 
     .supplier-card p {
@@ -187,7 +187,7 @@ $result = $conn->query($query);
         <h1>Suppliers</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
+            <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
     <hr>
@@ -217,7 +217,7 @@ $result = $conn->query($query);
                 <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
 
                 <button class="info-toggle" onclick="toggleInfo(this)">
-                    <i class="fa fa-circle-info" style="color:rgb(197, 192, 192);"></i>
+                    <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
                 </button>
 
                 <div class="supplier-info">

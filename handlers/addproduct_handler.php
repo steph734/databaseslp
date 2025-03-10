@@ -10,7 +10,6 @@ if (!isset($_SESSION['admin_id'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     $product_name = $_POST['product_name'] ?? '';
     $quantity = $_POST['quantity'] ?? 0;
     $price = $_POST['price'] ?? 0;
@@ -19,14 +18,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $supplier_id = $_POST['supplier_id'] ?? NULL;
     $createdbyid = $_SESSION['admin_id'];
 
-
+    // Validate required fields
     if (empty($product_name) || empty($unitofmeasurement) || empty($category_id)) {
         $_SESSION['error'] = "All fields are required except Supplier ID.";
         header("Location: ../resource/views/products.php?error=missing_fields");
         exit();
     }
 
-
+    // Call the stored procedure to add the product
     $stmt = $conn->prepare("CALL AddProduct(?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("sidssii", $product_name, $quantity, $price, $unitofmeasurement, $category_id, $supplier_id, $createdbyid);
 
@@ -34,14 +33,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['success'] = "Product added successfully!";
         header("Location: ../resource/layout/web-layout.php?page=products");
     } else {
-        $_SESSION['error'] = "Failed to add product.";
-        header("Location: ../resource/layout/web-layout.php?page=products");
+        $_SESSION['error'] = "Failed to add product: " . $stmt->error;
+        header("Location: ../resource/layout/web-layout.php?page=products&error=database_error");
     }
 
     $stmt->close();
 } else {
     $_SESSION['error'] = "Invalid request.";
-    header("Location: ../resource/layout/web-layout.php?page=products");
+    header("Location: ../resource/layout/web-layout.php?page=products&error=invalid_request");
 }
 
 $conn->close();

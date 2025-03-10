@@ -1,4 +1,5 @@
 <?php
+session_start(); // Start the session to store success/error messages
 include '../../database/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -11,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $updatedbyid = $_POST['updatedbyid'];
     $updatedate = date('Y-m-d H:i:s'); // Auto-update timestamp
 
+    // Use prepared statements to prevent SQL injection
     $query = "UPDATE customerreturn SET 
                 customer_id = ?, 
                 return_reason = ?, 
@@ -18,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 refund_status = ?, 
                 total_amount = ?, 
                 updatedbyid = ?, 
-                updatedate = ?
+                updatedate = ? 
               WHERE customer_return_id = ?";
 
     $stmt = mysqli_prepare($conn, $query);
@@ -28,15 +30,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $updatedate, $customer_return_id
     );
 
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: ../returns.php?success=Customer return updated");
-        exit();
+    if ($stmt->execute()) { 
+        $_SESSION['success'] = "Customer return updated successfully!";
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $_SESSION['error'] = "Error updating customer return: " . $stmt->error;
     }
 
-    mysqli_stmt_close($stmt);
-}
+    $stmt->close();
+    $conn->close();
 
-mysqli_close($conn);
+    header("Location: ../returns.php"); // Redirect to returns page
+    exit();
+}
 ?>

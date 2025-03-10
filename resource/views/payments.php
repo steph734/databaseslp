@@ -1,22 +1,21 @@
 <div class="main-content">
     <header>
-        <h1>Customers</h1>
+        <h1>Payments</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
             <?php include __DIR__ . '/profile.php'; ?>
-        </div>
     </header>
 
     <div class="search-container">
-        <input type="text" placeholder="Customer ID">
-        <input type="text" placeholder="Name">
-        <input type="text" placeholder="Contact">
-        <input type="text" placeholder="Address">
+        <input type="text" placeholder="Inventory ID">
+        <input type="text" placeholder="Product ID">
+        <input type="text" placeholder="Price">
+        <input type="text" placeholder="Quantity">
         <button class="search-btn">SEARCH</button>
         <button class="clear-btn">CLEAR</button>
     </div>
 
-    <div class="customer-table">
+    <div class="supplier-table">
         <div class="table-controls">
             <button class="create-btn">CREATE NEW <span>+</span></button>
             <button class="edit-btn">EDIT <span>✏️</span></button>
@@ -26,15 +25,13 @@
             <thead>
                 <tr>
                     <th><input type="checkbox"></th>
-                    <th>CustomerID</th>
-                    <th>TypeID</th>
+                    <th>SupplierID</th>
                     <th>Name</th>
-                    <th>Contact</th>
                     <th>Address</th>
-                    <th>Member</th>
+                    <th>Contact Info</th>
                 </tr>
             </thead>
-            <tbody id="customer-table-body">
+            <tbody id="supplier-table-body">
                 <!-- Data will be populated dynamically from the database -->
             </tbody>
         </table>

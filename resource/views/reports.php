@@ -2,8 +2,13 @@
     <header>
         <h1>Reports</h1>
         <div class="search-profile">
+<<<<<<< HEAD
             <?php include 'searchbar.php'; ?>
             <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
+=======
+            <?php include __DIR__ . '/searchbar.php'; ?>
+            <?php include __DIR__ . '/profile.php'; ?>
+>>>>>>> 2fbec378724fa20bea82d684e948bc4edecb67a8
         </div>
     </header>
 
