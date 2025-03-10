@@ -9,6 +9,12 @@
         <li class="<?= ($current_page == 'customer') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=customer"><i class="fa fa-user"></i> Customers</a>
         </li>
+        <li class="<?= ($current_page == 'membership') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=membership"><i class="fa-solid fa-id-card"></i> Membership</a>
+        </li>
+        <li class="<?= ($current_page == 'points') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=points"><i class="fa-solid fa-star"></i>Points</a>
+        </li>
         <li class="<?= ($current_page == 'sales') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=sales"><i class="fa fa-shopping-cart"></i> Sales</a>
         </li>
@@ -22,7 +28,7 @@
             <a href="../layout/web-layout.php?page=supplier"><i class="fa fa-truck"></i> Suppliers</a>
         </li>
         <li class="<?= ($current_page == 'payments') ? 'active' : '' ?>">
-            <a href="../layout/web-layout.php?page=payments"><i class="fa fa-credit-card"></i> Payments</a>
+            <a href="../layout/web-layout.php?page=returns"><i class="fa-solid fa-arrow-right-arrow-left"></i>Returns</a>
         </li>
         <li class="<?= ($current_page == 'reports') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=reports"><i class="fa fa-chart-bar"></i> Reports</a>

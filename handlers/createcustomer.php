@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contact = $_POST['contact'] ?? NULL;
     $address = $_POST['address'] ?? NULL;
     $is_member = isset($_POST['is_member']) ? 1 : 0;
-    $type_id = $_POST['type_id'] ?? NULL;
+    $type_id = $_SESSION['type_id'] ?? NULL;
     $createdbyid = $_SESSION['admin_id'] ?? NULL; 
 
     try {

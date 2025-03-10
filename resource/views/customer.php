@@ -1,12 +1,29 @@
 <?php 
+
+
 include '../../database/database.php';
 
-
+if (isset($_SESSION['search_results'])) {
+    $customers = $_SESSION['search_results'];
+    unset($_SESSION['search_results']); // Clear after displaying
+} else {
+   
+    $query = "SELECT * FROM Customer";
+    $result = $conn->query($query);
+    $customers = $result->fetch_all(MYSQLI_ASSOC);
+}
 // Fetch customers
 $query = "SELECT * FROM Customer";
 $result = $conn->query($query);
 ?>
-
+<style>
+    th{
+        background-color: #e6c200 !important;
+        color: white !important
+    }
+    
+    </style>
+  
 <div class="main-content">
     <header>
         <h1>Customers</h1>
@@ -25,6 +42,7 @@ $result = $conn->query($query);
         <button class="btn btn-secondary">CLEAR</button>
 </form>
     </div>
+
 
     <div class="customer-table">
         <div class="table-controls">
@@ -85,6 +103,8 @@ $result = $conn->query($query);
         </div>
 
         <table class="table table-striped">
+
+      
             <thead>
                 <tr>
                     <th><input type="checkbox"></th>

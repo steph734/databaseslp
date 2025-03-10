@@ -1,42 +1,29 @@
-<?php 
+<?php
+session_start();
 include '../database/database.php';
 
-// Initialize variables
-$customerID = $name = $contact = $address = "";
-$conditions = [];
-$params = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $search_query = trim($_POST['search_query']);
 
-// Check if search form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!empty($_POST['customerID'])) {
-        $conditions[] = "customer_id LIKE ?";
-        $params[] = "%" . $_POST['customerID'] . "%";
-    }
-    if (!empty($_POST['name'])) {
-        $conditions[] = "name LIKE ?";
-        $params[] = "%" . $_POST['name'] . "%";
-    }
-    if (!empty($_POST['contact'])) {
-        $conditions[] = "contact LIKE ?";
-        $params[] = "%" . $_POST['contact'] . "%";
-    }
-    if (!empty($_POST['address'])) {
-        $conditions[] = "address LIKE ?";
-        $params[] = "%" . $_POST['address'] . "%";
+    if (!empty($search_query)) {
+        // Search by Customer ID, Name, Contact, or Address
+        $query = "SELECT * FROM Customer 
+                  WHERE customer_id LIKE ? 
+                     OR name LIKE ? 
+                     OR contact LIKE ? 
+                     OR address LIKE ?";
+        
+        $stmt = $conn->prepare($query);
+        $search_param = "%{$search_query}%";
+        $stmt->bind_param("ssss", $search_param, $search_param, $search_param, $search_param);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $_SESSION['search_results'] = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
     }
 }
 
-// Construct the SQL query dynamically
-$query = "SELECT * FROM Customer";
-if (!empty($conditions)) {
-    $query .= " WHERE " . implode(" AND ", $conditions);
-}
-
-$stmt = $conn->prepare($query);
-if (!empty($params)) {
-    $stmt->bind_param(str_repeat("s", count($params)), ...$params);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-?>
+// Redirect back to customer.php to display results
+header("Location: ../views/customer.php");
+exit;
