@@ -68,7 +68,7 @@ table {
 }
 
 thead {
-  background: #e6c200;
+  background: rgb(227, 241, 224) !important;
 }
 
 thead th {

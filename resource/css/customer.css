@@ -96,13 +96,13 @@ table {
 }
 
 thead {
-  background: #e6c200;
+  background: rgb(227, 241, 224) !important;
 }
 
 thead th {
   padding: 10px;
   text-align: left;
-  background-color: #e6c200 !important;
+  background-color: rgb(227, 241, 224) !important;
 }
 
 tbody td {
