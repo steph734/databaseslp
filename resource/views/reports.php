@@ -2,13 +2,8 @@
     <header>
         <h1>Reports</h1>
         <div class="search-profile">
-<<<<<<< HEAD
             <?php include __DIR__ . '/searchbar.php'; ?>
             <?php include __DIR__ . '/profile.php'; ?>
-=======
-            <?php include 'searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
         </div>
     </header>
 
@@ -66,4 +61,5 @@
 
 <script src="script.js"></script>
 </body>
+
 </html>

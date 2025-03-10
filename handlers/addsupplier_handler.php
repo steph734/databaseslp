@@ -38,8 +38,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: ../resource/layout/web-layout.php?page=supplier");
 }
 
-<<<<<<< HEAD
 $conn->close();
-=======
-$conn->close();
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12

@@ -69,8 +69,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Redirect back to the inventory page
     header("Location: ../resource/layout/web-layout.php?page=inventory");
     exit();
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12

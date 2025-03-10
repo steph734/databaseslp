@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 <?php
 include '../../database/database.php';
 
@@ -7,24 +5,16 @@ $query = "SELECT * FROM membership";
 $result = $conn->query($query);
 ?>
 
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
 <div class="main-content">
     <header>
         <h1>Membership</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-<<<<<<< HEAD
-            <?php include __DIR__ . '/profile.php'; ?>
-        </div>
-    </header>
-
-=======
             <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
         </div>
     </header>
 
     <!-- Search Bar -->
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
     <div class="search-container-membership">
         <input type="text" id="membership-id" placeholder="Membership ID">
         <input type="text" id="customer-id" placeholder="Customer ID">
@@ -34,13 +24,6 @@ $result = $conn->query($query);
     </div>
 
     <div class="membership-table">
-<<<<<<< HEAD
-        <div class="table-controls">
-            <button class="create-btn">CREATE NEW <span>+</span></button>
-            <button class="edit-btn">EDIT <span>✏️</span></button>
-            <button class="delete-btn">DELETE <span>🗑️</span></button>
-        </div>
-=======
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pointsmodal">
             POINTS <i class="fa-solid fa-star"></i>
         </button>
@@ -114,7 +97,6 @@ $result = $conn->query($query);
         </div>
 
         <!-- Membership Table -->
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
         <table>
             <thead>
                 <tr>
@@ -122,20 +104,6 @@ $result = $conn->query($query);
                     <th>Membership ID</th>
                     <th>Customer ID</th>
                     <th>Status</th>
-<<<<<<< HEAD
-                    <th>Start Date</th>
-                    <th>Date Renewal</th>
-                    <th>Created By</th>
-                    <th>Updated By</th>
-                </tr>
-            </thead>
-            <tbody id="membership-table-body">
-                <!-- Data will be populated dynamically from the database -->
-            </tbody>
-        </table>
-    </div>
-</div>
-=======
                     <th>Date Start</th>
                     <th>Date Renewal</th>
                     <th>Created By</th>
@@ -146,39 +114,39 @@ $result = $conn->query($query);
                 </tr>
             </thead>
             <tbody>
-            <?php if ($result && $result->num_rows > 0) { ?>
-                <?php while ($row = $result->fetch_assoc()) { ?>
-                <tr>
-                    <td><input type="checkbox"></td>
-                    <td><?php echo htmlspecialchars($row['membership_id']); ?></td>
-                    <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
-                    <td><?php echo htmlspecialchars($row['status']); ?></td>
-                    <td><?php echo htmlspecialchars($row['date_start']); ?></td>
-                    <td><?php echo htmlspecialchars($row['date_renewal']); ?></td>
-                    <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
-                    <td><?php echo htmlspecialchars($row['createdate']); ?></td>
-                    <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
-                    <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
-                    <td>
-                        <br>
-                        <button class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal" 
-                            data-id="<?php echo htmlspecialchars($row['membership_id']); ?>"
-                            data-status="<?php echo htmlspecialchars($row['status']); ?>"
-                            data-startdate="<?php echo htmlspecialchars($row['date_start']); ?>"
-                            data-daterenewal="<?php echo htmlspecialchars($row['date_renewal']); ?>">
-                            EDIT <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-                        <button class="btn btn-danger delete-btn" data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
-                            DELETE <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                <?php if ($result && $result->num_rows > 0) { ?>
+                    <?php while ($row = $result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><?php echo htmlspecialchars($row['membership_id']); ?></td>
+                            <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
+                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                            <td><?php echo htmlspecialchars($row['date_start']); ?></td>
+                            <td><?php echo htmlspecialchars($row['date_renewal']); ?></td>
+                            <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
+                            <td><?php echo htmlspecialchars($row['createdate']); ?></td>
+                            <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
+                            <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
+                            <td>
+                                <br>
+                                <button class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal"
+                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>"
+                                    data-status="<?php echo htmlspecialchars($row['status']); ?>"
+                                    data-startdate="<?php echo htmlspecialchars($row['date_start']); ?>"
+                                    data-daterenewal="<?php echo htmlspecialchars($row['date_renewal']); ?>">
+                                    EDIT <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn btn-danger delete-btn" data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
+                                    DELETE <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                <?php } else { ?>
+                    <tr>
+                        <td colspan="11">No memberships found.</td>
+                    </tr>
                 <?php } ?>
-            <?php } else { ?>
-                <tr>
-                    <td colspan="11">No memberships found.</td>
-                </tr>
-            <?php } ?>
             </tbody>
         </table>
     </div>
@@ -218,43 +186,43 @@ $result = $conn->query($query);
                             <th>TotalPurchase</th>
                             <th>PointsAmount</th>
                             <th>Action</th>
-                            
+
                         </tr>
                     </thead>
-</div>
+            </div>
 
 
- <!--Edit script-->
-<script>
+            <!--Edit script-->
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    document.querySelectorAll(".edit-btn").forEach(button => {
+                        button.addEventListener("click", function() {
+                            document.getElementById("edit_membership_id").value = this.getAttribute("data-id");
+                            document.getElementById("edit_status").value = this.getAttribute("data-status");
+                            document.getElementById("edit_startdate").value = this.getAttribute("data-startdate");
+                            document.getElementById("edit_daterenewal").value = this.getAttribute("data-daterenewal");
+                        });
+                    });
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".edit-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            document.getElementById("edit_membership_id").value = this.getAttribute("data-id");
-            document.getElementById("edit_status").value = this.getAttribute("data-status");
-            document.getElementById("edit_startdate").value = this.getAttribute("data-startdate");
-            document.getElementById("edit_daterenewal").value = this.getAttribute("data-daterenewal");
-        });
-    });
-
-    document.querySelectorAll(".delete-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            let membershipId = this.getAttribute("data-id");
-            if (confirm("Are you sure you want to delete this member?")) {
-                fetch("../../handlers/deletemember.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `membership_id=${membershipId}`
-                })
-                .then(response => response.text())
-                .then(data => {
-                    alert("Member deleted successfully!");
-                    location.reload();
-                })
-                .catch(error => console.error("Error:", error));
-            }
-        });
-    });
-});
-</script>
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
+                    document.querySelectorAll(".delete-btn").forEach(button => {
+                        button.addEventListener("click", function() {
+                            let membershipId = this.getAttribute("data-id");
+                            if (confirm("Are you sure you want to delete this member?")) {
+                                fetch("../../handlers/deletemember.php", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/x-www-form-urlencoded"
+                                        },
+                                        body: `membership_id=${membershipId}`
+                                    })
+                                    .then(response => response.text())
+                                    .then(data => {
+                                        alert("Member deleted successfully!");
+                                        location.reload();
+                                    })
+                                    .catch(error => console.error("Error:", error));
+                            }
+                        });
+                    });
+                });
+            </script>

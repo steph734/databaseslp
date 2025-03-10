@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
 <?php
 session_start();
 include '../database/database.php';
