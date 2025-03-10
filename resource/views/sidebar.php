@@ -15,6 +15,12 @@
         <li class="<?= ($current_page == 'membership') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=membership"><i class="fa-solid fa-id-card"></i> Membership</a>
         </li>
+<<<<<<< HEAD
+=======
+        <li class="<?= ($current_page == 'points') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=points"><i class="fa-solid fa-star"></i>Points</a>
+        </li>
+>>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
         <li class="<?= ($current_page == 'sales') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=sales"><i class="fa fa-shopping-cart"></i> Sales</a>
         </li>
@@ -27,8 +33,13 @@
         <li class="<?= ($current_page == 'supplier') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=supplier"><i class="fa fa-truck"></i> Suppliers</a>
         </li>
+<<<<<<< HEAD
         <li class="<?= ($current_page == 'returns') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=returns"><i class="fa-solid fa-right-left"></i> Returns</a>
+=======
+        <li class="<?= ($current_page == 'payments') ? 'active' : '' ?>">
+            <a href="../layout/web-layout.php?page=returns"><i class="fa-solid fa-arrow-right-arrow-left"></i>Returns</a>
+>>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
         </li>
         <li class="<?= ($current_page == 'reports') ? 'active' : '' ?>">
             <a href="../layout/web-layout.php?page=reports"><i class="fa fa-chart-bar"></i> Reports</a>

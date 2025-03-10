@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12
 <?php
 include '../../database/database.php';
 
@@ -340,4 +344,8 @@ $result = $conn->query($query);
             window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
         }
     }
+<<<<<<< HEAD
 </script>
+=======
+</script>
+>>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12

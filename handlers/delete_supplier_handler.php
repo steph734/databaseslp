@@ -29,4 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['id'])) {
     $_SESSION['error'] = "Invalid request!";
     header("Location: ../resource/layout/web-layout.php?page=supplier");
     exit();
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 3e1a7cf36debfc72d0a4b43a979122b10df7cd12

@@ -102,6 +102,7 @@ thead {
 thead th {
   padding: 10px;
   text-align: left;
+  background-color: #e6c200 !important;
 }
 
 tbody td {
@@ -111,4 +112,8 @@ tbody td {
 
 tbody tr:hover {
   background: #efefef;
+}
+
+th{
+  
 }
