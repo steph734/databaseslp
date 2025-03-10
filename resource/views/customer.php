@@ -38,6 +38,7 @@ if (isset($_SESSION['search_results'])) {
             <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
+    <hr>
     <form method="POST" action="../../handlers/searchcustomer.php">
         <div class="search-container">
             <input type="text" name="customerID" placeholder="Customer ID">
