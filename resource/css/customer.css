@@ -97,12 +97,14 @@ table {
 
 thead {
   background: rgb(246, 247, 246) !important;
+  color: rgb(36, 34, 34) !important;
 }
 
 thead th {
   padding: 10px;
   text-align: left;
   background-color: rgb(227, 241, 224) !important;
+  color: rgb(36, 34, 34) !important;
 }
 
 tbody td {

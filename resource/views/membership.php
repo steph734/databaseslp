@@ -10,7 +10,7 @@ $result = $conn->query($query);
         <h1>Membership</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
+            <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
 
@@ -24,10 +24,10 @@ $result = $conn->query($query);
     </div>
 
     <div class="membership-table">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pointsmodal">
+        <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#pointsmodal">
             POINTS <i class="fa-solid fa-star"></i>
         </button>
-        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+        <button class="btn btn-secondary my-3" data-bs-toggle="modal" data-bs-target="#addMemberModal">
             CREATE NEW <i class="fa-solid fa-add"></i>
         </button>
 
@@ -98,8 +98,8 @@ $result = $conn->query($query);
 
         <!-- Membership Table -->
         <table>
-            <thead>
-                <tr>
+            <thead class="member-table" style="color:rgb(29, 28, 28); ">
+                <tr style="text-align: center !important;">
                     <th><input type="checkbox"></th>
                     <th>Membership ID</th>
                     <th>Customer ID</th>
@@ -121,7 +121,7 @@ $result = $conn->query($query);
                             <td><?php echo htmlspecialchars($row['membership_id']); ?></td>
                             <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
                             <td><?php echo htmlspecialchars($row['status']); ?></td>
-                            <td><?php echo htmlspecialchars($row['date_start']); ?></td>
+                            <td><?php echo htmlspecialchars($row['date_repairs']); ?></td>
                             <td><?php echo htmlspecialchars($row['date_renewal']); ?></td>
                             <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
                             <td><?php echo htmlspecialchars($row['createdate']); ?></td>
@@ -129,14 +129,16 @@ $result = $conn->query($query);
                             <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
                             <td>
                                 <br>
-                                <button class="btn btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal"
+                                <button class="btn btn-warning edit-btn" data-bs-toggle="modal"
+                                    data-bs-target="#editMemberModal"
                                     data-id="<?php echo htmlspecialchars($row['membership_id']); ?>"
                                     data-status="<?php echo htmlspecialchars($row['status']); ?>"
-                                    data-startdate="<?php echo htmlspecialchars($row['date_start']); ?>"
+                                    data-startdate="<?php echo htmlspecialchars($row['date_repairs']); ?>"
                                     data-daterenewal="<?php echo htmlspecialchars($row['date_renewal']); ?>">
                                     EDIT <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button class="btn btn-danger delete-btn" data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
+                                <button class="btn btn-danger delete-btn"
+                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
                                     DELETE <i class="fa-solid fa-trash"></i>
                                 </button>
                             </td>
@@ -197,10 +199,14 @@ $result = $conn->query($query);
                 document.addEventListener("DOMContentLoaded", function() {
                     document.querySelectorAll(".edit-btn").forEach(button => {
                         button.addEventListener("click", function() {
-                            document.getElementById("edit_membership_id").value = this.getAttribute("data-id");
-                            document.getElementById("edit_status").value = this.getAttribute("data-status");
-                            document.getElementById("edit_startdate").value = this.getAttribute("data-startdate");
-                            document.getElementById("edit_daterenewal").value = this.getAttribute("data-daterenewal");
+                            document.getElementById("edit_membership_id").value = this.getAttribute(
+                                "data-id");
+                            document.getElementById("edit_status").value = this.getAttribute(
+                                "data-status");
+                            document.getElementById("edit_startdate").value = this.getAttribute(
+                                "data-startdate");
+                            document.getElementById("edit_daterenewal").value = this.getAttribute(
+                                "data-daterenewal");
                         });
                     });
 

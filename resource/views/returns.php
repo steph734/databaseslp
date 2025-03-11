@@ -23,7 +23,8 @@ include '../../database/database.php';
     }
 
     /* Search and Table Controls Styling */
-    .search-container, .table-controls {
+    .search-container,
+    .table-controls {
         display: flex;
         gap: 10px;
         margin-bottom: 15px;
@@ -36,7 +37,11 @@ include '../../database/database.php';
         width: 150px;
     }
 
-    .search-btn, .clear-btn, .create-btn, .edit-btn, .delete-btn {
+    .search-btn,
+    .clear-btn,
+    .create-btn,
+    .edit-btn,
+    .delete-btn {
         padding: 8px 15px;
         border: none;
         cursor: pointer;
@@ -44,11 +49,26 @@ include '../../database/database.php';
         color: white;
     }
 
-    .search-btn { background: #6b8e5e; }
-    .clear-btn { background: #a3a3a3; }
-    .create-btn { background: #6b8e5e; }
-    .edit-btn { background: #ffd700; color: black; }
-    .delete-btn { background: #ff6347; }
+    .search-btn {
+        background: #6b8e5e;
+    }
+
+    .clear-btn {
+        background: #a3a3a3;
+    }
+
+    .create-btn {
+        background: #6b8e5e;
+    }
+
+    .edit-btn {
+        background: #ffd700;
+        color: black;
+    }
+
+    .delete-btn {
+        background: #ff6347;
+    }
 
     /* Table Styling */
     table {
@@ -63,7 +83,8 @@ include '../../database/database.php';
         padding: 10px;
     }
 
-    th, td {
+    th,
+    td {
         text-align: center;
         padding: 10px;
         border-bottom: 1px solid #ddd;
@@ -120,7 +141,8 @@ include '../../database/database.php';
         font-weight: bold;
     }
 
-    .modal-body input, .modal-body select {
+    .modal-body input,
+    .modal-body select {
         width: 100%;
         padding: 8px;
         margin-bottom: 10px;
@@ -152,7 +174,6 @@ include '../../database/database.php';
         cursor: pointer;
         border-radius: 5px;
     }
-
 </style>
 
 <script>
@@ -164,9 +185,12 @@ include '../../database/database.php';
         document.querySelector(`.tabs span[data-type="${type}"]`).classList.add('active');
 
         // Update form actions
-        document.getElementById('create-form').action = (type === 'customer') ? 'handlers/addcustomerreturn_handler.php' : 'handlers/addsupplierreturn_handler.php';
-        document.getElementById('edit-form').action = (type === 'customer') ? 'handlers/editcustomerreturn_handler.php' : 'handlers/editsupplierreturn_handler.php';
-        document.getElementById('delete-form').action = (type === 'customer') ? 'handlers/deletecustomerreturn_handler.php' : 'handlers/deletesupplierreturn_handler.php';
+        document.getElementById('create-form').action = (type === 'customer') ? 'handlers/addcustomerreturn_handler.php' :
+            'handlers/addsupplierreturn_handler.php';
+        document.getElementById('edit-form').action = (type === 'customer') ? 'handlers/editcustomerreturn_handler.php' :
+            'handlers/editsupplierreturn_handler.php';
+        document.getElementById('delete-form').action = (type === 'customer') ?
+            'handlers/deletecustomerreturn_handler.php' : 'handlers/deletesupplierreturn_handler.php';
     }
 
     function openModal(modalId) {
@@ -196,10 +220,10 @@ include '../../database/database.php';
     }
 
     window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = "none";
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
+        }
     }
-}
 </script>
 
 <div class="main-content">
@@ -207,7 +231,7 @@ include '../../database/database.php';
         <h1>Returns</h1>
         <div class="search-profile">
             <?php include __DIR__ . '/searchbar.php'; ?>
-            <i class="fa-solid fa-user" style="margin-left: 20px;"></i>
+            <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
 
@@ -216,7 +240,7 @@ include '../../database/database.php';
         <span class="active" data-type="customer" onclick="showTable('customer')">Customer</span>
         <span data-type="supplier" onclick="showTable('supplier')">Supplier</span>
     </div>
-
+    <hr>
     <!-- Search Fields -->
     <div class="search-container">
         <input type="text" placeholder="Customer Return ID">
@@ -227,12 +251,13 @@ include '../../database/database.php';
         <button class="clear-btn">CLEAR</button>
     </div>
 
-   <!-- Table Controls -->
-<div class="table-controls">
-    <button type="button" class="create-btn" onclick="openModal('createModal')">CREATE NEW <span>+</span></button>
-    <button type="button" class="edit-btn" onclick="openEditModal('editModal')">EDIT <span>✏️</span></button>
-    <button type="button" class="delete-btn" onclick="openDeleteModal('deleteModal')">DELETE <span>🗑️</span></button>
-</div>
+    <!-- Table Controls -->
+    <div class="table-controls">
+        <button type="button" class="create-btn" onclick="openModal('createModal')">CREATE NEW <span>+</span></button>
+        <button type="button" class="edit-btn" onclick="openEditModal('editModal')">EDIT <span>✏️</span></button>
+        <button type="button" class="delete-btn" onclick="openDeleteModal('deleteModal')">DELETE
+            <span>🗑️</span></button>
+    </div>
 
 <!-- Create Modal -->
 <div id="createModal" class="modal">
@@ -246,86 +271,86 @@ include '../../database/database.php';
                 <label for="customer_id">Customer ID:</label>
                 <input type="number" name="customer_id" required>
 
-                <label for="return_reason">Return Reason:</label>
-                <input type="text" name="return_reason" required>
+                    <label for="return_reason">Return Reason:</label>
+                    <input type="text" name="return_reason" required>
 
-                <label for="return_date">Return Date:</label>
-                <input type="date" name="return_date" required>
+                    <label for="return_date">Return Date:</label>
+                    <input type="date" name="return_date" required>
 
-                <label for="refund_status">Refund Status:</label>
-                <select name="refund_status" required>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
+                    <label for="refund_status">Refund Status:</label>
+                    <select name="refund_status" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
 
-                <label for="total_amount">Total Amount:</label>
-                <input type="number" name="total_amount" step="0.01" required>
+                    <label for="total_amount">Total Amount:</label>
+                    <input type="number" name="total_amount" step="0.01" required>
 
-                <div class="modal-footer">
-                    <button type="submit" class="submit-btn">Add Return</button>
-                    <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="submit-btn">Add Return</button>
+                        <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>Edit Return</span>
-            <span class="close" onclick="closeModal('editModal')">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form method="POST" action="../../handlers/editcustomerreturn_handler.php">
-                <input type="hidden" id="edit_return_id" name="return_id">
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit Return</span>
+                <span class="close" onclick="closeModal('editModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="../../handlers/editcustomerreturn_handler.php">
+                    <input type="hidden" id="edit_return_id" name="return_id">
 
-                <label for="edit_return_reason">Return Reason:</label>
-                <input type="text" id="edit_return_reason" name="return_reason" required>
+                    <label for="edit_return_reason">Return Reason:</label>
+                    <input type="text" id="edit_return_reason" name="return_reason" required>
 
-                <label for="edit_return_date">Return Date:</label>
-                <input type="date" id="edit_return_date" name="return_date" required>
+                    <label for="edit_return_date">Return Date:</label>
+                    <input type="date" id="edit_return_date" name="return_date" required>
 
-                <label for="edit_refund_status">Refund Status:</label>
-                <select id="edit_refund_status" name="refund_status" required>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
+                    <label for="edit_refund_status">Refund Status:</label>
+                    <select id="edit_refund_status" name="refund_status" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
 
-                <label for="edit_total_amount">Total Amount:</label>
-                <input type="number" id="edit_total_amount" name="total_amount" step="0.01" required>
+                    <label for="edit_total_amount">Total Amount:</label>
+                    <input type="number" id="edit_total_amount" name="total_amount" step="0.01" required>
 
-                <div class="modal-footer">
-                    <button type="submit" class="submit-btn">Save Changes</button>
-                    <button type="button" class="cancel-btn" onclick="closeModal('editModal')">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Modal -->
-<div id="deleteModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>Confirm Delete</span>
-            <span class="close" onclick="closeModal('deleteModal')">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form method="POST" action="../../handlers/deletecustomerreturn_handler.php">
-                <input type="hidden" id="delete_return_id" name="return_id">
-                <p>Are you sure you want to delete this return?</p>
-                <div class="modal-footer">
-                    <button type="submit" class="submit-btn">Yes, Delete</button>
-                    <button type="button" class="cancel-btn" onclick="closeModal('deleteModal')">Cancel</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="submit" class="submit-btn">Save Changes</button>
+                        <button type="button" class="cancel-btn" onclick="closeModal('editModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Confirm Delete</span>
+                <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="../../handlers/deletecustomerreturn_handler.php">
+                    <input type="hidden" id="delete_return_id" name="return_id">
+                    <p>Are you sure you want to delete this return?</p>
+                    <div class="modal-footer">
+                        <button type="submit" class="submit-btn">Yes, Delete</button>
+                        <button type="button" class="cancel-btn" onclick="closeModal('deleteModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Returns Table -->
     <div class="returns-table">
@@ -343,11 +368,11 @@ include '../../database/database.php';
                 </tr>
             </thead>
             <tbody>
-    <?php
-    $query = "SELECT * FROM customerreturn";
-    $result = mysqli_query($conn, $query);
-    while ($row = mysqli_fetch_assoc($result)) {
-        echo "<tr>
+                <?php
+                $query = "SELECT * FROM customerreturn";
+                $result = mysqli_query($conn, $query);
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo "<tr>
             <td><input type='checkbox'></td>
             <td>{$row['customer_return_id']}</td>
             <td>{$row['customer_id']}</td>
@@ -374,9 +399,9 @@ include '../../database/database.php';
                 <button class='delete-btn' onclick=\"openDeleteModal('{$row['customer_return_id']}')\">Delete</button>
             </td>
         </tr>";
-    }
-    ?>
-</tbody>
+                }
+                ?>
+            </tbody>
         </table>
 
         <table id="supplier-table" style="display: none;">
