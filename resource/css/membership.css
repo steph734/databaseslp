@@ -67,19 +67,21 @@ table {
   border-collapse: collapse;
 }
 
-thead {
-  background:  rgb(230, 231, 229) !important;
-  color: white;
+.member-table {
+  background: rgb(230, 231, 229) !important;
+  color: rgb(36, 34, 34) !important;
 }
 
 thead th {
   padding: 10px;
-  text-align: left;
+  text-align: center;
+  color: rgb(36, 34, 34) !important;
 }
 
 tbody td {
   padding: 10px;
   border-bottom: 1px solid #ccc;
+  text-align: center;
 }
 
 tbody tr:hover {

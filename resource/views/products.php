@@ -84,7 +84,7 @@ $units = [
     .clear-btn {
         padding: 8px 15px;
         border: none;
-        background: #28a745;
+        background: #34502b;
         color: white;
         border-radius: 5px;
         cursor: pointer;
@@ -92,8 +92,10 @@ $units = [
     }
 
     .clear-btn {
-        background: #dc3545;
+        border: 1px solid #34502b;
+        background: white;
         width: 70px;
+        color: #34502b;
     }
 
     /* Table Styling */
@@ -124,7 +126,7 @@ $units = [
 
     .create-btn:hover {
         background: white;
-        color:  #34502b;
+        color: #34502b;
         border: 1px solid #34502b;
         transform: translateY(-1px);
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -141,7 +143,7 @@ $units = [
     }
 
     th {
-        color:rgb(22, 21, 21) !important; 
+        color: rgb(22, 21, 21) !important;
         text-align: center !important;
         padding: 10px;
     }
@@ -175,8 +177,8 @@ $units = [
     }
 
     .btn-primary {
-        background: white!important;
-        border: 1px solid  #34502b !important;
+        background: white !important;
+        border: 1px solid #34502b !important;
         color: #34502b;
     }
 
@@ -187,8 +189,7 @@ $units = [
     }
 
     .modal-header {
-        background: rgb(24, 152, 47);
-        color: white;
+        color: #34502b;
         padding: 15px;
         border-radius: 5px 5px 0 0;
     }
@@ -344,6 +345,7 @@ $units = [
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th><input type="checkbox"></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Quantity</th>
@@ -362,6 +364,7 @@ $units = [
                     <?php if ($result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
+                                <td><input type="checkbox"></td>
                                 <td><?= $row['product_id'] ?></td>
                                 <td><?= htmlspecialchars($row['product_name']) ?></td>
                                 <td><?= $row['quantity'] ?></td>

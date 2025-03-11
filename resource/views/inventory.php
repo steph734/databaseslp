@@ -282,6 +282,7 @@ $productResult = $conn->query($productQuery);
             <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
+
     <hr>
     <div class="search-container">
         <input type="text" id="searchInventoryID" placeholder="Inventory ID">

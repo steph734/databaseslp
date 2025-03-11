@@ -180,6 +180,23 @@ $result = $conn->query($query);
         font-size: 100px;
         color: rgb(191, 195, 190);
     }
+
+    .tabs {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .tabs span {
+        cursor: pointer;
+        color: #000;
+        text-decoration: none;
+    }
+
+    .tabs span.active {
+        border-bottom: 2px solid #000;
+    }
 </style>
 
 <div class="main-content">
@@ -190,6 +207,11 @@ $result = $conn->query($query);
             <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
+    <!-- Tabs -->
+    <div class="tabs">
+        <span class="active" data-type="customer" onclick="showTable('suppliers')">My Suppliers</span>
+        <span data-type="supplier" onclick="showTable('orders')">My Orders</span>
+    </div>
     <hr>
     <div class="header-supplier">
         <button class="btn-add active" onclick="toggleAddForm()" style="font-weight: bold;"><i class="fa fa-add"></i>
