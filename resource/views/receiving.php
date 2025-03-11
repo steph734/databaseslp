@@ -1,6 +1,7 @@
 <?php
 include '../../database/database.php';
 
+// Fetch existing receiving records
 $receiving_query = "SELECT 
     r.receiving_id,
     r.supplier_id,
@@ -27,8 +28,12 @@ GROUP BY r.receiving_id";
 $receiving_result = $conn->query($receiving_query);
 
 if (!$receiving_result) {
-    die("Query failed: " . $conn->error); // Debugging line to catch SQL errors
+    die("Query failed: " . $conn->error);
 }
+
+// Fetch suppliers for the order form
+$supplier_query = "SELECT supplier_id, supplier_name FROM Supplier";
+$supplier_result = $conn->query($supplier_query);
 ?>
 
 <style>
@@ -46,7 +51,6 @@ if (!$receiving_result) {
         padding: 15px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        position: relative;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -126,7 +130,84 @@ if (!$receiving_result) {
         font-size: 16px;
     }
 
-    /* Modal styles remain unchanged */
+    .order-section {
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .order-section h3 {
+        color: #34502b;
+        margin-bottom: 15px;
+    }
+
+    .order-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .supplier-select {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+    }
+
+    .product-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-card input {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+
+    .btn-add-product {
+        background: #34502b;
+        color: white;
+        padding: 8px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-product:hover {
+        background: #2a3f23;
+    }
+
+    .btn-submit-order {
+        background: #ffc107;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit-order:hover {
+        background: #e0a800;
+    }
+
     .condition-damaged {
         color: #dc3545;
         font-weight: bold;
@@ -137,6 +218,29 @@ if (!$receiving_result) {
         font-weight: bold;
     }
 </style>
+
+<!-- Order Form Section -->
+<div class="order-section">
+    <h3>Create New Order</h3>
+    <form class="order-form" action="../../handlers/create_order_handler.php" method="POST">
+        <select class="supplier-select" name="supplier_id" required>
+            <option value="">Select Supplier</option>
+            <?php while ($supplier = $supplier_result->fetch_assoc()) : ?>
+                <option value="<?= $supplier['supplier_id'] ?>"><?= htmlspecialchars($supplier['supplier_name']) ?></option>
+            <?php endwhile; ?>
+        </select>
+        <div class="product-list" id="product-list">
+            <div class="product-card">
+                <input type="text" name="products[0][name]" placeholder="Product Name" required>
+                <input type="number" name="products[0][quantity]" placeholder="Quantity" min="1" required>
+                <input type="number" name="products[0][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0"
+                    required>
+            </div>
+        </div>
+        <button type="button" class="btn-add-product" onclick="addProduct()">Add Another Product</button>
+        <button type="submit" class="btn-submit-order">Submit Order</button>
+    </form>
+</div>
 
 <!-- Receiving Cards -->
 <div class="receiving-container">
@@ -165,7 +269,7 @@ if (!$receiving_result) {
     <?php endif; ?>
 </div>
 
-<!-- Receiving Details Modal (unchanged) -->
+<!-- Receiving Details Modal -->
 <div class="modal fade" id="receivingModal" tabindex="-1" aria-labelledby="receivingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -226,6 +330,21 @@ if (!$receiving_result) {
 <?php endif; ?>
 
 <script>
+    let productCount = 1;
+
+    function addProduct() {
+        const productList = document.getElementById('product-list');
+        const newProduct = document.createElement('div');
+        newProduct.className = 'product-card';
+        newProduct.innerHTML = `
+            <input type="text" name="products[${productCount}][name]" placeholder="Product Name" required>
+            <input type="number" name="products[${productCount}][quantity]" placeholder="Quantity" min="1" required>
+            <input type="number" name="products[${productCount}][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0" required>
+        `;
+        productList.appendChild(newProduct);
+        productCount++;
+    }
+
     function loadReceivingModal(receiving) {
         document.getElementById('view_receiving_id').textContent = receiving.receiving_id;
         document.getElementById('view_supplier_name').textContent = receiving.supplier_name;
@@ -247,7 +366,7 @@ if (!$receiving_result) {
         const conditions = receiving.conditions ? receiving.conditions.split(', ') : [];
 
         const tbody = document.getElementById('view_receiving_products');
-        tbody.innerHTML = ''; // Clear previous content
+        tbody.innerHTML = '';
 
         for (let i = 0; i < productIds.length; i++) {
             const row = document.createElement('tr');
