@@ -7,18 +7,8 @@ if (isset($_SESSION['search_results'])) {
     unset($_SESSION['search_results']); // Clear after displaying
 } else {
     // Join Customer with Customer_Type to fetch the type_name
-    $query = "SELECT i.customer_id, 
-                     i.name,
-                     i.contact,
-                     i.address,
-                     c.type_name,
-                     c.type_id,
-                     i.createdbyid,
-                     i.createdate,
-                     i.updatedbyid,
-                     i.updatedate
-              FROM Customer i 
-              JOIN customer_type c ON i.type_id = c.type_id";
+    $query = "SELECT *
+              FROM Customer";
     $result = $conn->query($query);
     $customers = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
@@ -125,7 +115,7 @@ if (isset($_SESSION['search_results'])) {
                             <td><?php echo htmlspecialchars($row['name']); ?></td>
                             <td><?php echo htmlspecialchars($row['contact']); ?></td>
                             <td><?php echo htmlspecialchars($row['address']); ?></td>
-                            <td><?php echo htmlspecialchars($row['type_name']); ?></td>
+                            <td><?php echo htmlspecialchars($row['type_id']); ?></td>
                             <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
                             <td><?php echo htmlspecialchars($row['createdate']); ?></td>
                             <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
