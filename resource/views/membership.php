@@ -1,8 +1,21 @@
 <?php
 include '../../database/database.php';
 
-$query = "SELECT * FROM membership";
+$query = "SELECT m.*, c.customer_id AS customer_id 
+FROM membership m 
+LEFT JOIN customer c ON m.customer_id = c.customer_id";
 $result = $conn->query($query);
+
+// Fetch member customers for dropdown
+$memberCustomersQuery = "SELECT customer_id, customer_name FROM customer";
+$memberCustomersResult = $conn->query($memberCustomersQuery);
+$memberCustomers = [];
+
+if ($memberCustomersResult) {
+    while ($row = $memberCustomersResult->fetch_assoc()) {
+        $memberCustomers[] = $row;
+    }
+}
 ?>
 
 <div class="main-content">
@@ -41,17 +54,33 @@ $result = $conn->query($query);
                     <div class="modal-body">
                         <form action="../../handlers/createmember.php" method="POST">
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <input type="text" name="status" class="form-control" required>
+                                <label class="form-label">Customer ID</label>
+                                <input type="text" name="customerid" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Start Date</label>
-                                <input type="date" name="startdate" class="form-control">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-control" required>
+                                    <option value="">Select Status</option>
+                                    <?php 
+                                    $statusQuery = "SELECT statusid, statusname FROM status";
+                                    $statusResult = $conn->query($statusQuery);
+                                    while ($statusRow = $statusResult->fetch_assoc()) { ?>
+                                        <option value="<?php echo htmlspecialchars($statusRow['statusid']); ?>">
+                                            <?php echo htmlspecialchars($statusRow['statusname']); ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Date Renewal</label>
+                                <input type="date" id="edit_daterenewal" name="daterenewal" class="form-control">
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Date Renewal</label>
                                 <input type="date" name="daterenewal" class="form-control">
                             </div>
+
                             <div class="modal-footer">
                                 <button type="submit" name="submit" class="btn btn-success">Submit</button>
                                 <button type="reset" class="btn btn-primary">Clear</button>
@@ -63,8 +92,62 @@ $result = $conn->query($query);
             </div>
         </div>
 
-        <!-- Edit Membership Modal -->
-        <div class="modal fade" id="editMemberModal" tabindex="-1">
+        <!-- Membership Table -->
+        <table>
+            <thead class="member-table" style="color:rgb(29, 28, 28);">
+                <tr style="text-align: center !important;">
+                    <th><input type="checkbox"></th>
+                    <th>Membership ID</th>
+                    <th>Customer ID</th>
+                    <th>Status</th>
+                    <th>Date Renewal</th>
+                    <th>Created By</th>
+                    <th>Created Date</th>
+                    <th>Updated By</th>
+                    <th>Updated Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($result && $result->num_rows > 0) { ?>
+                    <?php while ($row = $result->fetch_assoc()) { ?>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><?php echo htmlspecialchars($row['membership_id']); ?></td>
+                            <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
+                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                            <td><?php echo htmlspecialchars($row['date_renewal']); ?></td>
+                            <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
+                            <td><?php echo htmlspecialchars($row['createdate']); ?></td>
+                            <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
+                            <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
+                            <td>
+                                <button class="btn btn-warning" data-bs-toggle="modal"
+                                    data-bs-target="#editMemberModal"
+                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>"
+                                    data-status="<?php echo htmlspecialchars($row['status']); ?>"
+                                    data-daterenewal="<?php echo htmlspecialchars($row['date_renewal']); ?>">
+                                    EDIT <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn btn-danger delete-btn"
+                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
+                                    DELETE <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                <?php } else { ?>
+                    <tr>
+                        <td colspan="10">No memberships found.</td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Membership Modal -->
+<div class="modal fade" id="editMemberModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -96,139 +179,32 @@ $result = $conn->query($query);
             </div>
         </div>
 
-        <!-- Membership Table -->
-        <table>
-            <thead class="member-table" style="color:rgb(29, 28, 28); ">
-                <tr style="text-align: center !important;">
-                    <th><input type="checkbox"></th>
-                    <th>Membership ID</th>
-                    <th>Customer ID</th>
-                    <th>Status</th>
-                    <th>Date Start</th>
-                    <th>Date Renewal</th>
-                    <th>Created By</th>
-                    <th>Created Date</th>
-                    <th>Updated By</th>
-                    <th>Updated Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result && $result->num_rows > 0) { ?>
-                    <?php while ($row = $result->fetch_assoc()) { ?>
-                        <tr>
-                            <td><input type="checkbox"></td>
-                            <td><?php echo htmlspecialchars($row['membership_id']); ?></td>
-                            <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
-                            <td><?php echo htmlspecialchars($row['status']); ?></td>
-                            <td><?php echo htmlspecialchars($row['date_repairs']); ?></td>
-                            <td><?php echo htmlspecialchars($row['date_renewal']); ?></td>
-                            <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
-                            <td><?php echo htmlspecialchars($row['createdate']); ?></td>
-                            <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
-                            <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
-                            <td>
-                                <br>
-                                <button class="btn btn-warning edit-btn" data-bs-toggle="modal"
-                                    data-bs-target="#editMemberModal"
-                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>"
-                                    data-status="<?php echo htmlspecialchars($row['status']); ?>"
-                                    data-startdate="<?php echo htmlspecialchars($row['date_repairs']); ?>"
-                                    data-daterenewal="<?php echo htmlspecialchars($row['date_renewal']); ?>">
-                                    EDIT <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                                <button class="btn btn-danger delete-btn"
-                                    data-id="<?php echo htmlspecialchars($row['membership_id']); ?>">
-                                    DELETE <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                <?php } else { ?>
-                    <tr>
-                        <td colspan="11">No memberships found.</td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<div class="modal fade" id="pointsmodal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 800px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="categoryModalLabel">Member Points</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addCategoryForm" action="../../handlers/addcategory_handler.php" method="POST">
-                    <div class="mb-3">
-                        <label for="points_id" class="form-label">Point ID</label>
-                        <input type="text" class="form-control" id="points_id" name="points_id" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="total_purchase" class="form-label">Total Purchase</label>
-                        <input type="text" class="form-control" id="total_purchase" name="total_purchase" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="points_amount" class="form-label">Points Amount</label>
-                        <input type="text" class="form-control" id="points_amount" name="points_amount" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </form>
-                <br>
+<!-- JavaScript Fixes -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".edit-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            document.getElementById("edit_membership_id").value = this.getAttribute("data-id");
+            document.getElementById("edit_status").value = this.getAttribute("data-status");
+            document.getElementById("edit_daterenewal").value = this.getAttribute("data-daterenewal");
+        });
+    });
 
-                <table class="category-table">
-                    <thead>
-                        <tr>
-                            <th>PointsID</th>
-                            <th>MembershipID</th>
-                            <th>SalesID</th>
-                            <th>TotalPurchase</th>
-                            <th>PointsAmount</th>
-                            <th>Action</th>
-
-                        </tr>
-                    </thead>
-            </div>
-
-
-            <!--Edit script-->
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    document.querySelectorAll(".edit-btn").forEach(button => {
-                        button.addEventListener("click", function() {
-                            document.getElementById("edit_membership_id").value = this.getAttribute(
-                                "data-id");
-                            document.getElementById("edit_status").value = this.getAttribute(
-                                "data-status");
-                            document.getElementById("edit_startdate").value = this.getAttribute(
-                                "data-startdate");
-                            document.getElementById("edit_daterenewal").value = this.getAttribute(
-                                "data-daterenewal");
-                        });
-                    });
-
-                    document.querySelectorAll(".delete-btn").forEach(button => {
-                        button.addEventListener("click", function() {
-                            let membershipId = this.getAttribute("data-id");
-                            if (confirm("Are you sure you want to delete this member?")) {
-                                fetch("../../handlers/deletemember.php", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/x-www-form-urlencoded"
-                                        },
-                                        body: `membership_id=${membershipId}`
-                                    })
-                                    .then(response => response.text())
-                                    .then(data => {
-                                        alert("Member deleted successfully!");
-                                        location.reload();
-                                    })
-                                    .catch(error => console.error("Error:", error));
-                            }
-                        });
-                    });
-                });
-            </script>
+    document.querySelectorAll(".delete-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            let membershipId = this.getAttribute("data-id");
+            if (confirm("Are you sure you want to delete this member?")) {
+                fetch("../../handlers/deletemember.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `membership_id=${membershipId}`
+                })
+                .then(response => response.text())
+                .then(() => location.reload())
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+});
+</script>

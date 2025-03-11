@@ -1,32 +1,40 @@
 <?php
-session_start();
 include '../database/database.php';
 
+session_start();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'] ?? NULL;
-    $contact = $_POST['contact'] ?? NULL;
-    $address = $_POST['address'] ?? NULL;
-    $is_member = isset($_POST['is_member']) ? 1 : 0;
-    $type_id = $_SESSION['type_id'] ?? NULL;
-    $createdbyid = $_SESSION['admin_id'] ?? NULL; 
+    // Get form data
+    $name = trim($_POST['name']);
+    $contact = trim($_POST['contact']);
+    $address = trim($_POST['address']);
+    $customertype = intval($_POST['customertype']); // Ensure it's an integer
+    $createdbyid = 1; // Example, should be set dynamically from session
+    $createdate = date("Y-m-d H:i:s");
 
-    try {
-        $stmt = $conn->prepare("CALL add_customer(?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssii", $name, $contact, $address, $is_member, $type_id, $createdbyid);
-
-        if ($stmt->execute()) {
-            $_SESSION['success_customer'] = "Customer added successfully!";
-        } else {
-            $_SESSION['error_customer'] = "Error adding customer.";
-        }
-
-        $stmt->close();
-        $conn->close();
-
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Exception: " . $e->getMessage();
+    // Validate required fields
+    if (empty($name) || empty($contact) || empty($address) || empty($customertype)) {
+        $_SESSION['error'] = "All fields are required.";
+        header("Location: ../resource/layout/web-layout.php?page=customer"); // Redirect back
+        exit();
     }
-}
 
-header("Location: ../resource/layout/web-layout.php?page=customer");
-exit();
+    // Prepare SQL query
+    $stmt = $conn->prepare("INSERT INTO customer (name, contact, address, type_id, createdbyid, createdate) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssiss", $name, $contact, $address, $customertype, $createdbyid, $createdate);
+
+    // Execute the query
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "Member added successfully!";
+    } else {
+        $_SESSION['error'] = "Error adding member: " . $stmt->error;
+    }
+
+    $stmt->close();
+    $conn->close();
+
+    // Redirect back to the customer page
+    header("Location: ../resource/layout/web-layout.php?page=customer");
+    exit();
+}
+?>
