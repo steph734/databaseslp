@@ -1,32 +1,46 @@
 <?php
 include '../database/database.php';
 
-session_start();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $customer_id = isset($_POST['customerid']) ? trim($_POST['customerid']) : '';
+    $status_id = isset($_POST['status']) ? trim($_POST['status']) : '';
+    $date_renewal = isset($_POST['daterenewal']) ? trim($_POST['daterenewal']) : null;
+    $created_by = 1; // Change this to the logged-in user ID
+    $created_date = date("Y-m-d H:i:s");
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $status = $_POST['status'] ?? NULL;
-    $start_date = $_POST['startdate'] ?? NULL;
-    $date_renewal = $_POST['daterenewal'] ?? NULL;
-    $createdbyid = $_SESSION['admin_id'];
-
-    // Validate required fields
-    if (empty($status)) {
-        die("Status is required.");
+    // Validate input
+    if (empty($customer_id) || empty($status_id)) {
+        echo json_encode(["status" => "error", "message" => "All fields are required."]);
+        exit();
     }
 
-    // Prepare and bind statement to prevent SQL injection
-    $stmt = $conn->prepare("INSERT INTO membership (status, date_repairs, date_renewal, createdbyid, createdate) VALUES (?, ?, ?, ?, NOW())");
-    $stmt->bind_param("sssi", $status, $start_date, $date_renewal, $createdbyid);
-
-    if ($stmt->execute()) {
-        header("Location: ../resource/layout/web-layout.php?page=membership");
+    // Check if customer already has a membership
+    $checkQuery = "SELECT * FROM membership WHERE customer_id = ?";
+    $stmt = $conn->prepare($checkQuery);
+    $stmt->bind_param("i", $customer_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        echo json_encode(["status" => "error", "message" => "Customer already has a membership."]);
         exit();
+    }
+    
+    // Insert new membership
+    $query = "INSERT INTO membership (customer_id, status, date_renewal, createdbyid, createdate) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("iisss", $customer_id, $status_id, $date_renewal, $created_by, $created_date);
+    
+    if ($stmt->execute()) {
+        echo json_encode(["status" => "success", "message" => "Membership added successfully."]);
     } else {
-        echo "Error: " . $stmt->error;
+        echo json_encode(["status" => "error", "message" => "Error adding membership: " . $stmt->error]);
     }
 
     $stmt->close();
     $conn->close();
 } else {
-    echo "Invalid request method.";
+    echo json_encode(["status" => "error", "message" => "Invalid request method."]);
 }
+header("Location: ../resource/layout/web-layout.php?page=membership");
+exit();

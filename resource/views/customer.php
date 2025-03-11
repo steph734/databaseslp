@@ -7,18 +7,9 @@ if (isset($_SESSION['search_results'])) {
     unset($_SESSION['search_results']); // Clear after displaying
 } else {
     // Join Customer with Customer_Type to fetch the type_name
-    $query = "SELECT i.customer_id, 
-                     i.name,
-                     i.contact,
-                     i.address,
-                     c.type_name,
-                     c.type_id,
-                     i.createdbyid,
-                     i.createdate,
-                     i.updatedbyid,
-                     i.updatedate
-              FROM Customer i 
-              JOIN customer_type c ON i.type_id = c.type_id";
+    $query = "SELECT customer.*, Customer_Type.type_name 
+          FROM customer 
+          LEFT JOIN Customer_Type ON customer.type_id = Customer_Type.type_id";
     $result = $conn->query($query);
     $customers = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
@@ -120,17 +111,17 @@ if (isset($_SESSION['search_results'])) {
                 <?php if (!empty($customers)) { ?>
                     <?php foreach ($customers as $row) { ?>
                         <tr>
-                            <td><input type="checkbox"></td>
-                            <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
-                            <td><?php echo htmlspecialchars($row['name']); ?></td>
-                            <td><?php echo htmlspecialchars($row['contact']); ?></td>
-                            <td><?php echo htmlspecialchars($row['address']); ?></td>
-                            <td><?php echo htmlspecialchars($row['type_name']); ?></td>
-                            <td><?php echo htmlspecialchars($row['createdbyid']); ?></td>
-                            <td><?php echo htmlspecialchars($row['createdate']); ?></td>
-                            <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
-                            <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
-                            <td>
+                        <td><input type="checkbox"></td>
+                <td><?php echo htmlspecialchars($row['customer_id'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['name'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['contact'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['address'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['type_name'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['createdbyid'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['createdate'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['updatedbyid'] ?? '-'); ?></td>
+                <td><?php echo htmlspecialchars($row['updatedate'] ?? '-'); ?></td>
+                <td>
                                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit<?php echo $row['customer_id']; ?>">Edit</button>
                                 <br>
                                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete<?php echo $row['customer_id']; ?>">Delete</button>
