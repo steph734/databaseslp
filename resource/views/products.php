@@ -338,7 +338,7 @@ $units = [
                 CATEGORY <i class="fa-solid fa-gear"></i>
             </button>
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                CREATE NEW <i class="fa-solid fa-add"></i>
+                ADD PRODUCT <i class="fa-solid fa-add"></i>
             </button>
         </div>
         <div class="table-responsive rounded-3">
