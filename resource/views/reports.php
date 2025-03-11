@@ -32,7 +32,7 @@
                     <th>Date Adjusted</th>
                 </tr>
             </thead>
-            <tbody id="supplier-table-body">
+            <tbody id="reports-table-body">
                 <!-- Data will be loaded dynamically -->
             </tbody>
         </table>

@@ -243,7 +243,7 @@ include '../../database/database.php';
         </div>
         <div class="modal-body">
             <form method="POST" action="../../handlers/addcustomerreturn_handler.php">
-                <label for="customer_id">Customer Return ID:</label>
+                <label for="customer_id">Customer ID:</label>
                 <input type="number" name="customer_id" required>
 
                 <label for="return_reason">Return Reason:</label>
@@ -339,6 +339,7 @@ include '../../database/database.php';
                     <th>Reason</th>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
