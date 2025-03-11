@@ -239,6 +239,38 @@ $productResult = $conn->query($productQuery);
             flex-direction: column;
             text-align: center;
         }
+
+        .stock-legend {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .stock-legend {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
     }
 </style>
 
@@ -286,6 +318,7 @@ $productResult = $conn->query($productQuery);
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
+
     <div class="products-table">
         <div class="table-controls">
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
