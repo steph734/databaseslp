@@ -13,7 +13,7 @@ $outOfStockCount = $countRow['out_of_stock_count'] ?? 0;
 $lowStockCount = $countRow['low_stock_count'] ?? 0;
 $totalCriticalCount = $outOfStockCount + $lowStockCount;
 
-// Main query for the table
+// Main query for the table, including Product.quantity
 $query = "SELECT 
     i.inventory_id, 
     i.product_id,
@@ -28,6 +28,7 @@ $query = "SELECT
     i.createdate, 
     i.updatedbyid, 
     i.updatedate,
+    p.quantity AS product_quantity,
     CASE 
         WHEN (i.stock_quantity - i.damage_stock) <= 0 THEN 'Out of Stock'
         WHEN (i.stock_quantity - i.damage_stock) <= 30 THEN 'Low Stock'
@@ -38,22 +39,26 @@ FROM Inventory i
 JOIN Product p ON i.product_id = p.product_id";
 $result = $conn->query($query);
 
-$productQuery = "SELECT product_id, product_name FROM product";
+// Modified product query to exclude products already in Inventory
+$productQuery = "SELECT p.product_id, p.product_name, p.quantity 
+                 FROM Product p
+                 LEFT JOIN Inventory i ON p.product_id = i.product_id
+                 WHERE i.product_id IS NULL";
 $productResult = $conn->query($productQuery);
 ?>
 
 <style>
+    /* Your existing CSS remains unchanged */
     html,
     body {
         overflow-x: hidden;
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-        background: url('../../path/to/your/image.jpg') no-repeat center center fixed; /* Replace with your image path */
-        background-size: cover; /* Ensures the image covers the entire viewport */
+        background: url('../../path/to/your/image.jpg') no-repeat center center fixed;
+        background-size: cover;
     }
 
-    /* Main Content */
     .main-content {
         margin-left: 250px;
         width: calc(100% - 250px);
@@ -61,7 +66,6 @@ $productResult = $conn->query($productQuery);
         overflow: hidden;
     }
 
-    /* Header */
     header {
         display: flex;
         justify-content: space-between;
@@ -106,7 +110,6 @@ $productResult = $conn->query($productQuery);
         border: 1px solid #34502b;
     }
 
-    /* Table Styling */
     .products-table {
         background: white;
         padding: 15px;
@@ -142,12 +145,13 @@ $productResult = $conn->query($productQuery);
         max-width: 100%;
         overflow-x: auto;
     }
-    thead{
+
+    thead {
         background: rgb(255, 255, 255) !important;
     }
+
     th {
-       
-        color:rgb(22, 21, 21) !important; 
+        color: rgb(22, 21, 21) !important;
         text-align: center !important;
         padding: 10px;
         font-size: 14px !important;
@@ -161,7 +165,6 @@ $productResult = $conn->query($productQuery);
         font-size: 14px;
     }
 
-    /* Buttons */
     .btn {
         padding: 5px 10px;
         border-radius: 5px;
@@ -181,7 +184,6 @@ $productResult = $conn->query($productQuery);
         background: #007bff;
     }
 
-    /* Modal Styling */
     .modal-content {
         padding: 20px;
         border-radius: 5px;
@@ -197,7 +199,6 @@ $productResult = $conn->query($productQuery);
         display: flex;
     }
 
-    /* Validation Message */
     .validation-message {
         color: #dc3545;
         font-size: 0.9em;
@@ -205,7 +206,6 @@ $productResult = $conn->query($productQuery);
         display: none;
     }
 
-    /* Responsive Fix */
     @media (max-width: 768px) {
         .sidebar {
             width: 200px;
@@ -259,7 +259,6 @@ $productResult = $conn->query($productQuery);
         <button class="search-btn" onclick="filterInventory()">SEARCH</button>
         <button class="clear-btn" onclick="clearFilters()">CLEAR</button>
     </div>
-    <!-- Warning Alert for Low Stock and Out of Stock -->
     <?php if ($totalCriticalCount > 0) : ?>
         <div class="alert alert-danger alert-dismissible fade show text-center" role="alert"
             style="width: auto !important; padding-right: 2.5rem !important;">
@@ -276,7 +275,6 @@ $productResult = $conn->query($productQuery);
                 } elseif ($lowStockCount > 0) {
                     $full_warning_message .= "{$lowStockCount} product(s) are low stock.";
                 }
-
                 $short_warning_message = strlen($full_warning_message) > 100 ? substr($full_warning_message, 0, 100) . '...' : $full_warning_message;
                 ?>
                 <span class="alert-short"><?= htmlspecialchars($short_warning_message) ?></span>
@@ -291,7 +289,7 @@ $productResult = $conn->query($productQuery);
     <div class="products-table">
         <div class="table-controls">
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
-                UPDATE INVENTORY <i class="fa-solid fa-pen"></i>
+                ADD INVENTORY <i class="fa-solid fa-pen"></i>
             </button>
         </div>
         <div class="table-responsive rounded-3">
@@ -319,7 +317,7 @@ $productResult = $conn->query($productQuery);
                     <?php if ($result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
-                                <td> <input type="checkbox"></td>
+                                <td><input type="checkbox"></td>
                                 <td><?= $row['inventory_id'] ?></td>
                                 <td><?= htmlspecialchars($row['product_name']) ?></td>
                                 <td><?= number_format($row['price'], 2) ?></td>
@@ -329,8 +327,7 @@ $productResult = $conn->query($productQuery);
                                 <td><?= $row['last_restock_date'] ?? '-' ?></td>
                                 <td><?= $row['damage_stock'] ?? '-' ?></td>
                                 <td
-                                    class="
-                        <?= $row['stock_level'] == 'Out of Stock' ? 'text-danger' : ($row['stock_level'] == 'Low Stock' ? 'text-warning' : ($row['stock_level'] == 'Reorder Needed' ? 'text-primary' : 'text-success')) ?>">
+                                    class="<?= $row['stock_level'] == 'Out of Stock' ? 'text-danger' : ($row['stock_level'] == 'Low Stock' ? 'text-warning' : ($row['stock_level'] == 'Reorder Needed' ? 'text-primary' : 'text-success')) ?>">
                                     <?= $row['stock_level'] ?>
                                 </td>
                                 <td><?= $row['createdbyid'] ?? '-' ?></td>
@@ -372,32 +369,41 @@ $productResult = $conn->query($productQuery);
                 <h5 class="modal-title" id="addInventoryModalLabel">Add Inventory</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="../../handlers/updateinventory_handler.php" method="POST">
+            <form action="../../handlers/updateinventory_handler.php" method="POST" id="addInventoryForm">
                 <div class="modal-body">
                     <label>Product:</label>
-                    <select name="product_id" class="form-control" required>
+                    <select name="product_id" id="addProductSelect" class="form-control" required
+                        onchange="checkProductLimit(this.value)">
                         <option value="" disabled selected>Pick a product</option>
-                        <?php while ($product = $productResult->fetch_assoc()) : ?>
-                            <option value="<?= htmlspecialchars($product['product_id']) ?>">
-                                <?= htmlspecialchars($product['product_id'] . ' - ' . $product['product_name']) ?>
+                        <?php
+                        $productResult->data_seek(0); // Reset pointer
+                        while ($product = $productResult->fetch_assoc()) : ?>
+                            <option value="<?= htmlspecialchars($product['product_id']) ?>"
+                                data-quantity="<?= $product['quantity'] ?>">
+                                <?= htmlspecialchars($product['product_id'] . ' - ' . $product['product_name'] . ' (Max: ' . $product['quantity'] . ')') ?>
                             </option>
                         <?php endwhile; ?>
                     </select>
 
                     <label>Price:</label>
-                    <input type="number" step="0.01" name="price" class="form-control" required min="0">
+                    <input type="number" step="0.01" name="price" id="addPriceInput" class="form-control" required
+                        min="0">
 
                     <label>Quantity to Add:</label>
-                    <input type="number" name="quantity_to_add" class="form-control" required min="0">
+                    <input type="number" name="quantity_to_add" id="quantityToAddInput" class="form-control" required
+                        min="1" oninput="validateQuantity()">
+                    <p id="quantityValidation" class="validation-message">Quantity cannot exceed available stock.
+                    </p>
+                    <p id="currentStockPreview" class="mt-2 text-muted"></p>
+                    <p id="newStockPreview" class="mt-2 text-success"></p>
 
                     <label>Received Date:</label>
                     <input type="date" name="received_date" class="form-control" value="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn" style="color: white; background-color: #34502b;">Update
-                    </button>
+                    <button type="submit" class="btn" style="color: white; background-color: #34502b;">Add</button>
                     <button type="button" class="btn" data-bs-dismiss="modal"
-                        style="color: #34502b; background-color:rgb(255, 255, 255); border: 1px solid #34502b;">Cancel</button>
+                        style="color: #34502b; background-color: rgb(255, 255, 255); border: 1px solid #34502b;">Cancel</button>
                 </div>
             </form>
         </div>
@@ -416,25 +422,18 @@ $productResult = $conn->query($productQuery);
             <form action="../../handlers/editinventory_handler.php" method="POST" id="editInventoryForm">
                 <div class="modal-body">
                     <input type="hidden" name="inventory_id">
-
                     <label>Product:</label>
-                    <select name="product_id" id="editProductSelect" class="form-control" required>
-                        <option value="" disabled>Select a product</option>
-                        <?php
-                        $productResult->data_seek(0); // Reset pointer for reusing result set
-                        while ($product = $productResult->fetch_assoc()) :
-                        ?>
-                            <option value="<?= $product['product_id'] ?>">
-                                <?= $product['product_id'] . ' - ' . $product['product_name'] ?></option>
-                        <?php endwhile; ?>
-                    </select>
+                    <input type="text" id="editProductName" class="form-control" readonly>
+                    <input type="hidden" name="product_id" id="editProductId">
 
                     <label>Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required min="0">
 
                     <label>Stock Quantity:</label>
                     <input type="number" name="stock_quantity" id="stockQuantityInput" class="form-control" required
-                        min="0">
+                        min="0" oninput="validateEditQuantity()">
+                    <p id="stockValidation" class="validation-message">Stock quantity must be zero or more.</p>
+                    <p id="remainingQuantityPreview" class="mt-2 text-muted"></p>
 
                     <label>Total Value:</label>
                     <input type="number" step="0.01" name="total_value" class="form-control" min="0">
@@ -446,9 +445,10 @@ $productResult = $conn->query($productQuery);
                     <input type="date" name="last_restock_date" class="form-control">
 
                     <label>Damage Stock:</label>
-                    <input type="number" name="damage_stock" id="damageStockInput" class="form-control" min="0">
-                    <p id="damageStockValidation" class="validation-message">Damage stock cannot exceed stock quantity.
-                    </p>
+                    <input type="number" name="damage_stock" id="damageStockInput" class="form-control" min="0"
+                        oninput="validateEditQuantity()">
+                    <p id="damageStockValidation" class="validation-message">Damage stock cannot exceed stock
+                        quantity.</p>
 
                     <p id="stockLevelPreview" class="mt-2"></p>
                 </div>
@@ -487,6 +487,7 @@ $productResult = $conn->query($productQuery);
     </div>
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
+
 <script>
     function confirmDelete(inventoryId) {
         if (confirm("Are you sure you want to delete this inventory record?")) {
@@ -496,87 +497,154 @@ $productResult = $conn->query($productQuery);
 
     function loadEditModal(inventory) {
         document.querySelector("#editInventoryModal input[name='inventory_id']").value = inventory.inventory_id;
+        document.querySelector("#editInventoryModal #editProductId").value = inventory.product_id;
+        document.querySelector("#editInventoryModal #editProductName").value = inventory.product_name;
         document.querySelector("#editInventoryModal input[name='price']").value = inventory.price;
         document.querySelector("#editInventoryModal input[name='stock_quantity']").value = inventory.stock_quantity;
         document.querySelector("#editInventoryModal input[name='total_value']").value = inventory.total_value || '';
         document.querySelector("#editInventoryModal input[name='received_date']").value = inventory.received_date || '';
-        document.querySelector("#editInventoryModal input[name='last_restock_date']").value = inventory.last_restock_date ||
-            '';
+        document.querySelector("#editInventoryModal input[name='last_restock_date']").value = inventory
+            .last_restock_date || '';
         document.querySelector("#editInventoryModal input[name='damage_stock']").value = inventory.damage_stock || '';
 
-        // Set selected product
-        let productDropdown = document.querySelector("#editProductSelect");
-        productDropdown.value = inventory.product_id;
-
-        // Set max attribute for damage_stock based on stock_quantity
-        updateDamageStockMax();
-
-        // Calculate initial stock level
-        updateStockLevelPreview();
+        // Store product_quantity in dataset for reference
+        document.querySelector("#stockQuantityInput").dataset.productQuantity = inventory.product_quantity;
+        validateEditQuantity(); // Validate and update indicators on load
     }
 
-    function updateDamageStockMax() {
+    function validateEditQuantity() {
         const stockQuantityInput = document.querySelector("#stockQuantityInput");
         const damageStockInput = document.querySelector("#damageStockInput");
-        const validationMessage = document.querySelector("#damageStockValidation");
+        const stockValidation = document.querySelector("#stockValidation");
+        const damageStockValidation = document.querySelector("#damageStockValidation");
+        const remainingQuantityPreview = document.querySelector("#remainingQuantityPreview");
+        const productQuantity = parseInt(stockQuantityInput.dataset.productQuantity) || 0;
 
-        // Set max attribute for damage_stock
-        damageStockInput.max = stockQuantityInput.value || 0;
+        const stockQuantity = stockQuantityInput.value === '' ? null : parseInt(stockQuantityInput.value);
+        const damageStock = damageStockInput.value === '' ? null : parseInt(damageStockInput.value);
 
-        // Validate current damage_stock value
-        const stockQuantity = parseInt(stockQuantityInput.value) || 0;
-        const damageStock = parseInt(damageStockInput.value) || 0;
-
-        if (damageStock > stockQuantity) {
-            damageStockInput.value = stockQuantity; // Reset to max allowed value
-            validationMessage.style.display = 'block';
+        // Stock Quantity Validation
+        if (stockQuantity === null) {
+            stockValidation.style.display = 'none';
+            remainingQuantityPreview.textContent = `Remaining Quantity to Store: ${productQuantity}`;
+        } else if (stockQuantity < 0) {
+            stockQuantityInput.value = 0;
+            stockValidation.textContent = 'Stock quantity must be zero or more.';
+            stockValidation.style.display = 'block';
+            remainingQuantityPreview.textContent = `Remaining Quantity to Store: ${productQuantity}`;
+        } else if (stockQuantity > productQuantity) {
+            stockQuantityInput.value = productQuantity;
+            stockValidation.textContent = `Stock quantity cannot exceed product quantity (${productQuantity}).`;
+            stockValidation.style.display = 'block';
+            remainingQuantityPreview.textContent = `Remaining Quantity to Store: 0`;
         } else {
-            validationMessage.style.display = 'none';
+            stockValidation.style.display = 'none';
+            remainingQuantityPreview.textContent = `Remaining Quantity to Store: ${productQuantity - stockQuantity}`;
         }
 
-        // Update stock level preview
+        // Damage Stock Validation
+        if (damageStock === null || stockQuantity === null) {
+            damageStockValidation.style.display = 'none';
+        } else if (damageStock < 0) {
+            damageStockInput.value = 0;
+            damageStockValidation.textContent = 'Damage stock must be zero or more.';
+            damageStockValidation.style.display = 'block';
+        } else if (damageStock > stockQuantity) {
+            damageStockInput.value = stockQuantity;
+            damageStockValidation.textContent = 'Damage stock cannot exceed stock quantity.';
+            damageStockValidation.style.display = 'block';
+        } else {
+            damageStockValidation.style.display = 'none';
+        }
+
         updateStockLevelPreview();
     }
 
     function updateStockLevelPreview() {
-        const stockQuantity = parseInt(document.querySelector("#stockQuantityInput").value) || 0;
-        const damageStock = parseInt(document.querySelector("#damageStockInput").value) || 0;
+        const stockQuantityInput = document.querySelector("#stockQuantityInput");
+        const damageStockInput = document.querySelector("#damageStockInput");
+        const stockQuantity = stockQuantityInput.value === '' ? 0 : parseInt(stockQuantityInput.value);
+        const damageStock = damageStockInput.value === '' ? 0 : parseInt(damageStockInput.value);
         const effectiveStock = stockQuantity - damageStock;
         let stockLevel;
 
-        if (effectiveStock <= 0) {
-            stockLevel = 'Out of Stock';
-        } else if (effectiveStock <= 115) {
-            stockLevel = 'Low Stock';
-        } else if (effectiveStock <= 280) {
-            stockLevel = 'Reorder Needed';
-        } else {
-            stockLevel = 'In Stock';
-        }
+        if (effectiveStock <= 0) stockLevel = 'Out of Stock';
+        else if (effectiveStock <= 115) stockLevel = 'Low Stock';
+        else if (effectiveStock <= 280) stockLevel = 'Reorder Needed';
+        else stockLevel = 'In Stock';
 
         const previewElement = document.querySelector("#stockLevelPreview");
         if (previewElement) {
             previewElement.textContent = `Stock Level Preview: ${stockLevel}`;
-            previewElement.className = `mt-2 ${
-                stockLevel === 'Out of Stock' ? 'text-danger' :
-                stockLevel === 'Low Stock' ? 'text-warning' :
-                stockLevel === 'Reorder Needed' ? 'text-primary' : 'text-success'
-            }`;
+            previewElement.className =
+                `mt-2 ${stockLevel === 'Out of Stock' ? 'text-danger' : stockLevel === 'Low Stock' ? 'text-warning' : stockLevel === 'Reorder Needed' ? 'text-primary' : 'text-success'}`;
         }
     }
 
-    // Add event listeners to update stock level and damage stock max on input change
+    function checkProductLimit(productId) {
+        const quantityInput = document.getElementById('quantityToAddInput');
+        const currentStockPreview = document.getElementById('currentStockPreview');
+        const newStockPreview = document.getElementById('newStockPreview');
+        const validationMessage = document.getElementById('quantityValidation');
+
+        if (!productId) {
+            currentStockPreview.textContent = '';
+            newStockPreview.textContent = '';
+            quantityInput.max = '';
+            quantityInput.dataset.currentStock = '';
+            quantityInput.dataset.maxQuantity = '';
+            quantityInput.value = '';
+            validationMessage.style.display = 'none';
+            return;
+        }
+
+        const select = document.getElementById('addProductSelect');
+        const maxQuantity = parseInt(select.options[select.selectedIndex].dataset.quantity) || 0;
+
+        currentStockPreview.textContent = 'Current Stock: 0';
+        quantityInput.dataset.currentStock = 0;
+        quantityInput.dataset.maxQuantity = maxQuantity;
+        quantityInput.max = maxQuantity;
+
+        if (quantityInput.value !== '') {
+            validateQuantity();
+        } else {
+            newStockPreview.textContent = '';
+            validationMessage.style.display = 'none';
+        }
+    }
+
+    function validateQuantity() {
+        const quantityInput = document.getElementById('quantityToAddInput');
+        const validationMessage = document.getElementById('quantityValidation');
+        const currentStock = parseInt(quantityInput.dataset.currentStock) || 0;
+        const maxQuantity = parseInt(quantityInput.dataset.maxQuantity) || 0;
+        const quantityToAdd = quantityInput.value === '' ? null : parseInt(quantityInput.value);
+
+        if (quantityToAdd === null) {
+            document.getElementById('newStockPreview').textContent = '';
+            validationMessage.style.display = 'none';
+            return;
+        }
+
+        if (quantityToAdd <= 0) {
+            quantityInput.value = '';
+            validationMessage.textContent = 'Quantity must be more than zero!';
+            validationMessage.style.display = 'block';
+            document.getElementById('newStockPreview').textContent = '';
+        } else if (quantityToAdd + currentStock > maxQuantity) {
+            quantityInput.value = maxQuantity;
+            validationMessage.textContent = 'Quantity cannot exceed available stock.';
+            validationMessage.style.display = 'block';
+            document.getElementById('newStockPreview').textContent = `New Stock Quantity: ${maxQuantity}`;
+        } else {
+            validationMessage.style.display = 'none';
+            document.getElementById('newStockPreview').textContent =
+                `New Stock Quantity: ${currentStock + quantityToAdd}`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        const stockQuantityInput = document.querySelector("#stockQuantityInput");
-        const damageStockInput = document.querySelector("#damageStockInput");
-
-        // Update damage stock max and validate when stock quantity changes
-        stockQuantityInput.addEventListener('input', updateDamageStockMax);
-
-        // Validate damage stock and update stock level preview when damage stock changes
-        damageStockInput.addEventListener('input', updateDamageStockMax);
-
-        // Toggle between short and full message for alerts
         const toggleButtons = document.querySelectorAll('.toggle-message');
         toggleButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -595,11 +663,9 @@ $productResult = $conn->query($productQuery);
             });
         });
 
-        // Filter critical stock (Low Stock or Out of Stock)
         window.filterCriticalStock = function() {
-            document.getElementById('searchStock').value =
-                '0-115'; // Filter for 0 to 115 (Low Stock or Out of Stock)
-            filterInventory(); // Call the existing filter function
+            document.getElementById('searchStock').value = '0-115';
+            filterInventory();
         };
     });
 
@@ -610,4 +676,16 @@ $productResult = $conn->query($productQuery);
             setTimeout(() => alert.remove(), 500);
         }
     }, 20000);
+
+    function filterInventory() {
+        console.log("Filter applied");
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInventoryID').value = '';
+        document.getElementById('searchProductID').value = '';
+        document.getElementById('searchPrice').value = '';
+        document.getElementById('searchStock').value = '';
+        console.log("Filters cleared");
+    }
 </script>
