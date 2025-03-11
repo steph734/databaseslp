@@ -5,7 +5,6 @@ $supplier_query = "SELECT supplier_id, supplier_name, contact_info, address, cre
 $supplier_result = $conn->query($supplier_query);
 ?>
 
-<!-- Existing styles remain unchanged, removing receiving-specific styles -->
 <style>
     .card-container {
         display: grid;
@@ -98,13 +97,13 @@ $supplier_result = $conn->query($supplier_query);
         color: white;
     }
 
-    .btn-delete {
+    .btn-delete-supplier {
         background: rgb(255, 255, 255);
         color: rgba(255, 0, 25, 0.37);
         border: 1px solid rgba(255, 0, 25, 0.37);
     }
 
-    .btn-delete:hover {
+    .btn-delete-supplier:hover {
         background: rgb(255, 0, 25);
         color: white;
     }
@@ -132,16 +131,16 @@ $supplier_result = $conn->query($supplier_query);
         text-align: center;
         cursor: pointer;
         color: white;
-        background-color: #ffc107;
+        background-color: #34502b;
         border-radius: 5px;
         width: 100px !important;
         transition: all 0.2s ease-in-out;
     }
 
     .btn-save:hover {
-        color: #ffc107;
+        color: #34502b;
         background-color: rgb(255, 255, 255);
-        border: 1px solid #ffc107;
+        border: 1px solid #34502b;
     }
 
     .header-supplier {
@@ -149,7 +148,7 @@ $supplier_result = $conn->query($supplier_query);
         height: 80px;
     }
 
-    .btn-add {
+    .btn-add-supplier {
         background: #34502b;
         color: white;
         padding: 10px;
@@ -158,10 +157,17 @@ $supplier_result = $conn->query($supplier_query);
         border-radius: 5px;
         margin-bottom: 20px;
         transition: all 0.3s ease-in-out;
+        font-weight: bold;
     }
 
-    .btn-add:hover {
+    .btn-add-supplier:hover {
         transform: translateY(-3px);
+    }
+
+    .btn-add-supplier.active {
+        background: white;
+        color: #34502b;
+        border: 1px solid #34502b;
     }
 
     .details {
@@ -213,7 +219,7 @@ $supplier_result = $conn->query($supplier_query);
     <!-- Suppliers Content -->
     <div id="suppliers-content">
         <div class="header-supplier">
-            <button class="btn-add active" onclick="toggleAddForm()" style="font-weight: bold;">
+            <button class="btn-add-supplier" onclick="toggleAddSupplierForm()">
                 <i class="fa fa-add"></i> Add Supplier
             </button>
         </div>
@@ -253,7 +259,7 @@ $supplier_result = $conn->query($supplier_query);
                         <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button class="btn btn-delete" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
+                        <button class="btn btn-delete-supplier" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -319,21 +325,18 @@ $supplier_result = $conn->query($supplier_query);
         modal.show();
     }
 
-    function toggleAddForm() {
+    function toggleAddSupplierForm() {
         var form = document.getElementById("addSupplierForm");
-        var button = document.querySelector(".btn-add");
+        var button = document.querySelector(".btn-add-supplier");
 
         if (form.style.display === "none" || form.style.display === "") {
             form.style.display = "block";
             button.innerHTML = '<i class="fa fa-times"></i> Close';
-            button.style.backgroundColor = "white";
-            button.style.color = "#34502b";
-            button.style.border = "1px solid #34502b";
+            button.classList.add("active");
         } else {
             form.style.display = "none";
             button.innerHTML = '<i class="fa fa-add"></i> Add Supplier';
-            button.style.backgroundColor = "#34502b";
-            button.style.color = "white";
+            button.classList.remove("active");
         }
     }
 

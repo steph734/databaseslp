@@ -34,6 +34,14 @@ if (!$receiving_result) {
 // Fetch suppliers for the order form
 $supplier_query = "SELECT supplier_id, supplier_name FROM Supplier";
 $supplier_result = $conn->query($supplier_query);
+
+// Fetch products for autocomplete
+$product_query = "SELECT product_name FROM Product";
+$product_result = $conn->query($product_query);
+$products = [];
+while ($row = $product_result->fetch_assoc()) {
+    $products[] = $row['product_name'];
+}
 ?>
 
 <style>
@@ -105,7 +113,8 @@ $supplier_result = $conn->query($supplier_query);
         color: #333;
     }
 
-    .btn-view {
+    .btn-view,
+    .btn-delete {
         background: white;
         color: #34502b;
         border: 1px solid #34502b;
@@ -117,7 +126,8 @@ $supplier_result = $conn->query($supplier_query);
         font-size: 14px;
     }
 
-    .btn-view:hover {
+    .btn-view:hover,
+    .btn-delete:hover {
         background: #34502b;
         color: white;
     }
@@ -179,22 +189,30 @@ $supplier_result = $conn->query($supplier_query);
     }
 
     .btn-add-product {
-        background: #34502b;
-        color: white;
+        background: rgb(255, 255, 255);
+        color: #2a3f23;
+        border: 1px solid #2a3f23;
+        padding: 8px;
+        border-radius: 5px;
+        width: 200px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-remove-product {
+        background-color: inherit;
+        color: rgb(63, 35, 35);
         padding: 8px;
         border: none;
-        border-radius: 5px;
+        width: 50px;
+        border-radius: 20px;
         cursor: pointer;
         font-size: 14px;
         transition: all 0.3s ease;
     }
 
-    .btn-add-product:hover {
-        background: #2a3f23;
-    }
-
     .btn-submit-order {
-        background: #ffc107;
+        background: #2a3f23;
         color: white;
         padding: 10px;
         border: none;
@@ -202,10 +220,12 @@ $supplier_result = $conn->query($supplier_query);
         cursor: pointer;
         font-size: 14px;
         transition: all 0.3s ease;
+        width: 150px;
     }
 
     .btn-submit-order:hover {
-        background: #e0a800;
+        background: #2a3f23;
+        color: white;
     }
 
     .condition-damaged {
@@ -217,30 +237,97 @@ $supplier_result = $conn->query($supplier_query);
         color: #28a745;
         font-weight: bold;
     }
-</style>
 
+    .btn-clear-product {
+        background: rgb(255, 255, 255);
+        color: rgb(87, 2, 2);
+        border: 1px solid rgb(87, 2, 2);
+        padding: 8px;
+        border-radius: 5px;
+        width: 100px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+
+    .btn-add-receiving {
+        background: #34502b;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease-in-out;
+        font-weight: bold;
+    }
+
+    .btn-add-receiving:hover {
+        transform: translateY(-3px);
+    }
+
+    .btn-add-receiving.active {
+        background: white;
+        color: #34502b;
+        border: 1px solid #34502b;
+    }
+
+    /* New styles for scrollable modal */
+    .modal-dialog.modal-lg {
+        max-width: 800px;
+    }
+
+    .modal-content {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+</style>
 <!-- Order Form Section -->
 <div class="order-section">
-    <h3>Create New Order</h3>
-    <form class="order-form" action="../../handlers/create_order_handler.php" method="POST">
-        <select class="supplier-select" name="supplier_id" required>
-            <option value="">Select Supplier</option>
-            <?php while ($supplier = $supplier_result->fetch_assoc()) : ?>
-                <option value="<?= $supplier['supplier_id'] ?>"><?= htmlspecialchars($supplier['supplier_name']) ?></option>
-            <?php endwhile; ?>
-        </select>
-        <div class="product-list" id="product-list">
-            <div class="product-card">
-                <input type="text" name="products[0][name]" placeholder="Product Name" required>
-                <input type="number" name="products[0][quantity]" placeholder="Quantity" min="1" required>
-                <input type="number" name="products[0][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0"
-                    required>
+    <button class="btn-add-receiving" onclick="toggleAddReceivingForm()">
+        <i class="fa fa-add"></i> Create New Order
+    </button>
+    <div id="orderForm" style="display: none;">
+        <h3>Create New Order</h3>
+        <form class="order-form" action="../../handlers/create_order_handler.php" method="POST">
+            <select class="supplier-select" name="supplier_id" required>
+                <option value="">Select Supplier</option>
+                <?php while ($supplier = $supplier_result->fetch_assoc()) : ?>
+                    <option value="<?= $supplier['supplier_id'] ?>"><?= htmlspecialchars($supplier['supplier_name']) ?></option>
+                <?php endwhile; ?>
+            </select>
+            <div class="product-list" id="product-list">
+                <div class="product-card">
+                    <input type="text" name="products[0][name]" placeholder="Product Name" list="product-suggestions" required>
+                    <input type="number" name="products[0][quantity]" placeholder="Quantity" min="1" required>
+                    <input type="number" name="products[0][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0" required>
+                    <button type="button" class="btn-remove-product" onclick="removeProduct(this)"><i class="fa fa-trash"></i></button>
+                </div>
             </div>
-        </div>
-        <button type="button" class="btn-add-product" onclick="addProduct()">Add Another Product</button>
-        <button type="submit" class="btn-submit-order">Submit Order</button>
-    </form>
+            <div style="text-align: center;">
+                <button type="button" class="btn-add-product" onclick="addProduct()"><i class="fa fa-plus"></i> Add Another Product</button>
+                <button type="button" class="btn-clear-product" onclick="clearProducts()"><i class="fa fa-eraser"></i> Clear</button>
+            </div>
+            <button type="submit" class="btn-submit-order">Submit Order</button>
+        </form>
+    </div>
 </div>
+
+<!-- Datalist for product suggestions -->
+<datalist id="product-suggestions">
+    <?php foreach ($products as $product_name) : ?>
+        <option value="<?= htmlspecialchars($product_name) ?>">
+    <?php endforeach; ?>
+</datalist>
 
 <!-- Receiving Cards -->
 <div class="receiving-container">
@@ -261,6 +348,9 @@ $supplier_result = $conn->query($supplier_query);
                 </div>
                 <button class="btn-view" onclick="loadReceivingModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                     <i class="fa fa-eye"></i> View Details
+                </button>
+                <button class="btn-delete" onclick="confirmDelete(<?= $row['receiving_id'] ?>)">
+                    <i class="fa fa-trash"></i> Delete
                 </button>
             </div>
         <?php endwhile; ?>
@@ -296,7 +386,7 @@ $supplier_result = $conn->query($supplier_query);
                         <tr>
                             <th>Product ID</th>
                             <th>Product Name</th>
-                            <th>Quantity Furnished</th>
+                            <th>Quantity</th>
                             <th>Unit Cost (₱)</th>
                             <th>Subtotal Cost (₱)</th>
                             <th>Condition</th>
@@ -320,29 +410,48 @@ $supplier_result = $conn->query($supplier_query);
     </div>
 </div>
 
-<?php if (isset($_SESSION['success'])) : ?>
-    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
-        style="width: 290px !important;">
-        <?= $_SESSION['success']; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
-
 <script>
     let productCount = 1;
+
+    function toggleAddReceivingForm() {
+        var form = document.getElementById("orderForm");
+        var button = document.querySelector(".btn-add-receiving");
+
+        if (form.style.display === "none" || form.style.display === "") {
+            form.style.display = "block";
+            button.innerHTML = '<i class="fa fa-times"></i> Close';
+            button.classList.add("active");
+        } else {
+            form.style.display = "none";
+            button.innerHTML = '<i class="fa fa-add"></i> Create New Order';
+            button.classList.remove("active");
+        }
+    }
 
     function addProduct() {
         const productList = document.getElementById('product-list');
         const newProduct = document.createElement('div');
         newProduct.className = 'product-card';
         newProduct.innerHTML = `
-            <input type="text" name="products[${productCount}][name]" placeholder="Product Name" required>
+            <input type="text" name="products[${productCount}][name]" placeholder="Product Name" list="product-suggestions" required>
             <input type="number" name="products[${productCount}][quantity]" placeholder="Quantity" min="1" required>
             <input type="number" name="products[${productCount}][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0" required>
+            <button type="button" class="btn-remove-product" onclick="removeProduct(this)"><i class="fa fa-trash"></i></button>
         `;
         productList.appendChild(newProduct);
         productCount++;
+    }
+
+    function removeProduct(button) {
+        const productCard = button.parentElement;
+        productCard.remove();
+    }
+
+    function clearProducts() {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';
+        productCount = 0;
+        addProduct();
     }
 
     function loadReceivingModal(receiving) {
@@ -351,8 +460,7 @@ $supplier_result = $conn->query($supplier_query);
         document.getElementById('view_receiving_date').textContent = receiving.receiving_date || '-';
         document.getElementById('view_total_quantity').textContent = receiving.total_quantity;
         document.getElementById('view_total_cost').textContent = Number(receiving.total_cost).toFixed(2) || '-';
-        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0).toUpperCase() +
-            receiving.status.slice(1) : '-';
+        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0).toUpperCase() + receiving.status.slice(1) : '-';
         document.getElementById('view_createdbyid').textContent = receiving.createdbyid || '-';
         document.getElementById('view_createdate').textContent = receiving.createdate || '-';
         document.getElementById('view_updatedbyid').textContent = receiving.updatedbyid || '-';
@@ -383,6 +491,12 @@ $supplier_result = $conn->query($supplier_query);
 
         var modal = new bootstrap.Modal(document.getElementById("receivingModal"));
         modal.show();
+    }
+
+    function confirmDelete(receivingId) {
+        if (confirm("Are you sure you want to delete this receiving record?")) {
+            window.location.href = "../../handlers/deletereceiving_handler.php?id=" + receivingId;
+        }
     }
 
     setTimeout(function() {

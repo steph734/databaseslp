@@ -69,6 +69,20 @@ unset($_SESSION['login']);
     ?>
 
 
+    <?php if (isset($_SESSION['success'])) : ?>
+        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+            <?= $_SESSION['success']; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    <?php if (isset($_SESSION['error'])) : ?>
+        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+            <?= $_SESSION['error']; ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
 </body>
 
 </html>
