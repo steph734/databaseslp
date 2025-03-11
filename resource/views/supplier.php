@@ -195,7 +195,6 @@ $supplier_result = $conn->query($supplier_query);
         border-bottom: 2px solid #000;
     }
 </style>
-
 <div class="main-content">
     <header>
         <h1>Suppliers</h1>
@@ -206,56 +205,66 @@ $supplier_result = $conn->query($supplier_query);
     </header>
     <!-- Tabs -->
     <div class="tabs">
-        <span class="active">My Suppliers</span>
-        <a href="../layout/web-layout.php?page=receiving">Receiving</a>
+        <span class="active" data-tab="suppliers">My Suppliers</span>
+        <span data-tab="receiving">Receiving</span>
     </div>
     <hr>
-    <div class="header-supplier">
-        <button class="btn-add active" onclick="toggleAddForm()" style="font-weight: bold;"><i class="fa fa-add"></i>
-            Add Supplier</button>
-    </div>
-    <div class="add-form" id="addSupplierForm">
-        <h3 style="color: #34502b;">Add New Supplier</h3>
-        <form action="../../handlers/addsupplier_handler.php" method="POST">
-            <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
-            <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
-            <textarea class="form-control my-3" name="address" placeholder="Address" rows="3" required></textarea>
-            <button type="submit" class="btn-save">Save</button>
-        </form>
+
+    <!-- Suppliers Content -->
+    <div id="suppliers-content">
+        <div class="header-supplier">
+            <button class="btn-add active" onclick="toggleAddForm()" style="font-weight: bold;">
+                <i class="fa fa-add"></i> Add Supplier
+            </button>
+        </div>
+        <div class="add-form" id="addSupplierForm">
+            <h3 style="color: #34502b;">Add New Supplier</h3>
+            <form action="../../handlers/addsupplier_handler.php" method="POST">
+                <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
+                <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
+                <textarea class="form-control my-3" name="address" placeholder="Address" rows="3" required></textarea>
+                <button type="submit" class="btn-save">Save</button>
+            </form>
+        </div>
+
+        <div class="card-container">
+            <?php while ($row = $supplier_result->fetch_assoc()) : ?>
+                <div class="supplier-card">
+                    <div class="supplier-logo">
+                        <i class="fa-solid fa-shop"></i>
+                    </div>
+                    <hr>
+                    <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
+                    <button class="info-toggle" onclick="toggleInfo(this)">
+                        <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
+                    </button>
+                    <div class="supplier-info">
+                        <p><strong>Created by:</strong> <?= $row['createdbyid'] ?? 'N/A' ?></p>
+                        <p><strong>Created at:</strong> <?= $row['createdate'] ?></p>
+                        <p><strong>Updated by:</strong> <?= $row['updatedbyid'] ?? 'N/A' ?></p>
+                        <p><strong>Updated at:</strong> <?= $row['updatedate'] ?? 'N/A' ?></p>
+                    </div>
+                    <div class="details">
+                        <p><strong class="important-detail">Contact Info:</strong>
+                            <?= htmlspecialchars($row['contact_info']) ?></p>
+                        <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
+                    </div>
+                    <div class="supplier-actions">
+                        <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-delete" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        </div>
     </div>
 
-    <div class="card-container">
-        <?php while ($row = $supplier_result->fetch_assoc()) : ?>
-            <div class="supplier-card">
-                <div class="supplier-logo">
-                    <i class="fa-solid fa-shop"></i>
-                </div>
-                <hr>
-                <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
-                <button class="info-toggle" onclick="toggleInfo(this)">
-                    <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
-                </button>
-                <div class="supplier-info">
-                    <p><strong>Created by:</strong> <?= $row['createdbyid'] ?? 'N/A' ?></p>
-                    <p><strong>Created at:</strong> <?= $row['createdate'] ?></p>
-                    <p><strong>Updated by:</strong> <?= $row['updatedbyid'] ?? 'N/A' ?></p>
-                    <p><strong>Updated at:</strong> <?= $row['updatedate'] ?? 'N/A' ?></p>
-                </div>
-                <div class="details">
-                    <p><strong class="important-detail">Contact Info:</strong> <?= htmlspecialchars($row['contact_info']) ?>
-                    </p>
-                    <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
-                </div>
-                <div class="supplier-actions">
-                    <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
-                    <button class="btn btn-delete" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        <?php endwhile; ?>
+    <!-- Receiving Content -->
+    <div id="receiving-content" style="display: none;">
+        <?php include __DIR__ . '/receiving.php'; ?>
     </div>
 </div>
 
@@ -338,6 +347,17 @@ $supplier_result = $conn->query($supplier_query);
         var infoBox = button.nextElementSibling;
         infoBox.classList.toggle("active");
     }
+
+    document.querySelectorAll('.tabs span').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tabs span').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('suppliers-content').style.display = this.dataset.tab === 'suppliers' ?
+                'block' : 'none';
+            document.getElementById('receiving-content').style.display = this.dataset.tab === 'receiving' ?
+                'block' : 'none';
+        });
+    });
 
     setTimeout(function() {
         let alert = document.querySelector(".floating-alert");

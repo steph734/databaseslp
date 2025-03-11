@@ -335,10 +335,10 @@ $units = [
     <div class="products-table">
         <div class="table-controls">
             <button class="create-btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
-                CATEGORY <i class="fa-solid fa-gear"></i>
+                <i class="fa-solid fa-gear"></i> CATEGORY
             </button>
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                ADD PRODUCT <i class="fa-solid fa-add"></i>
+                <i class="fa-solid fa-add"></i> ADD PRODUCT
             </button>
         </div>
         <div class="table-responsive rounded-3">

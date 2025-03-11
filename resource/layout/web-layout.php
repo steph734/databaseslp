@@ -57,7 +57,7 @@ unset($_SESSION['login']);
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
-    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports', 'receiving'];
+    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports'];
 
     $page_path = __DIR__ . "/../views/{$page}.php";
 

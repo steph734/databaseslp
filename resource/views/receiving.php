@@ -32,48 +32,85 @@ if (!$receiving_result) {
 ?>
 
 <style>
-    .receiving-table {
+    .receiving-container {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .receiving-card {
         background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
         padding: 15px;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        overflow-x: auto;
-        margin: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .table-responsive {
-        max-width: 100%;
-        overflow-x: auto;
+    .receiving-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
+    .receiving-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 10px;
     }
 
-    th,
-    td {
-        text-align: center;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
+    .receiving-header .supplier-name {
+        font-size: 16px;
+        font-weight: bold;
+        color: #34502b;
     }
 
-    th {
-        color: rgb(41, 40, 40) !important;
+    .receiving-header .status {
+        font-size: 14px;
+        font-weight: bold;
     }
 
-    tr:hover {
-        background: #f1f1f1;
+    .status-pending {
+        color: #ffc107;
+    }
+
+    .status-received {
+        color: #28a745;
+    }
+
+    .status-cancelled {
+        color: #dc3545;
+    }
+
+    .receiving-details {
+        font-size: 14px;
+        color: #555;
+    }
+
+    .receiving-details p {
+        margin: 5px 0;
+    }
+
+    .receiving-details strong {
+        color: #333;
     }
 
     .btn-view {
-        background: rgb(255, 255, 255);
+        background: white;
         color: #34502b;
         border: 1px solid #34502b;
-        padding: 5px 10px;
+        padding: 5px 15px;
         border-radius: 5px;
         cursor: pointer;
         transition: all 0.3s ease;
+        align-self: flex-end;
+        font-size: 14px;
     }
 
     .btn-view:hover {
@@ -81,21 +118,15 @@ if (!$receiving_result) {
         color: white;
     }
 
-    .status-pending {
-        color: #ffc107;
-        font-weight: bold;
+    .no-records {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 16px;
     }
 
-    .status-received {
-        color: #28a745;
-        font-weight: bold;
-    }
-
-    .status-cancelled {
-        color: #dc3545;
-        font-weight: bold;
-    }
-
+    /* Modal styles remain unchanged */
     .condition-damaged {
         color: #dc3545;
         font-weight: bold;
@@ -105,88 +136,36 @@ if (!$receiving_result) {
         color: #28a745;
         font-weight: bold;
     }
-
-    .tabs {
-        display: flex;
-        gap: 20px;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-
-    .tabs a,
-    .tabs span {
-        cursor: pointer;
-        color: #000;
-        text-decoration: none;
-    }
-
-    .tabs span.active {
-        border-bottom: 2px solid #000;
-    }
 </style>
 
-<div class="main-content">
-    <header>
-        <h1>Suppliers</h1>
-        <div class="search-profile">
-            <?php include __DIR__ . '/searchbar.php'; ?>
-            <?php include __DIR__ . '/profile.php'; ?>
-        </div>
-    </header>
-    <!-- Tabs -->
-    <div class="tabs">
-        <a href="../layout/web-layout.php?page=supplier">My Suppliers</a>
-        <span class="active">Receiving</span>
-    </div>
-    <hr>
-
-    <!-- Receiving Table -->
-    <div class="receiving-table">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Receiving ID</th>
-                        <th>Supplier</th>
-                        <th>Receiving Date</th>
-                        <th>Total Quantity</th>
-                        <th>Total Cost (₱)</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="receiving-table-body">
-                    <?php if ($receiving_result->num_rows > 0) : ?>
-                        <?php while ($row = $receiving_result->fetch_assoc()) : ?>
-                            <tr>
-                                <td><?= $row['receiving_id'] ?></td>
-                                <td><?= htmlspecialchars($row['supplier_name']) ?></td>
-                                <td><?= $row['receiving_date'] ?? '-' ?></td>
-                                <td><?= $row['total_quantity'] ?></td>
-                                <td><?= number_format($row['total_cost'], 2) ?? '-' ?></td>
-                                <td class="status-<?= strtolower($row['status']) ?>"><?= ucfirst($row['status']) ?></td>
-                                <td>
-                                    <button class="btn btn-view"
-                                        onclick="loadReceivingModal(<?= htmlspecialchars(json_encode($row)) ?>)">
-                                        <i class="fa fa-eye"></i> View
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else : ?>
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
-                                No receiving records found.
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- Receiving Cards -->
+<div class="receiving-container">
+    <?php if ($receiving_result->num_rows > 0) : ?>
+        <?php while ($row = $receiving_result->fetch_assoc()) : ?>
+            <div class="receiving-card">
+                <div class="receiving-header">
+                    <span class="supplier-name"><?= htmlspecialchars($row['supplier_name']) ?></span>
+                    <span class="status status-<?= strtolower($row['status']) ?>">
+                        <?= ucfirst($row['status']) ?>
+                    </span>
+                </div>
+                <div class="receiving-details">
+                    <p><strong>Receiving ID:</strong> <?= $row['receiving_id'] ?></p>
+                    <p><strong>Date:</strong> <?= $row['receiving_date'] ?? '-' ?></p>
+                    <p><strong>Total Quantity:</strong> <?= $row['total_quantity'] ?></p>
+                    <p><strong>Total Cost:</strong> ₱<?= number_format($row['total_cost'], 2) ?? '-' ?></p>
+                </div>
+                <button class="btn-view" onclick="loadReceivingModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                    <i class="fa fa-eye"></i> View Details
+                </button>
+            </div>
+        <?php endwhile; ?>
+    <?php else : ?>
+        <div class="no-records">No receiving records found.</div>
+    <?php endif; ?>
 </div>
 
-<!-- Receiving Details Modal -->
+<!-- Receiving Details Modal (unchanged) -->
 <div class="modal fade" id="receivingModal" tabindex="-1" aria-labelledby="receivingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

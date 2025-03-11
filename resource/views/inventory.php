@@ -323,7 +323,7 @@ $productResult = $conn->query($productQuery);
     <div class="products-table">
         <div class="table-controls">
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
-                UPDATE INVENTORY <i class="fa-solid fa-pen"></i>
+                <i class="fa-solid fa-pen"></i> UPDATE INVENTORY
             </button>
         </div>
         <div class="table-responsive rounded-3">
