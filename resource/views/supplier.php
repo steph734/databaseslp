@@ -1,10 +1,11 @@
 <?php
 include '../../database/database.php';
 
-$query = "SELECT supplier_id, supplier_name, contact_info, address, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
-$result = $conn->query($query);
+$supplier_query = "SELECT supplier_id, supplier_name, contact_info, address, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
+$supplier_result = $conn->query($supplier_query);
 ?>
 
+<!-- Existing styles remain unchanged, removing receiving-specific styles -->
 <style>
     .card-container {
         display: grid;
@@ -23,7 +24,6 @@ $result = $conn->query($query);
         min-height: 200px;
     }
 
-    /* Info Button */
     .info-toggle {
         position: absolute;
         top: 10px;
@@ -35,7 +35,6 @@ $result = $conn->query($query);
         cursor: pointer;
     }
 
-    /* Hidden Dropdown */
     .supplier-info {
         display: none;
         position: absolute;
@@ -119,12 +118,11 @@ $result = $conn->query($query);
         margin-bottom: 20px;
     }
 
-    .add-form input {
-        /* display: block; */
+    .add-form input,
+    .add-form textarea {
         width: 100%;
         margin-top: 10px;
         padding: 8px;
-
     }
 
     .btn-save {
@@ -159,8 +157,6 @@ $result = $conn->query($query);
         cursor: pointer;
         border-radius: 5px;
         margin-bottom: 20px;
-        top: 100px;
-        right: 100px;
         transition: all 0.3s ease-in-out;
     }
 
@@ -188,6 +184,7 @@ $result = $conn->query($query);
         margin-bottom: 10px;
     }
 
+    .tabs a,
     .tabs span {
         cursor: pointer;
         color: #000;
@@ -209,8 +206,8 @@ $result = $conn->query($query);
     </header>
     <!-- Tabs -->
     <div class="tabs">
-        <span class="active" data-type="customer" onclick="showTable('suppliers')">My Suppliers</span>
-        <span data-type="supplier" onclick="showTable('orders')">My Orders</span>
+        <span class="active">My Suppliers</span>
+        <a href="../layout/web-layout.php?page=receiving">Receiving</a>
     </div>
     <hr>
     <div class="header-supplier">
@@ -218,8 +215,7 @@ $result = $conn->query($query);
             Add Supplier</button>
     </div>
     <div class="add-form" id="addSupplierForm">
-
-        <h3 style="color: #34502b;" ;">Add New Supplier</h3>
+        <h3 style="color: #34502b;">Add New Supplier</h3>
         <form action="../../handlers/addsupplier_handler.php" method="POST">
             <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
             <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
@@ -229,32 +225,27 @@ $result = $conn->query($query);
     </div>
 
     <div class="card-container">
-        <?php while ($row = $result->fetch_assoc()) : ?>
+        <?php while ($row = $supplier_result->fetch_assoc()) : ?>
             <div class="supplier-card">
-
                 <div class="supplier-logo">
                     <i class="fa-solid fa-shop"></i>
                 </div>
                 <hr>
                 <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
-
                 <button class="info-toggle" onclick="toggleInfo(this)">
                     <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
                 </button>
-
                 <div class="supplier-info">
                     <p><strong>Created by:</strong> <?= $row['createdbyid'] ?? 'N/A' ?></p>
                     <p><strong>Created at:</strong> <?= $row['createdate'] ?></p>
                     <p><strong>Updated by:</strong> <?= $row['updatedbyid'] ?? 'N/A' ?></p>
                     <p><strong>Updated at:</strong> <?= $row['updatedate'] ?? 'N/A' ?></p>
                 </div>
-
                 <div class="details">
                     <p><strong class="important-detail">Contact Info:</strong> <?= htmlspecialchars($row['contact_info']) ?>
                     </p>
                     <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
                 </div>
-
                 <div class="supplier-actions">
                     <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                         <i class="fa-solid fa-pen"></i>
@@ -266,8 +257,8 @@ $result = $conn->query($query);
             </div>
         <?php endwhile; ?>
     </div>
-
 </div>
+
 <!-- Edit Supplier Modal -->
 <div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel"
     aria-hidden="true">
@@ -305,9 +296,9 @@ $result = $conn->query($query);
         <?= $_SESSION['success']; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <?php unset($_SESSION['success']);
-    ?>
+    <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
+
 <script>
     function loadEditModal(supplier) {
         document.getElementById("editSupplierId").value = supplier.supplier_id;
@@ -337,15 +328,14 @@ $result = $conn->query($query);
         }
     }
 
-
     function confirmDelete(supplierId) {
         if (confirm("Are you sure you want to delete this supplier?")) {
-            window.location.href = "delete_supplier.php?id=" + supplierId;
+            window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
         }
     }
 
     function toggleInfo(button) {
-        var infoBox = button.nextElementSibling; // Get the next element (supplier-info div)
+        var infoBox = button.nextElementSibling;
         infoBox.classList.toggle("active");
     }
 
@@ -356,10 +346,4 @@ $result = $conn->query($query);
             setTimeout(() => alert.remove(), 500);
         }
     }, 4000);
-
-    function confirmDelete(supplierId) {
-        if (confirm("Are you sure do you want to delete this supplier?")) {
-            window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
-        }
-    }
 </script>

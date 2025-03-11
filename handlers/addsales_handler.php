@@ -72,6 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['error'] = "Failed to add sale: " . $e->getMessage();
     }
 
-    header("Location: ../resource/layout/web-layout.php?sales");
+    header("Location: ../resource/layout/web-layout.php?page=sales");
     exit();
 }
