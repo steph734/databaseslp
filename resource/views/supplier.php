@@ -1,7 +1,7 @@
 <?php
 include '../../database/database.php';
 
-$supplier_query = "SELECT supplier_id, supplier_name, contact_info, address, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
+$supplier_query = "SELECT supplier_id, supplier_name, contact_info, address, status, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
 $supplier_result = $conn->query($supplier_query);
 ?>
 
@@ -200,7 +200,29 @@ $supplier_result = $conn->query($supplier_query);
     .tabs span.active {
         border-bottom: 2px solid #000;
     }
+
+    /* Status Dropdown Styles */
+    .status-dropdown-supplier {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        font-weight: bold;
+        background: white;
+        width: 120px;
+        cursor: pointer;
+    }
+
+
+    .status-active {
+        color: #28a745;
+    }
+
+    .status-inactive {
+        color: #dc3545;
+    }
 </style>
+
 <div class="main-content">
     <header>
         <h1>Suppliers</h1>
@@ -240,7 +262,17 @@ $supplier_result = $conn->query($supplier_query);
                         <i class="fa-solid fa-shop"></i>
                     </div>
                     <hr>
-                    <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
+                        <select class="status-dropdown-supplier status-<?= strtolower($row['status']) ?>"
+                            onchange="updateSupplierStatus(<?= $row['supplier_id'] ?>, this.value)">
+
+                            <option value="active" <?= $row['status'] === 'active' ? 'selected' : '' ?>
+                                class="status-active">Active</option>
+                            <option value="inactive" <?= $row['status'] === 'inactive' ? 'selected' : '' ?>
+                                class="status-inactive">Inactive</option>
+                        </select>
+                    </div>
                     <button class="info-toggle" onclick="toggleInfo(this)">
                         <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
                     </button>
@@ -253,7 +285,8 @@ $supplier_result = $conn->query($supplier_query);
                     <div class="details">
                         <p><strong class="important-detail">Contact Info:</strong>
                             <?= htmlspecialchars($row['contact_info']) ?></p>
-                        <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
+                        <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?>
+                        </p>
                     </div>
                     <div class="supplier-actions">
                         <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
@@ -351,14 +384,40 @@ $supplier_result = $conn->query($supplier_query);
         infoBox.classList.toggle("active");
     }
 
+    function updateSupplierStatus(supplierId, newStatus) {
+        // Update the dropdown color dynamically
+        const dropdown = document.querySelector(`select[onchange="updateSupplierStatus(${supplierId}, this.value)"]`);
+        dropdown.className = `status-dropdown status-${newStatus}`;
+
+        // AJAX request to update the database
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "../../handlers/update_supplier_status_handler.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                if (xhr.responseText === "success") {
+                    console.log(`Status updated to ${newStatus} for supplier ID ${supplierId}`);
+                } else {
+                    alert("Failed to update status: " + xhr.responseText);
+                    // Revert dropdown on failure
+                    dropdown.value = dropdown.dataset.oldValue;
+                    dropdown.className = `status-dropdown status-${dropdown.dataset.oldValue}`;
+                }
+            }
+        };
+        // Store the old value in case of failure
+        dropdown.dataset.oldValue = dropdown.value;
+        xhr.send(`supplier_id=${supplierId}&status=${newStatus}`);
+    }
+
     document.querySelectorAll('.tabs span').forEach(tab => {
         tab.addEventListener('click', function() {
             document.querySelectorAll('.tabs span').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            document.getElementById('suppliers-content').style.display = this.dataset.tab === 'suppliers' ?
-                'block' : 'none';
-            document.getElementById('receiving-content').style.display = this.dataset.tab === 'receiving' ?
-                'block' : 'none';
+            document.getElementById('suppliers-content').style.display = this.dataset.tab ===
+                'suppliers' ? 'block' : 'none';
+            document.getElementById('receiving-content').style.display = this.dataset.tab ===
+                'receiving' ? 'block' : 'none';
         });
     });
 

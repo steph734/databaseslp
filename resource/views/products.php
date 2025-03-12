@@ -182,6 +182,26 @@ $units = [
         color: #34502b;
     }
 
+    .btn-add-product {
+        background: #34502b;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-cancel {
+        background: white;
+        color: #34502b;
+        padding: 8px 12px;
+        border: 1px solid #34502b !important;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
     /* Modal Styling */
     .modal-content {
         padding: 20px;
@@ -196,7 +216,6 @@ $units = [
 
     .modal-footer {
         display: flex;
-        justify-content: space-between;
     }
 
     /* Responsive Fix */
@@ -414,8 +433,6 @@ $units = [
                 <div class="modal-body">
                     <label class="my-2">Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
-                    <label class="my-2">Quantity:</label>
-                    <input type="number" name="quantity" class="form-control" required>
                     <label class="my-2">Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
                     <label class="my-2">Unit of measurement:</label>
@@ -441,8 +458,8 @@ $units = [
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Add Product</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-add-product">Add Product</button>
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -462,8 +479,6 @@ $units = [
                     <input type="hidden" name="product_id">
                     <label>Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
-                    <label>Quantity:</label>
-                    <input type="number" name="quantity" class="form-control" required>
                     <label>Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
                     <label>Unit:</label>

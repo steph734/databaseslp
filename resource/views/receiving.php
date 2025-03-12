@@ -43,7 +43,6 @@ while ($row = $product_result->fetch_assoc()) {
     $products[] = $row['product_name'];
 }
 ?>
-
 <style>
     .receiving-container {
         padding: 20px;
@@ -83,14 +82,16 @@ while ($row = $product_result->fetch_assoc()) {
         color: #34502b;
     }
 
-    .status-dropdown {
-        padding: 5px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
+    .status-container {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-text {
         font-size: 14px;
         font-weight: bold;
-        background: white;
-        cursor: pointer;
+        margin-right: 5px;
     }
 
     .status-pending {
@@ -103,6 +104,34 @@ while ($row = $product_result->fetch_assoc()) {
 
     .status-cancelled {
         color: #dc3545;
+    }
+
+    .status-dropdown {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: transparent;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: #555;
+        width: 20px;
+        padding: 0;
+        position: relative;
+    }
+
+    .status-dropdown:focus {
+        outline: none;
+    }
+
+    .status-container::after {
+        content: '\25BC';
+        /* Down arrow */
+        font-size: 10px;
+        color: #555;
+        position: absolute;
+        right: 5px;
+        pointer-events: none;
     }
 
     .receiving-details {
@@ -279,7 +308,6 @@ while ($row = $product_result->fetch_assoc()) {
         border: 1px solid #34502b;
     }
 
-    /* Modal styles */
     .modal-dialog.modal-lg {
         max-width: 800px;
     }
@@ -359,7 +387,6 @@ while ($row = $product_result->fetch_assoc()) {
     }
 </style>
 
-
 <!-- Order Form Section -->
 <div class="order-section">
     <button class="btn-add-receiving" onclick="toggleAddReceivingForm()">
@@ -411,15 +438,18 @@ while ($row = $product_result->fetch_assoc()) {
             <div class="receiving-card">
                 <div class="receiving-header">
                     <span class="supplier-name"><?= htmlspecialchars($row['supplier_name']) ?></span>
-                    <select class="status-dropdown status-<?= strtolower($row['status']) ?>"
-                        onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)">
-                        <option value="pending" <?= $row['status'] === 'pending' ? 'selected' : '' ?> class="status-pending">
-                            Pending</option>
-                        <option value="received" <?= $row['status'] === 'received' ? 'selected' : '' ?> class="status-received">
-                            Received</option>
-                        <option value="cancelled" <?= $row['status'] === 'cancelled' ? 'selected' : '' ?>
-                            class="status-cancelled">Cancelled</option>
-                    </select>
+                    <div class="status-container">
+                        <span class="status-text status-<?= strtolower($row['status']) ?>"
+                            id="status-text-<?= $row['receiving_id'] ?>">
+                            <?= ucfirst($row['status']) ?>
+                        </span>
+                        <select class="status-dropdown" onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)">
+                            <option value="" disabled selected></option>
+                            <option value="pending">Pending</option>
+                            <option value="received">Received</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="receiving-details">
                     <p><strong>Receiving ID:</strong> <?= $row['receiving_id'] ?></p>
@@ -590,8 +620,7 @@ while ($row = $product_result->fetch_assoc()) {
         document.getElementById('view_receiving_date').textContent = receiving.receiving_date || '-';
         document.getElementById('view_total_quantity').textContent = receiving.total_quantity;
         document.getElementById('view_total_cost').textContent = Number(receiving.total_cost).toFixed(2) || '-';
-        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0)
-            .toUpperCase() +
+        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0).toUpperCase() +
             receiving.status.slice(1) : '-';
         document.getElementById('view_createdbyid').textContent = receiving.createdbyid || '-';
         document.getElementById('view_createdate').textContent = receiving.createdate || '-';
@@ -651,36 +680,40 @@ while ($row = $product_result->fetch_assoc()) {
             tbody.appendChild(row);
         }
 
-        document.getElementById('view_invoice_total').textContent = 'Total: ₱' + Number(receiving.total_cost).toFixed(
-            2);
+        document.getElementById('view_invoice_total').textContent = 'Total: ₱' + Number(receiving.total_cost).toFixed(2);
 
         var modal = new bootstrap.Modal(document.getElementById("invoiceModal"));
         modal.show();
     }
 
     function updateStatus(receivingId, newStatus) {
-        // Update the dropdown color dynamically
+        const statusText = document.getElementById(`status-text-${receivingId}`);
+        const oldStatus = statusText.textContent.trim().toLowerCase();
         const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
-        dropdown.className = `status-dropdown status-${newStatus}`;
 
-        // AJAX request to update the database
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "../../handlers/update_status_handler.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                if (xhr.responseText === "success") {
-                    console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    if (xhr.responseText === "success") {
+                        console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+                        // Update the text only on success
+                        statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                        statusText.className = `status-text status-${newStatus}`;
+                    } else {
+                        console.error("Server response: " + xhr.responseText);
+                        alert("Failed to update status: " + xhr.responseText);
+                    }
                 } else {
-                    alert("Failed to update status: " + xhr.responseText);
-                    // Revert dropdown on failure (optional)
-                    dropdown.value = dropdown.dataset.oldValue;
-                    dropdown.className = `status-dropdown status-${dropdown.dataset.oldValue}`;
+                    console.error("AJAX error: Status " + xhr.status);
+                    alert("AJAX request failed with status: " + xhr.status);
                 }
+                // Reset dropdown to blank after attempt
+                dropdown.value = "";
             }
         };
-        // Store the old value in case of failure
-        dropdown.dataset.oldValue = dropdown.value;
         xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
     }
 
