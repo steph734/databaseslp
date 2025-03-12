@@ -7,14 +7,14 @@ if (isset($_SESSION['search_results'])) {
     unset($_SESSION['search_results']); // Clear after displaying
 } else {
     // Join Customer with Customer_Type to fetch the type_name
-
+<<<<<<< HEAD
     $query = "SELECT *
               FROM Customer";
-
+=======
     $query = "SELECT customer.*, Customer_Type.type_name 
           FROM customer 
           LEFT JOIN Customer_Type ON customer.type_id = Customer_Type.type_id";
-
+>>>>>>> d1d9b70231ee98a33f92952c6ba17d290c252a82
     $result = $conn->query($query);
     $customers = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 }
@@ -116,7 +116,7 @@ if (isset($_SESSION['search_results'])) {
                 <?php if (!empty($customers)) { ?>
                     <?php foreach ($customers as $row) { ?>
                         <tr>
-
+<<<<<<< HEAD
                             <td><input type="checkbox"></td>
                             <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
                             <td><?php echo htmlspecialchars($row['name']); ?></td>
@@ -128,7 +128,7 @@ if (isset($_SESSION['search_results'])) {
                             <td><?php echo htmlspecialchars($row['updatedbyid']); ?></td>
                             <td><?php echo htmlspecialchars($row['updatedate']); ?></td>
                             <td>
-
+=======
                         <td><input type="checkbox"></td>
                 <td><?php echo htmlspecialchars($row['customer_id'] ?? '-'); ?></td>
                 <td><?php echo htmlspecialchars($row['name'] ?? '-'); ?></td>
@@ -140,7 +140,7 @@ if (isset($_SESSION['search_results'])) {
                 <td><?php echo htmlspecialchars($row['updatedbyid'] ?? '-'); ?></td>
                 <td><?php echo htmlspecialchars($row['updatedate'] ?? '-'); ?></td>
                 <td>
-
+>>>>>>> d1d9b70231ee98a33f92952c6ba17d290c252a82
                                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit<?php echo $row['customer_id']; ?>">Edit</button>
                                 <br>
                                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete<?php echo $row['customer_id']; ?>">Delete</button>
