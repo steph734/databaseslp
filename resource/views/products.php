@@ -331,6 +331,22 @@ $units = [
         display: block;
         margin: 0 auto;
     }
+
+    .btn-delete {
+        background-color: rgb(255, 255, 255);
+        color: rgb(81, 2, 2);
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgb(81, 2, 2);
+    }
+
+    .btn-delete:hover {
+        background-color: rgb(81, 2, 2);
+        color: white;
+    }
 </style>
 
 <div class="main-content">
@@ -359,12 +375,15 @@ $units = [
             <button class="create-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
                 <i class="fa-solid fa-add"></i> ADD PRODUCT
             </button>
+            <button class="btn-delete active" onclick="removeSelected()" style="font-weight: bold;">
+                <i class="fa fa-trash"></i> Remove
+            </button>
         </div>
         <div class="table-responsive rounded-3">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Quantity</th>
@@ -405,7 +424,6 @@ $units = [
                                             class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>
                                         Delete</button>
                                 </td>
-
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
@@ -419,7 +437,6 @@ $units = [
         </div>
     </div>
 </div>
-
 
 <!-- ADD PRODUCT MODAL -->
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
@@ -465,8 +482,8 @@ $units = [
         </div>
     </div>
 </div>
-<!-- EDIT PRODUCT MODAL -->
 
+<!-- EDIT PRODUCT MODAL -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -568,7 +585,7 @@ $units = [
         </div>
     </div>
 </div>
-<!-- EDIT CATEGORY MODAL -->
+
 <!-- EDIT CATEGORY MODAL -->
 <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
     aria-hidden="true">
@@ -597,6 +614,7 @@ $units = [
         </div>
     </div>
 </div>
+
 <?php if (isset($_SESSION['success'])) : ?>
     <div class="alert alert-success alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
         style="width: auto !important; padding-right: 2.5rem !important;">
@@ -616,48 +634,128 @@ $units = [
 <?php endif ?>
 
 <script>
-    function confirmDelete(productid) {
-        if (confirm("Are you sure do you want to delete this supplier?")) {
-            window.location.href = "../../handlers/delete_product_handler.php?id=" + productid;
+// Function to toggle select/deselect all checkboxes
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('#products-table-body input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+// Function to get all selected product IDs
+function getSelectedProductIds() {
+    const selectedCheckboxes = document.querySelectorAll('#products-table-body input[type="checkbox"]:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(checkbox => {
+        return checkbox.closest('tr').querySelector('td:nth-child(2)').textContent.trim(); // Assuming product_id is in the second column
+    });
+    return selectedIds;
+}
+
+// Function to remove selected products
+function removeSelected() {
+    const selectedIds = getSelectedProductIds();
+
+    if (selectedIds.length === 0) {
+        alert("Please select at least one product to remove.");
+        return;
+    }
+
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} selected product(s)?`)) {
+        // Perform AJAX request to delete selected products
+        fetch('../../handlers/delete_multiple_products_handler.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ product_ids: selectedIds }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Reload the page or update the table dynamically
+                location.reload(); // Simple solution: reload the page
+                // Alternatively, you can remove the rows dynamically without reloading
+                // removeSelectedRows(selectedIds);
+            } else {
+                alert(data.message || 'Failed to delete products.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting products.');
+        });
+    }
+}
+
+// Optional: Function to dynamically remove rows from the table without reloading
+function removeSelectedRows(selectedIds) {
+    selectedIds.forEach(id => {
+        const row = document.querySelector(`#products-table-body tr td:nth-child(2):contains("${id}")`).closest('tr');
+        if (row) {
+            row.remove();
         }
+    });
+    // If no rows are left, show "No products found" message
+    if (document.querySelectorAll('#products-table-body tr').length === 0) {
+        document.querySelector('#products-table-body').innerHTML = `
+            <tr>
+                <td colspan="13" style="text-align: center; padding: 20px; color: #666;">
+                    No products found.
+                </td>
+            </tr>
+        `;
     }
+    // Uncheck the "Select All" checkbox
+    document.getElementById('selectAll').checked = false;
+}
 
-    function confirmDeleteCategory(id) {
-        if (confirm("Are you sure you want to delete the category '" + id +
-                "'? This will also delete all related products.")) {
-            window.location.href = "../../handlers/deletecategory_handler.php?id=" + encodeURIComponent(id);
-        }
+// Utility function to make :contains() work in querySelector
+if (!('contains' in Element.prototype)) {
+    Element.prototype.matches = Element.prototype.matches || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector;
+    Element.prototype.contains = function (text) {
+        return this.textContent.includes(text);
+    };
+}
+
+function confirmDelete(productid) {
+    if (confirm("Are you sure do you want to delete this product?")) {
+        window.location.href = "../../handlers/delete_product_handler.php?id=" + productid;
     }
+}
 
-    function loadEditModal(product) {
-        console.log(product);
-
-
-        document.querySelector("#editProductModal input[name='product_id']").value = product.product_id;
-
-        document.querySelector("#editProductModal input[name='product_name']").value = product.product_name;
-        document.querySelector("#editProductModal input[name='quantity']").value = product.quantity;
-        document.querySelector("#editProductModal input[name='price']").value = product.price;
-
-        document.querySelector("#editProductModal select[name='unitofmeasurement']").value =
-            product.unitofmeasurement || '';
-        document.querySelector("#editProductModal select[name='category_id']").value =
-            (product.category_id === "N/A" || product.category_id === null) ? '' : product.category_id;
-
-        document.querySelector("#editProductModal select[name='supplier_id']").value =
-            (product.supplier_id === "N/A" || product.supplier_id === null) ? '' : product.supplier_id;
+function confirmDeleteCategory(id) {
+    if (confirm("Are you sure you want to delete the category '" + id +
+            "'? This will also delete all related products.")) {
+        window.location.href = "../../handlers/deletecategory_handler.php?id=" + encodeURIComponent(id);
     }
+}
 
-    function loadEditCategory(categoryId, categoryName) {
-        document.querySelector("#editCategoryModal input[name='category_id']").value = categoryId;
-        document.querySelector("#editCategoryModal input[name='category_name']").value = categoryName;
+function loadEditModal(product) {
+    console.log(product);
+    document.querySelector("#editProductModal input[name='product_id']").value = product.product_id;
+    document.querySelector("#editProductModal input[name='product_name']").value = product.product_name;
+    document.querySelector("#editProductModal input[name='quantity']").value = product.quantity;
+    document.querySelector("#editProductModal input[name='price']").value = product.price;
+    document.querySelector("#editProductModal select[name='unitofmeasurement']").value =
+        product.unitofmeasurement || '';
+    document.querySelector("#editProductModal select[name='category_id']").value =
+        (product.category_id === "N/A" || product.category_id === null) ? '' : product.category_id;
+    document.querySelector("#editProductModal select[name='supplier_id']").value =
+        (product.supplier_id === "N/A" || product.supplier_id === null) ? '' : product.supplier_id;
+}
+
+function loadEditCategory(categoryId, categoryName) {
+    document.querySelector("#editCategoryModal input[name='category_id']").value = categoryId;
+    document.querySelector("#editCategoryModal input[name='category_name']").value = categoryName;
+}
+
+setTimeout(function() {
+    let alert = document.querySelector(".floating-alert");
+    if (alert) {
+        alert.style.opacity = "0";
+        setTimeout(() => alert.remove(), 500);
     }
-
-    setTimeout(function() {
-        let alert = document.querySelector(".floating-alert");
-        if (alert) {
-            alert.style.opacity = "0";
-            setTimeout(() => alert.remove(), 500);
-        }
-    }, 4000);
+}, 4000);
 </script>
