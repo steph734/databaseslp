@@ -9,8 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contact = trim($_POST['contact']);
     $address = trim($_POST['address']);
     $customertype = intval($_POST['customertype']); // Ensure it's an integer
-    $createdbyid = 1; // Example, should be set dynamically from session
-    $createdate = date("Y-m-d H:i:s");
+    $createdbyid = $_SESSION['admin_id'];
 
     // Validate required fields
     if (empty($name) || empty($contact) || empty($address) || empty($customertype)) {
@@ -19,9 +18,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Prepare SQL query
-    $stmt = $conn->prepare("INSERT INTO customer (name, contact, address, type_id, createdbyid, createdate) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssiss", $name, $contact, $address, $customertype, $createdbyid, $createdate);
+    // Prepare SQL query with both createdate and updatedate set to NOW()
+    $stmt = $conn->prepare("INSERT INTO customer (name, contact, address, type_id, createdbyid, createdate, updatedate) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt->bind_param("sssii", $name, $contact, $address, $customertype, $createdbyid);
 
     // Execute the query
     if ($stmt->execute()) {
