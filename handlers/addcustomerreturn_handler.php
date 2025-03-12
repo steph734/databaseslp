@@ -1,44 +1,46 @@
-
 <?php
 include '../database/database.php';
+session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $return_id = $_POST['customer_return_id'];
-    $customer_id = $_POST['customer_id'];
-    $return_reason = $_POST['return_reason'];
-    $return_date = $_POST['return_date'];
-    $refund_status = $_POST['refund_status'];
-    $total_amount = $_POST['total_amount'];
-    $updatedbyid = $_POST['updatedbyid'] ?? null;
-    $updatedate = date('Y-m-d H:i:s'); // Automatically set the updated timestamp
-
-    // Use a prepared statement for security
-    $query = "UPDATE customerreturn SET 
-                customer_id = ?, 
-                return_reason = ?, 
-                return_date = ?, 
-                refund_status = ?, 
-                total_amount = ?, 
-                updatedbyid = ?, 
-                updatedate = ? 
-              WHERE customer_return_id = ?";
-
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "isssdisi", 
-        $customer_id, $return_reason, $return_date, 
-        $refund_status, $total_amount, $updatedbyid, 
-        $updatedate, $return_id
-    );
-
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: ../returns.php?success=Customer return updated successfully");
-        exit();
-    } else {
-        echo "Error: " . mysqli_error($conn);
-    }
-
-    mysqli_stmt_close($stmt);
+// Check if admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    $_SESSION['error'] = "Unauthorized access!";
+    header("Location: ../returns.php?error=unauthorized");
+    exit();
 }
 
-mysqli_close($conn);
-?>
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $customer_id = $_POST['customer_id'] ?? null;
+    $return_reason = $_POST['return_reason'] ?? null;
+    $return_date = $_POST['return_date'] ?? null;
+    $refund_status = $_POST['refund_status'] ?? null;
+    $total_amount = $_POST['total_amount'] ?? null;
+    $createdbyid = $_SESSION['admin_id'];
+    $createdate = date('Y-m-d H:i:s'); // Automatically set the creation timestamp
+
+    // Validate required fields
+    if (!$customer_id || !$return_reason || !$return_date || !$refund_status || !$total_amount) {
+        $_SESSION['error'] = "All fields are required.";
+        header("Location: ../returns.php?error=missing_fields");
+        exit();
+    }
+
+    // Call a stored procedure (if you have one) or use a prepared statement
+    $stmt = $conn->prepare("INSERT INTO customerreturn (customer_id, return_reason, return_date, refund_status, total_amount, createdbyid, createdate) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssdis", $customer_id, $return_reason, $return_date, $refund_status, $total_amount, $createdbyid, $createdate);
+
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "Customer return added successfully!";
+        header("Location: ../resource/layout/web-layout.php?page=returns");
+    } else {
+        $_SESSION['error'] = "Failed to add return: " . $stmt->error;
+        header("Location: ../resource/layout/web-layout.php?page=customer_returns&error=database_error");
+    }
+
+    $stmt->close();
+} else {
+    $_SESSION['error'] = "Invalid request.";
+    header("Location: ../resource/layout/web-layout.php?page=customer_returns&error=invalid_request");
+}
+
+$conn->close();

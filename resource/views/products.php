@@ -553,7 +553,7 @@ $units = [
         </div>
     </div>
 </div>
-<!-- EDIT CATEGORY MODAL -->
+
 <!-- EDIT CATEGORY MODAL -->
 <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
     aria-hidden="true">
