@@ -357,8 +357,8 @@ while ($row = $product_result->fetch_assoc()) {
                 </div>
             </div>
             <div style="padding: 10px; text-align: center;">
-                <button type="button" class="btn-add-product" onclick="addProductEntry()">Add more <i
-                        class="fa fa-plus"></i></button>
+                <button type="button" class="btn-add-product" onclick="addProductEntry()"><i class="fa fa-plus"></i> Add
+                    more </button>
             </div>
             <label for="payment_method">Payment Method:</label>
             <select class="form-control" name="payment_method" required>
@@ -366,7 +366,7 @@ while ($row = $product_result->fetch_assoc()) {
                 <option value="GCash">GCash</option>
             </select>
             <button type="submit" class="btn-save">Save</button>
-            <button type="button" class="btn-clear" onclick="clearForm()">Clear <i class="fa fa-eraser"></i></button>
+            <button type="button" class="btn-clear" onclick="clearForm()"><i class="fa fa-eraser"></i> Clear </button>
         </form>
     </div>
     <div class="sales-table">

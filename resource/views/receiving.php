@@ -83,9 +83,14 @@ while ($row = $product_result->fetch_assoc()) {
         color: #34502b;
     }
 
-    .receiving-header .status {
+    .status-dropdown {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
         font-size: 14px;
         font-weight: bold;
+        background: white;
+        cursor: pointer;
     }
 
     .status-pending {
@@ -114,7 +119,8 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     .btn-view,
-    .btn-delete {
+    .btn-delete,
+    .btn-invoice {
         background: white;
         color: #34502b;
         border: 1px solid #34502b;
@@ -127,7 +133,8 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     .btn-view:hover,
-    .btn-delete:hover {
+    .btn-delete:hover,
+    .btn-invoice:hover {
         background: #34502b;
         color: white;
     }
@@ -272,25 +279,87 @@ while ($row = $product_result->fetch_assoc()) {
         border: 1px solid #34502b;
     }
 
-    /* New styles for scrollable modal */
+    /* Modal styles */
     .modal-dialog.modal-lg {
         max-width: 800px;
     }
 
     .modal-content {
         max-height: 80vh;
-        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #eee;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        flex-shrink: 0;
+        background: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .modal-title {
+        font-weight: 300;
+        color: #34502b;
     }
 
     .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
         padding: 20px;
+        line-height: 24px;
+        color: #555;
+    }
+
+    .modal-footer {
+        flex-shrink: 0;
+        border-top: 1px solid #eee;
     }
 
     .table {
         width: 100%;
         margin-bottom: 1rem;
+        border-collapse: collapse;
+    }
+
+    .table td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .table tr.heading td {
+        background: #eee;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .table tr.item td {
+        border-bottom: 1px solid #eee;
+    }
+
+    .table tr.item.last td {
+        border-bottom: none;
+    }
+
+    .table tr.total td:nth-child(2) {
+        border-top: 2px solid #eee;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .modal-body label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .modal-body p {
+        margin: 0 0 15px 0;
+        color: #555;
     }
 </style>
+
+
 <!-- Order Form Section -->
 <div class="order-section">
     <button class="btn-add-receiving" onclick="toggleAddReceivingForm()">
@@ -302,20 +371,26 @@ while ($row = $product_result->fetch_assoc()) {
             <select class="supplier-select" name="supplier_id" required>
                 <option value="">Select Supplier</option>
                 <?php while ($supplier = $supplier_result->fetch_assoc()) : ?>
-                    <option value="<?= $supplier['supplier_id'] ?>"><?= htmlspecialchars($supplier['supplier_name']) ?></option>
+                    <option value="<?= $supplier['supplier_id'] ?>"><?= htmlspecialchars($supplier['supplier_name']) ?>
+                    </option>
                 <?php endwhile; ?>
             </select>
             <div class="product-list" id="product-list">
                 <div class="product-card">
-                    <input type="text" name="products[0][name]" placeholder="Product Name" list="product-suggestions" required>
+                    <input type="text" name="products[0][name]" placeholder="Product Name" list="product-suggestions"
+                        required>
                     <input type="number" name="products[0][quantity]" placeholder="Quantity" min="1" required>
-                    <input type="number" name="products[0][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0" required>
-                    <button type="button" class="btn-remove-product" onclick="removeProduct(this)"><i class="fa fa-trash"></i></button>
+                    <input type="number" name="products[0][unit_cost]" placeholder="Unit Cost (₱)" step="0.01" min="0"
+                        required>
+                    <button type="button" class="btn-remove-product" onclick="removeProduct(this)"><i
+                            class="fa fa-trash"></i></button>
                 </div>
             </div>
             <div style="text-align: center;">
-                <button type="button" class="btn-add-product" onclick="addProduct()"><i class="fa fa-plus"></i> Add Another Product</button>
-                <button type="button" class="btn-clear-product" onclick="clearProducts()"><i class="fa fa-eraser"></i> Clear</button>
+                <button type="button" class="btn-add-product" onclick="addProduct()"><i class="fa fa-plus"></i> Add
+                    Another Product</button>
+                <button type="button" class="btn-clear-product" onclick="clearProducts()"><i class="fa fa-eraser"></i>
+                    Clear</button>
             </div>
             <button type="submit" class="btn-submit-order">Submit Order</button>
         </form>
@@ -326,7 +401,7 @@ while ($row = $product_result->fetch_assoc()) {
 <datalist id="product-suggestions">
     <?php foreach ($products as $product_name) : ?>
         <option value="<?= htmlspecialchars($product_name) ?>">
-    <?php endforeach; ?>
+        <?php endforeach; ?>
 </datalist>
 
 <!-- Receiving Cards -->
@@ -336,9 +411,15 @@ while ($row = $product_result->fetch_assoc()) {
             <div class="receiving-card">
                 <div class="receiving-header">
                     <span class="supplier-name"><?= htmlspecialchars($row['supplier_name']) ?></span>
-                    <span class="status status-<?= strtolower($row['status']) ?>">
-                        <?= ucfirst($row['status']) ?>
-                    </span>
+                    <select class="status-dropdown status-<?= strtolower($row['status']) ?>"
+                        onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)">
+                        <option value="pending" <?= $row['status'] === 'pending' ? 'selected' : '' ?> class="status-pending">
+                            Pending</option>
+                        <option value="received" <?= $row['status'] === 'received' ? 'selected' : '' ?> class="status-received">
+                            Received</option>
+                        <option value="cancelled" <?= $row['status'] === 'cancelled' ? 'selected' : '' ?>
+                            class="status-cancelled">Cancelled</option>
+                    </select>
                 </div>
                 <div class="receiving-details">
                     <p><strong>Receiving ID:</strong> <?= $row['receiving_id'] ?></p>
@@ -346,7 +427,7 @@ while ($row = $product_result->fetch_assoc()) {
                     <p><strong>Total Quantity:</strong> <?= $row['total_quantity'] ?></p>
                     <p><strong>Total Cost:</strong> ₱<?= number_format($row['total_cost'], 2) ?? '-' ?></p>
                 </div>
-                <button class="btn-view" onclick="loadReceivingModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                <button class="btn-invoice" onclick="loadInvoiceModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                     <i class="fa fa-eye"></i> View Details
                 </button>
                 <button class="btn-delete" onclick="confirmDelete(<?= $row['receiving_id'] ?>)">
@@ -410,6 +491,55 @@ while ($row = $product_result->fetch_assoc()) {
     </div>
 </div>
 
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceModalLabel">Receiving Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label>Receive #:</label>
+                    <p id="view_invoice_number"></p>
+                    <label>Created:</label>
+                    <p id="view_created_date"></p>
+                    <label>Due:</label>
+                    <p id="view_due_date"></p>
+                </div>
+                <div>
+                    <label>To:</label>
+                    <p id="view_from">Riverview SLP Association<br />Davao City, Davao Del Sur, 8000</p>
+                    <label>From:</label>
+                    <p id="view_to"></p>
+                </div>
+                <label>Payment Method:</label>
+                <p id="view_payment_method">Cash</p>
+                <label>Items:</label>
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="heading">
+                            <td>Product Name</td>
+                            <td>Quantity</td>
+                            <td>Unit Cost (₱)</td>
+                            <td>Subtotal Cost (₱)</td>
+                        </tr>
+                    </thead>
+                    <tbody id="view_invoice_items"></tbody>
+                    <tr class="total">
+                        <td colspan="3"></td>
+                        <td id="view_invoice_total"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let productCount = 1;
 
@@ -460,7 +590,9 @@ while ($row = $product_result->fetch_assoc()) {
         document.getElementById('view_receiving_date').textContent = receiving.receiving_date || '-';
         document.getElementById('view_total_quantity').textContent = receiving.total_quantity;
         document.getElementById('view_total_cost').textContent = Number(receiving.total_cost).toFixed(2) || '-';
-        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0).toUpperCase() + receiving.status.slice(1) : '-';
+        document.getElementById('view_status').textContent = receiving.status ? receiving.status.charAt(0)
+            .toUpperCase() +
+            receiving.status.slice(1) : '-';
         document.getElementById('view_createdbyid').textContent = receiving.createdbyid || '-';
         document.getElementById('view_createdate').textContent = receiving.createdate || '-';
         document.getElementById('view_updatedbyid').textContent = receiving.updatedbyid || '-';
@@ -491,6 +623,65 @@ while ($row = $product_result->fetch_assoc()) {
 
         var modal = new bootstrap.Modal(document.getElementById("receivingModal"));
         modal.show();
+    }
+
+    function loadInvoiceModal(receiving) {
+        document.getElementById('view_invoice_number').textContent = receiving.receiving_id;
+        document.getElementById('view_created_date').textContent = receiving.createdate || '-';
+        document.getElementById('view_due_date').textContent = receiving.receiving_date || '-';
+        document.getElementById('view_to').textContent = receiving.supplier_name;
+
+        const productNames = receiving.product_names ? receiving.product_names.split(', ') : [];
+        const quantities = receiving.quantities ? receiving.quantities.split(', ') : [];
+        const unitCosts = receiving.unit_costs ? receiving.unit_costs.split(', ') : [];
+        const subtotalCosts = receiving.subtotal_costs ? receiving.subtotal_costs.split(', ') : [];
+
+        const tbody = document.getElementById('view_invoice_items');
+        tbody.innerHTML = '';
+
+        for (let i = 0; i < productNames.length; i++) {
+            const row = document.createElement('tr');
+            row.className = i === productNames.length - 1 ? 'item last' : 'item';
+            row.innerHTML = `
+                <td>${productNames[i] || '-'}</td>
+                <td>${quantities[i] || '-'}</td>
+                <td>${Number(unitCosts[i]).toFixed(2) || '-'}</td>
+                <td>${Number(subtotalCosts[i]).toFixed(2) || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        document.getElementById('view_invoice_total').textContent = 'Total: ₱' + Number(receiving.total_cost).toFixed(
+            2);
+
+        var modal = new bootstrap.Modal(document.getElementById("invoiceModal"));
+        modal.show();
+    }
+
+    function updateStatus(receivingId, newStatus) {
+        // Update the dropdown color dynamically
+        const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
+        dropdown.className = `status-dropdown status-${newStatus}`;
+
+        // AJAX request to update the database
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "../../handlers/update_status_handler.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                if (xhr.responseText === "success") {
+                    console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+                } else {
+                    alert("Failed to update status: " + xhr.responseText);
+                    // Revert dropdown on failure (optional)
+                    dropdown.value = dropdown.dataset.oldValue;
+                    dropdown.className = `status-dropdown status-${dropdown.dataset.oldValue}`;
+                }
+            }
+        };
+        // Store the old value in case of failure
+        dropdown.dataset.oldValue = dropdown.value;
+        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
     }
 
     function confirmDelete(receivingId) {
