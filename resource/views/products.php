@@ -662,7 +662,6 @@ function removeSelected() {
     }
 
     if (confirm(`Are you sure you want to delete ${selectedIds.length} selected product(s)?`)) {
-        // Perform AJAX request to delete selected products
         fetch('../../handlers/delete_multiple_products_handler.php', {
             method: 'POST',
             headers: {
@@ -670,17 +669,9 @@ function removeSelected() {
             },
             body: JSON.stringify({ product_ids: selectedIds }),
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Reload the page or update the table dynamically
-                location.reload(); // Simple solution: reload the page
-                // Alternatively, you can remove the rows dynamically without reloading
-                // removeSelectedRows(selectedIds);
-            } else {
-                alert(data.message || 'Failed to delete products.');
-            }
+        .then(() => {
+            // Simply reload the page to show the session alert
+            location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
