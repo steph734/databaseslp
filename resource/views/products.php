@@ -452,7 +452,7 @@ $units = [
                     <input type="text" name="product_name" class="form-control" required>
                     <label class="my-2">Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
-                    <label class="my-2">Unit of measurement:</label>
+                    <label class="my-2">Unit of Measurement:</label>
                     <select name="unitofmeasurement" class="form-control" required>
                         <option value="">Select Unit</option>
                         <?php foreach ($units as $value => $label) : ?>
@@ -463,13 +463,6 @@ $units = [
                     <select name="category_id" class="form-control" required>
                         <option value="">Select Category</option>
                         <?php foreach ($categories as $id => $name) : ?>
-                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <label class="my-2">Supplier of product:</label>
-                    <select name="supplier_id" class="form-control" required>
-                        <option value="">Select Supplier</option>
-                        <?php foreach ($suppliers as $id => $name) : ?>
                             <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                         <?php endforeach; ?>
                     </select>
