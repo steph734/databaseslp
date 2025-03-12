@@ -120,23 +120,28 @@ if (!$result_supplier) {
 
     /* Modal Styling */
     .modal {
-        display: none;
-        position: fixed;
-        z-index: 10;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-    }
+    display: none; /* Ensure it remains hidden by default */
+    position: fixed;
+    z-index: 10;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
 
     .modal-content {
         background: white;
         padding: 20px;
         border-radius: 5px;
-        width: 40%;
+        width: 35%; /* Reduced width from 40% */
+        max-width: 450px; /* Added max width */
+        max-height: 80vh; /* Restricts height */
+        overflow-y: auto; /* Enables scrolling if content is too long */
         position: relative;
     }
 
@@ -174,30 +179,32 @@ if (!$result_supplier) {
         border-radius: 5px;
     }
 
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        padding-top: 10px;
+        .modal-footer .submit-btn,
+    .modal-footer .cancel-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
     }
 
     .submit-btn {
-        background: #007200;
+        background-color: #007200;
         color: white;
-        padding: 10px 15px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        margin-right: 10px;
     }
 
     .cancel-btn {
-        background: #a3a3a3;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
+        background-color: #ccc;
+        color: black;
     }
+
+    .submit-btn:hover {
+        background-color: #005a00;
+    }
+
+    .cancel-btn:hover {
+        background-color: #999;
+}
 </style>
 
 <script>
@@ -237,18 +244,19 @@ if (!$result_supplier) {
 
     }
 
-    function openEditModal(returnId, customerId, reason, returnDate, refundStatus, totalAmount, createdBy, createDate) {
-    document.getElementById("edit_customerreturn_id").value = returnId;
+    function openEditModal(id, customerId, reason, date, status, amount, updateId, updateDate) {
+    document.getElementById("edit_customerreturn_id").value = id;
     document.getElementById("edit_customer_id").value = customerId;
     document.getElementById("edit_return_reason").value = reason;
-    document.getElementById("edit_return_date").value = returnDate;
-    document.getElementById("edit_refund_status").value = refundStatus;
-    document.getElementById("edit_total_amount").value = totalAmount;
-    document.getElementById("edit_createdbyid").value = createdBy;
-    document.getElementById("edit_createdate").value = createDate;
+    document.getElementById("edit_return_date").value = date;
+    document.getElementById("edit_refund_status").value = status;
+    document.getElementById("edit_total_amount").value = amount;
+    document.getElementById("edit_updatebyid").value = updateId;
+    document.getElementById("edit_updatedate").value = updateDate;
 
-    openModal("editModal");
-}
+    openModal('editModal'); // Open modal after setting values
+
+    }
 
 
     function openDeleteModal(returnId) {
@@ -309,55 +317,49 @@ if (!$result_supplier) {
     </div>
 
 
-<!-- Create Modal -->
-<div id="createModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>Add Return</span>
-            <span class="close" onclick="closeModal('createModal')">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form method="POST" action="../../handlers/addcustomerreturn_handler.php">
-                <label for="customer_id">Customer ID:</label>
-                <input type="number" name="customer_id" required>
+    <!-- Create Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Add Return</span>
+                <span class="close" onclick="closeModal('createModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="../../handlers/addcustomerreturn_handler.php">
+                    <label for="customer_id">Customer ID:</label>
+                    <input type="number" name="customer_id" required>
 
-                    <label for="return_reason">Return Reason:</label>
-                    <input type="text" name="return_reason" required>
+                        <label for="return_reason">Return Reason:</label>
+                        <input type="text" name="return_reason" required>
 
-                    <label for="return_date">Return Date:</label>
-                    <input type="date" name="return_date" required>
+                        <label for="return_date">Return Date:</label>
+                        <input type="date" name="return_date" required>
 
-                    <label for="refund_status">Refund Status:</label>
-                    <select name="refund_status" required>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Rejunded</option>
-                        <option value="Rejected">Replaced</option>
-                    </select>
+                        <label for="refund_status">Refund Status:</label>
+                        <select name="refund_status" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Rejunded</option>
+                            <option value="Rejected">Replaced</option>
+                        </select>
 
-                    <label for="total_amount">Total Amount:</label>
-                    <input type="number" name="total_amount" step="0.01" required>
+                        <label for="total_amount">Total Amount:</label>
+                        <input type="number" name="total_amount" step="0.01" required>
 
-                    <label for="createdbyid">Created By:</label>
-                    <input type="text" id="createdbyid" name="createdbyid" required>
+                        <label for="createdbyid">Created By:</label>
+                        <input type="text" id="createdbyid" name="createdbyid" required>
 
-                    <label for="createdate">Created Date:</label>
-                    <input type="datetime-local" id="createdate" name="createdate" required>
-
-                    <label for="updatedbyid">Updated By:</label>
-                    <input type="text" id="updatedbyid" name="updatedbyid" required>
-
-                    <label for="updatedate">Updated Date:</label>
-                    <input type="datetime-local" id="updatedate" name="updatedate" required>
+                        <label for="createdate">Created Date:</label>
+                        <input type="datetime-local" id="createdate" name="createdate" required>
 
 
-                    <div class="modal-footer">
-                        <button type="submit" class="submit-btn">Add Return</button>
-                        <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
-                    </div>
-                </form>
+                        <div class="modal-footer">
+                            <button type="submit" class="submit-btn">Add Return</button>
+                            <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
 
     <!-- Edit Modal -->
@@ -391,11 +393,11 @@ if (!$result_supplier) {
                 <label for="edit_total_amount">Total Amount:</label>
                 <input type="number" id="edit_total_amount" name="total_amount" step="0.01" required>
 
-                <label for="edit_createdbyid">Created By:</label>
-                <input type="text" id="edit_createdbyid" name="createdbyid" required>
+                <label for="edit_updatebyid">Updated By:</label>
+                <input type="text" id="edit_updatebyid" name="updatebyid" required>
 
-                <label for="edit_createdate">Created Date:</label>
-                <input type="datetime-local" id="edit_createdate" name="createdate" required>
+                <label for="edit_updatedate">Update Date:</label>
+                <input type="datetime-local" id="edit_updatedate" name="updatedate" required>
 
                 <div class="modal-footer">
                     <button type="submit" class="submit-btn">Save Changes</button>
