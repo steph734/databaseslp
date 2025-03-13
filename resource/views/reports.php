@@ -2,62 +2,80 @@
     <header>
         <h1>Reports</h1>
         <div class="search-profile">
-            <?php include __DIR__ . '/searchbar.php'; ?>
             <?php include __DIR__ . '/profile.php'; ?>
         </div>
     </header>
 
-    <div class="search-container">
-        <input type="text" id="searchAdjustmentID" placeholder="Adjustment ID">
-        <input type="text" id="searchProductID" placeholder="Product ID">
-        <input type="text" id="searchDateAdjusted" placeholder="Date Adjusted" onfocus="(this.type='date')" onblur="(this.type='text')">
-        <button class="search-btn">SEARCH</button>
-        <button class="clear-btn">CLEAR</button>
-    </div>
-
-    <div class="supplier-table">
-        <div class="table-controls">
-            <button class="create-btn">CREATE NEW <span>+</span></button>
-            <button class="edit-btn">EDIT <span>✏️</span></button>
-            <button class="delete-btn">DELETE <span>🗑️</span></button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select-all"></th>
-                    <th>AdjustmentID</th>
-                    <th>ProductID</th>
-                    <th>Adjusted Quantity</th>
-                    <th>Description</th>
-                    <th>Date Adjusted</th>
-                </tr>
-            </thead>
-            <tbody id="reports-table-body">
-                <!-- Data will be loaded dynamically -->
-            </tbody>
-        </table>
+    <div class="reports-container">
+        <button class="report-btn" onclick="location.href='invoice.php'">
+            <i class="fas fa-file-invoice"></i>
+            <span>Invoice</span>
+        </button>
+        <button class="report-btn" onclick="location.href='stock_adjustment.php'">
+            <i class="fas fa-boxes"></i>
+            <span>Stock Adjustment</span>
+        </button>
+        <button class="report-btn" onclick="location.href='damage.php'">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Damage</span>
+        </button>
     </div>
 </div>
 
-<!-- Create/Edit Modal -->
-<div id="recordModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="modal-title">Create Report</h2>
-        <form id="recordForm">
-            <input type="hidden" id="adjustmentID">
-            <label>Product ID:</label>
-            <input type="text" id="productID" required>
-            <label>Adjusted Quantity:</label>
-            <input type="number" id="adjustedQuantity" required>
-            <label>Description:</label>
-            <input type="text" id="description">
-            <label>Date Adjusted:</label>
-            <input type="date" id="dateAdjusted" required>
-            <button type="submit">Save</button>
-        </form>
-    </div>
-</div>
+<!-- FontAwesome for Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<style>
+    .main-content {
+        text-align: center;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .reports-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 50px;
+        margin-top: 80px;
+        flex-wrap: wrap;
+    }
+
+    .report-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 50px;
+        font-size: 26px;
+        font-weight: bold;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 6px 8px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 250px;
+        height: 220px;
+        text-align: center;
+    }
+
+    .report-btn i {
+        font-size: 60px;
+        margin-bottom: 15px;
+    }
+
+    .report-btn:hover {
+        background-color: #0056b3;
+        transform: translateY(-8px);
+    }
+</style>
 
 <script src="script.js"></script>
 </body>

@@ -245,6 +245,63 @@ if (!$result_supplier) {
 
     }
 
+    function openCreateModal() {
+    const activeTab = document.querySelector('.tabs span.active').getAttribute('data-type');
+    const modalTitle = document.getElementById('modal-title');
+    const modalFields = document.getElementById('modal-fields');
+    const createForm = document.getElementById('create-form');
+
+    if (activeTab === 'customer') {
+        modalTitle.textContent = 'Add Customer Return';
+        modalFields.innerHTML = `
+            <label for="customer_id">Customer ID:</label>
+            <input type="number" name="customer_id" required>
+            <label for="return_reason">Return Reason:</label>
+            <input type="text" name="return_reason" required>
+            <label for="return_date">Return Date:</label>
+            <input type="date" name="return_date" required>
+            <label for="refund_status">Refund Status:</label>
+            <select name="refund_status" required>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Refunded</option>
+                <option value="Rejected">Replaced</option>
+            </select>
+            <label for="total_amount">Total Amount:</label>
+            <input type="number" name="total_amount" step="0.01" required>
+            <label for="createdbyid">Created By:</label>
+            <input type="text" name="createdbyid" required>
+            <label for="createdate">Created Date:</label>
+            <input type="datetime-local" name="createdate" required>
+        `;
+        createForm.action = '../../handlers/addcustomerreturn_handler.php';
+    } else {
+        modalTitle.textContent = 'Add Supplier Return';
+        modalFields.innerHTML = `
+            <label for="supplier_id">Supplier ID:</label>
+            <input type="number" name="supplier_id" required>
+            <label for="return_reason">Return Reason:</label>
+            <input type="text" name="return_reason" required>
+            <label for="return_date">Return Date:</label>
+            <input type="date" name="return_date" required>
+            <label for="refund_status">Refund Status:</label>
+            <select name="refund_status" required>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Refunded</option>
+                <option value="Rejected">Replaced</option>
+            </select>
+            <label for="total_amount">Total Amount:</label>
+            <input type="number" name="total_amount" step="0.01" required>
+            <label for="createdbyid">Created By:</label>
+            <input type="text" name="createdbyid" required>
+            <label for="createdate">Created Date:</label>
+            <input type="datetime-local" name="createdate" required>
+        `;
+        createForm.action = '../../handlers/addsupplierreturn_handler.php';
+    }
+
+    openModal('createModal'); // Open the modal
+}
+
     function openEditModal(id, customerId, reason, date, status, amount, updateId, updateDate) {
     document.getElementById("edit_customerreturn_id").value = id;
     document.getElementById("edit_customer_id").value = customerId;
@@ -346,9 +403,9 @@ function deleteSelectedRows() {
         <button class="clear-btn">CLEAR</button>
     </div>
 
-    <!-- Table Controls -->
+        <!-- Table Controls -->
     <div class="table-controls">
-        <button type="button" class="create-btn" onclick="openModal('createModal')">
+        <button type="button" class="create-btn" onclick="openCreateModal()">
             CREATE NEW <i class="fa fa-plus"></i>
         </button>
         <button type="button" class="delete-btn" onclick="deleteSelectedRows()">
@@ -356,50 +413,26 @@ function deleteSelectedRows() {
         </button>
     </div>
 
-
-    <!-- Create Modal -->
+        <!-- Create Modal -->
     <div id="createModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span>Add Return</span>
+                <span id="modal-title">Add Return</span>
                 <span class="close" onclick="closeModal('createModal')">&times;</span>
             </div>
             <div class="modal-body">
-                <form method="POST" action="../../handlers/addcustomerreturn_handler.php">
-                    <label for="customer_id">Customer ID:</label>
-                    <input type="number" name="customer_id" required>
-
-                        <label for="return_reason">Return Reason:</label>
-                        <input type="text" name="return_reason" required>
-
-                        <label for="return_date">Return Date:</label>
-                        <input type="date" name="return_date" required>
-
-                        <label for="refund_status">Refund Status:</label>
-                        <select name="refund_status" required>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Rejunded</option>
-                            <option value="Rejected">Replaced</option>
-                        </select>
-
-                        <label for="total_amount">Total Amount:</label>
-                        <input type="number" name="total_amount" step="0.01" required>
-
-                        <label for="createdbyid">Created By:</label>
-                        <input type="text" id="createdbyid" name="createdbyid" required>
-
-                        <label for="createdate">Created Date:</label>
-                        <input type="datetime-local" id="createdate" name="createdate" required>
-
-
-                        <div class="modal-footer">
-                            <button type="submit" class="submit-btn">Add Return</button>
-                            <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
-                        </div>
-                    </form>
-                </div>
+                <form id="create-form" method="POST" action="">
+                    <div id="modal-fields">
+                        <!-- Fields will be populated dynamically -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="submit-btn">Add Return</button>
+                        <button type="button" class="cancel-btn" onclick="closeModal('createModal')">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
 
     <!-- Edit Modal -->
@@ -535,35 +568,53 @@ function deleteSelectedRows() {
 </div>
 
 
-    <!--Supplier Return Table -->
+    <!-- Supplier Return Table -->
+    <div class="returns-table">
         <table id="supplier-table" style="display: none;">
             <thead>
                 <tr>
-                    <th><input type="checkbox"></th>
-                    <th>SupplierReturnID</th>
-                    <th>ProductID</th>
-                    <th>SupplierID</th>
+                    <th><input type="checkbox" id="select-all-supplier" onclick="toggleSelectAll(this)"></th>
+                    <th>Supplier ReturnID</th>
+                    <th>Supplier ID</th>
                     <th>Reason</th>
                     <th>Return Date</th>
                     <th>Status</th>
+                    <th>Total Amount</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $query = "SELECT * FROM supplierreturn";
-                $result = mysqli_query($conn, $query);
-                while ($row = mysqli_fetch_assoc($result)) {
-                    echo "<tr>
-                        <td><input type='checkbox'></td>
-                        <td>{$row['supplier_return_id']}</td>
-                        <td>{$row['supplier_id']}</td>
-                        <td>{$row['return_reason']}</td>
-                        <td>{$row['return_date']}</td>
-                        <td>{$row['refund_status']}</td>
-                    </tr>";
-                }
-                ?>
+                <?php if ($result_supplier->num_rows > 0) : ?>
+                    <?php while ($row = mysqli_fetch_assoc($result_supplier)) : ?>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox" name="supplier_return_id[]" value="<?= $row['supplier_return_id'] ?>"></td>
+                            <td><?= $row['supplier_return_id'] ?></td>
+                            <td><?= $row['supplier_id'] ?></td>
+                            <td><?= htmlspecialchars($row['return_reason']) ?></td>
+                            <td><?= $row['return_date'] ?></td>
+                            <td><?= $row['refund_status'] ?></td>
+                            <td>
+                                <button class="btn btn-sm text-warning action-btn"
+                                    onclick="openEditModal(
+                                        '<?= $row['supplier_return_id'] ?>',
+                                        '<?= $row['supplier_id'] ?>',
+                                        '<?= htmlspecialchars($row['return_reason'], ENT_QUOTES) ?>',
+                                        '<?= $row['return_date'] ?>',
+                                        '<?= $row['refund_status'] ?>'
+                                    )">
+                                    <i class="fa fa-edit"></i> Edit</button>
+
+                                <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['supplier_return_id'] ?>)"><i
+                                    class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>Delete</button>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
+                            No supplier returns found.</td>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
