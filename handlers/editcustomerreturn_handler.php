@@ -12,6 +12,7 @@ if (!isset($_SESSION['admin_id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $customer_return_id = $_POST['customer_return_id']; // Ensure this field exists
     $customer_id = $_POST['customer_id'];
+    $return_date = $_POST['return_date'];
     $return_reason = $_POST['return_reason'];
     $refund_status = $_POST['refund_status'];
     $total_amount = $_POST['total_amount'];
@@ -31,13 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $query = "UPDATE customerreturn SET 
                     customer_id = ?, 
                     return_reason = ?, 
+                    return_date = ?,
                     refund_status = ?, 
                     total_amount = ?, 
                     updatedbyid = ?, 
                     updatedate = ? 
                   WHERE customer_return_id = ?";
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("issdisi", $customer_id, $return_reason, $refund_status, $total_amount, $updatedbyid, $updatedate, $customer_return_id);
+        $stmt->bind_param("isssdisi", $customer_id, $return_reason, $return_date, $refund_status, $total_amount, $updatedbyid, $updatedate, $customer_return_id);
         
         if ($stmt->execute()) {
             $_SESSION['success'] = "Customer return updated successfully!";

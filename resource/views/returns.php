@@ -231,6 +231,7 @@ if (!$result_supplier) {
         'handlers/addsupplierreturn_handler.php';
     document.getElementById('edit-form').action = (type === 'customer') ? 'handlers/editcustomerreturn_handler.php' :
         'handlers/editsupplierreturn_handler.php';
+    
     document.getElementById('delete-form').action = (type === 'customer') ?
         'handlers/deletecustomerreturn_handler.php' : 'handlers/deletesupplierreturn_handler.php';
 }
@@ -425,8 +426,8 @@ function deleteSelectedRows() {
                 <label for="edit_refund_status">Refund Status:</label>
                 <select id="edit_refund_status" name="refund_status" required>
                     <option value="Pending">Pending</option>
-                    <option value="Approved">Refunded</option>
-                    <option value="Rejected">Replaced</option>
+                    <option value="Refunded">Refunded</option>
+                    <option value="Replaced">Replaced</option>
                 </select>
 
                 <label for="edit_total_amount">Total Amount:</label>
