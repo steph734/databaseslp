@@ -3,7 +3,6 @@
 
     <div class="sidebar-title" style="text-align: center;padding:20px; ">
         <h2><strong>INVENTORY SYSTEM</strong></h2>
-        <p>by stiffen</p>
     </div>
 
 

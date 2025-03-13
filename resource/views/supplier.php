@@ -1,8 +1,8 @@
 <?php
 include '../../database/database.php';
 
-$query = "SELECT supplier_id, supplier_name, contact_info, address, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
-$result = $conn->query($query);
+$supplier_query = "SELECT supplier_id, supplier_name, contact_info, address, status, createdbyid, createdate, updatedbyid, updatedate FROM Supplier";
+$supplier_result = $conn->query($supplier_query);
 ?>
 
 <style>
@@ -23,7 +23,6 @@ $result = $conn->query($query);
         min-height: 200px;
     }
 
-    /* Info Button */
     .info-toggle {
         position: absolute;
         top: 10px;
@@ -35,7 +34,6 @@ $result = $conn->query($query);
         cursor: pointer;
     }
 
-    /* Hidden Dropdown */
     .supplier-info {
         display: none;
         position: absolute;
@@ -99,13 +97,13 @@ $result = $conn->query($query);
         color: white;
     }
 
-    .btn-delete {
+    .btn-delete-supplier {
         background: rgb(255, 255, 255);
         color: rgba(255, 0, 25, 0.37);
         border: 1px solid rgba(255, 0, 25, 0.37);
     }
 
-    .btn-delete:hover {
+    .btn-delete-supplier:hover {
         background: rgb(255, 0, 25);
         color: white;
     }
@@ -119,12 +117,11 @@ $result = $conn->query($query);
         margin-bottom: 20px;
     }
 
-    .add-form input {
-        /* display: block; */
+    .add-form input,
+    .add-form textarea {
         width: 100%;
         margin-top: 10px;
         padding: 8px;
-
     }
 
     .btn-save {
@@ -134,16 +131,16 @@ $result = $conn->query($query);
         text-align: center;
         cursor: pointer;
         color: white;
-        background-color: #ffc107;
+        background-color: #34502b;
         border-radius: 5px;
         width: 100px !important;
         transition: all 0.2s ease-in-out;
     }
 
     .btn-save:hover {
-        color: #ffc107;
+        color: #34502b;
         background-color: rgb(255, 255, 255);
-        border: 1px solid #ffc107;
+        border: 1px solid #34502b;
     }
 
     .header-supplier {
@@ -151,7 +148,7 @@ $result = $conn->query($query);
         height: 80px;
     }
 
-    .btn-add {
+    .btn-add-supplier {
         background: #34502b;
         color: white;
         padding: 10px;
@@ -159,13 +156,18 @@ $result = $conn->query($query);
         cursor: pointer;
         border-radius: 5px;
         margin-bottom: 20px;
-        top: 100px;
-        right: 100px;
         transition: all 0.3s ease-in-out;
+        font-weight: bold;
     }
 
-    .btn-add:hover {
+    .btn-add-supplier:hover {
         transform: translateY(-3px);
+    }
+
+    .btn-add-supplier.active {
+        background: white;
+        color: #34502b;
+        border: 1px solid #34502b;
     }
 
     .details {
@@ -188,6 +190,7 @@ $result = $conn->query($query);
         margin-bottom: 10px;
     }
 
+    .tabs a,
     .tabs span {
         cursor: pointer;
         color: #000;
@@ -196,6 +199,27 @@ $result = $conn->query($query);
 
     .tabs span.active {
         border-bottom: 2px solid #000;
+    }
+
+    /* Status Dropdown Styles */
+    .status-dropdown-supplier {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        font-weight: bold;
+        background: white;
+        width: 120px;
+        cursor: pointer;
+    }
+
+
+    .status-active {
+        color: #28a745;
+    }
+
+    .status-inactive {
+        color: #dc3545;
     }
 </style>
 
@@ -209,65 +233,80 @@ $result = $conn->query($query);
     </header>
     <!-- Tabs -->
     <div class="tabs">
-        <span class="active" data-type="customer" onclick="showTable('suppliers')">My Suppliers</span>
-        <span data-type="supplier" onclick="showTable('orders')">My Orders</span>
+        <span class="active" data-tab="suppliers">My Suppliers</span>
+        <span data-tab="receiving">Receiving</span>
     </div>
     <hr>
-    <div class="header-supplier">
-        <button class="btn-add active" onclick="toggleAddForm()" style="font-weight: bold;"><i class="fa fa-add"></i>
-            Add Supplier</button>
-    </div>
-    <div class="add-form" id="addSupplierForm">
 
-        <h3 style="color: #34502b;" ;">Add New Supplier</h3>
-        <form action="../../handlers/addsupplier_handler.php" method="POST">
-            <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
-            <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
-            <textarea class="form-control my-3" name="address" placeholder="Address" rows="3" required></textarea>
-            <button type="submit" class="btn-save">Save</button>
-        </form>
-    </div>
+    <!-- Suppliers Content -->
+    <div id="suppliers-content">
+        <div class="header-supplier">
+            <button class="btn-add-supplier" onclick="toggleAddSupplierForm()">
+                <i class="fa fa-add"></i> Add Supplier
+            </button>
+        </div>
+        <div class="add-form" id="addSupplierForm">
+            <h3 style="color: #34502b;">Add New Supplier</h3>
+            <form action="../../handlers/addsupplier_handler.php" method="POST">
+                <input class="form-control" type="text" name="supplier_name" placeholder="Supplier Name" required>
+                <input class="form-control" type="text" name="contact_info" placeholder="Contact Info" required>
+                <textarea class="form-control my-3" name="address" placeholder="Address" rows="3" required></textarea>
+                <button type="submit" class="btn-save">Save</button>
+            </form>
+        </div>
 
-    <div class="card-container">
-        <?php while ($row = $result->fetch_assoc()) : ?>
-            <div class="supplier-card">
+        <div class="card-container">
+            <?php while ($row = $supplier_result->fetch_assoc()) : ?>
+                <div class="supplier-card">
+                    <div class="supplier-logo">
+                        <i class="fa-solid fa-shop"></i>
+                    </div>
+                    <hr>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
+                        <select class="status-dropdown-supplier status-<?= strtolower($row['status']) ?>"
+                            onchange="updateSupplierStatus(<?= $row['supplier_id'] ?>, this.value)">
 
-                <div class="supplier-logo">
-                    <i class="fa-solid fa-shop"></i>
-                </div>
-                <hr>
-                <h3><strong><?= htmlspecialchars($row['supplier_name']) ?></strong></h3>
-
-                <button class="info-toggle" onclick="toggleInfo(this)">
-                    <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
-                </button>
-
-                <div class="supplier-info">
-                    <p><strong>Created by:</strong> <?= $row['createdbyid'] ?? 'N/A' ?></p>
-                    <p><strong>Created at:</strong> <?= $row['createdate'] ?></p>
-                    <p><strong>Updated by:</strong> <?= $row['updatedbyid'] ?? 'N/A' ?></p>
-                    <p><strong>Updated at:</strong> <?= $row['updatedate'] ?? 'N/A' ?></p>
-                </div>
-
-                <div class="details">
-                    <p><strong class="important-detail">Contact Info:</strong> <?= htmlspecialchars($row['contact_info']) ?>
-                    </p>
-                    <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?></p>
-                </div>
-
-                <div class="supplier-actions">
-                    <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
-                        <i class="fa-solid fa-pen"></i>
+                            <option value="active" <?= $row['status'] === 'active' ? 'selected' : '' ?>
+                                class="status-active">Active</option>
+                            <option value="inactive" <?= $row['status'] === 'inactive' ? 'selected' : '' ?>
+                                class="status-inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button class="info-toggle" onclick="toggleInfo(this)">
+                        <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
                     </button>
-                    <button class="btn btn-delete" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <div class="supplier-info">
+                        <p><strong>Created by:</strong> <?= $row['createdbyid'] ?? 'N/A' ?></p>
+                        <p><strong>Created at:</strong> <?= $row['createdate'] ?></p>
+                        <p><strong>Updated by:</strong> <?= $row['updatedbyid'] ?? 'N/A' ?></p>
+                        <p><strong>Updated at:</strong> <?= $row['updatedate'] ?? 'N/A' ?></p>
+                    </div>
+                    <div class="details">
+                        <p><strong class="important-detail">Contact Info:</strong>
+                            <?= htmlspecialchars($row['contact_info']) ?></p>
+                        <p><strong class="important-detail">Address:</strong> <?= htmlspecialchars($row['address']) ?>
+                        </p>
+                    </div>
+                    <div class="supplier-actions">
+                        <button class="btn btn-edit" onclick="loadEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-delete-supplier" onclick="confirmDelete(<?= $row['supplier_id'] ?>)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        <?php endwhile; ?>
+            <?php endwhile; ?>
+        </div>
     </div>
 
+    <!-- Receiving Content -->
+    <div id="receiving-content" style="display: none;">
+        <?php include __DIR__ . '/receiving.php'; ?>
+    </div>
 </div>
+
 <!-- Edit Supplier Modal -->
 <div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel"
     aria-hidden="true">
@@ -305,9 +344,9 @@ $result = $conn->query($query);
         <?= $_SESSION['success']; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <?php unset($_SESSION['success']);
-    ?>
+    <?php unset($_SESSION['success']); ?>
 <?php endif; ?>
+
 <script>
     function loadEditModal(supplier) {
         document.getElementById("editSupplierId").value = supplier.supplier_id;
@@ -319,35 +358,68 @@ $result = $conn->query($query);
         modal.show();
     }
 
-    function toggleAddForm() {
+    function toggleAddSupplierForm() {
         var form = document.getElementById("addSupplierForm");
-        var button = document.querySelector(".btn-add");
+        var button = document.querySelector(".btn-add-supplier");
 
         if (form.style.display === "none" || form.style.display === "") {
             form.style.display = "block";
             button.innerHTML = '<i class="fa fa-times"></i> Close';
-            button.style.backgroundColor = "white";
-            button.style.color = "#34502b";
-            button.style.border = "1px solid #34502b";
+            button.classList.add("active");
         } else {
             form.style.display = "none";
             button.innerHTML = '<i class="fa fa-add"></i> Add Supplier';
-            button.style.backgroundColor = "#34502b";
-            button.style.color = "white";
+            button.classList.remove("active");
         }
     }
 
-
     function confirmDelete(supplierId) {
         if (confirm("Are you sure you want to delete this supplier?")) {
-            window.location.href = "delete_supplier.php?id=" + supplierId;
+            window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
         }
     }
 
     function toggleInfo(button) {
-        var infoBox = button.nextElementSibling; // Get the next element (supplier-info div)
+        var infoBox = button.nextElementSibling;
         infoBox.classList.toggle("active");
     }
+
+    function updateSupplierStatus(supplierId, newStatus) {
+        // Update the dropdown color dynamically
+        const dropdown = document.querySelector(`select[onchange="updateSupplierStatus(${supplierId}, this.value)"]`);
+        dropdown.className = `status-dropdown-supplier status-${newStatus}`;
+
+        // AJAX request to update the database
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "../../handlers/update_supplier_status_handler.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                if (xhr.responseText === "success") {
+                    console.log(`Status updated to ${newStatus} for supplier ID ${supplierId}`);
+                } else {
+                    alert("Failed to update status: " + xhr.responseText);
+                    // Revert dropdown on failure
+                    dropdown.value = dropdown.dataset.oldValue;
+                    dropdown.className = `status-dropdown-supplier status-${dropdown.dataset.oldValue}`;
+                }
+            }
+        };
+        // Store the old value in case of failure
+        dropdown.dataset.oldValue = dropdown.value;
+        xhr.send(`supplier_id=${supplierId}&status=${newStatus}`);
+    }
+
+    document.querySelectorAll('.tabs span').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tabs span').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('suppliers-content').style.display = this.dataset.tab ===
+                'suppliers' ? 'block' : 'none';
+            document.getElementById('receiving-content').style.display = this.dataset.tab ===
+                'receiving' ? 'block' : 'none';
+        });
+    });
 
     setTimeout(function() {
         let alert = document.querySelector(".floating-alert");
@@ -356,10 +428,4 @@ $result = $conn->query($query);
             setTimeout(() => alert.remove(), 500);
         }
     }, 4000);
-
-    function confirmDelete(supplierId) {
-        if (confirm("Are you sure do you want to delete this supplier?")) {
-            window.location.href = "../../handlers/delete_supplier_handler.php?id=" + supplierId;
-        }
-    }
 </script>

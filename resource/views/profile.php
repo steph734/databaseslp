@@ -4,7 +4,7 @@
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
         <li><a class="dropdown-item" href="#">Profile</a></li>
-        <li><a class="dropdown-item" href="#">Audit Log</a></li>
+        <li><a class="dropdown-item" href="#">Accounts</a></li>
         <li>
             <hr class="dropdown-divider">
         </li>

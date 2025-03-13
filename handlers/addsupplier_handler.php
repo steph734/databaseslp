@@ -14,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $contact_info = $_POST['contact_info'] ?? '';
     $address = $_POST['address'] ?? '';
     $createdbyid = $_SESSION['admin_id'];
+    $status = 'active';
 
     if (empty($supplier_name)) {
         $_SESSION['error'] = "Supplier name is required.";
@@ -21,8 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $stmt = $conn->prepare("CALL AddSupplier(?, ?, ?, ?)");
-    $stmt->bind_param("sssi", $supplier_name, $contact_info, $address, $createdbyid);
+    $stmt = $conn->prepare("CALL AddSupplier(?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssi", $supplier_name, $contact_info, $address, $status, $createdbyid);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Supplier added successfully!";

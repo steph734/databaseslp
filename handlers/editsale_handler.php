@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../../database/database.php';
+include '../database/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sales_id = $_POST['sales_id'];
@@ -16,14 +16,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->begin_transaction();
 
         // Update Sales table
-        $stmt = $conn->prepare("UPDATE Sales SET sale_date = ?, total_amount = ?, updatedbyid = ? WHERE sales_id = ?");
-        $stmt->bind_param("sdii", $sale_date, $total_amount, $updatedbyid, $sales_id);
+        $stmt = $conn->prepare("UPDATE Sales SET sale_date = ?, updatedbyid = ? WHERE sales_id = ?");
+        $stmt->bind_param("sii", $sale_date, $updatedbyid, $sales_id);
         $stmt->execute();
 
-        // Update SalesLine table
-        $stmt = $conn->prepare("UPDATE SalesLine SET product_id = ?, quantity = ?, unit_price = ?, subtotal_price = ? WHERE sales_id = ?");
-        $stmt->bind_param("iiddi", $product_id, $quantity, $unit_price, $subtotal_price, $sales_id);
-        $stmt->execute();
+        // // Update SalesLine table
+        // $stmt = $conn->prepare("UPDATE SalesLine SET product_id = ?, quantity = ?, unit_price = ?, subtotal_price = ? WHERE sales_id = ?");
+        // $stmt->bind_param("iiddi", $product_id, $quantity, $unit_price, $subtotal_price, $sales_id);
+        // $stmt->execute();
 
         $conn->commit();
         $_SESSION['success'] = "Sale updated successfully.";
