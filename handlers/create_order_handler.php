@@ -1,12 +1,22 @@
 <?php
 include '../database/database.php';
+session_start();
+
+// Check if admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    $_SESSION['error'] = "Unauthorized access!";
+    header("Location: ../resource/layout/web-layout.php?page=supplier&error=unauthorized");
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $supplier_id = $_POST['supplier_id'] ?? '';
     $products = $_POST['products'] ?? [];
 
     if (empty($supplier_id) || empty($products)) {
-        die("Error: Supplier and products are required.");
+        $_SESSION['error'] = "Supplier and products are required.";
+        header("Location: ../resource/layout/web-layout.php?page=supplier&error=missing_data");
+        exit();
     }
 
     $conn->begin_transaction();
@@ -19,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $total_cost += $product['quantity'] * $product['unit_cost'];
         }
 
-        // Insert into Receiving (without createdbyid and createdate)
+        // Insert into Receiving
         $receiving_query = "INSERT INTO Receiving (supplier_id, receiving_date, total_quantity, total_cost, status) 
                             VALUES (?, NOW(), ?, ?, 'Pending')";
         $stmt = $conn->prepare($receiving_query);
@@ -38,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $quantity = $product['quantity'];
             $unit_cost = $product['unit_cost'];
             $subtotal = $quantity * $unit_cost;
-            $created_by = 1; // Change this to actual user ID
+            $created_by = $_SESSION['admin_id']; // Use session admin ID
 
             $stmt->bind_param("iiiidi", $receiving_id, $product_id, $quantity, $unit_cost, $subtotal, $created_by);
             $stmt->execute();
@@ -46,15 +56,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->close();
 
         $conn->commit();
+        $_SESSION['success'] = "Order created successfully!";
         header("Location: ../resource/layout/web-layout.php?page=supplier");
         exit();
     } catch (Exception $e) {
         $conn->rollback();
-        die("Error: " . $e->getMessage());
+        $_SESSION['error'] = "Error creating order: " . $e->getMessage();
+        header("Location: ../resource/layout/web-layout.php?page=supplier&error=database_error");
+        exit();
     }
 }
 
-die("Invalid request");
+$_SESSION['error'] = "Invalid request.";
+header("Location: ../resource/layout/web-layout.php?page=supplier&error=invalid_request");
+exit();
 
 function getProductId($conn, $product_name) {
     $query = "SELECT product_id FROM Product WHERE product_name = ?";

@@ -2,64 +2,49 @@
 session_start();
 include '../database/database.php';
 
-header('Content-Type: application/json');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $product_ids = $data['product_ids'] ?? [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ids'])) {
-    $ids = explode(',', $_POST['ids']);
-    $ids = array_map('intval', $ids); // Sanitize IDs
+    if (empty($product_ids)) {
+        $_SESSION['error'] = 'No products selected for deletion.';
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        exit;
+    }
+
+    // Sanitize product IDs
+    $product_ids = array_map('intval', $product_ids);
 
     try {
         // Prepare the deletion query
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $sql = "DELETE FROM Sales WHERE sales_id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
+        $placeholders = implode(',', array_fill(0, count($product_ids), '?'));
+        $query = "DELETE FROM Product WHERE product_id IN ($placeholders)";
+        
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            throw new Exception('Failed to prepare query: ' . $conn->error);
+        }
 
         // Bind parameters
-        $stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
-
+        $stmt->bind_param(str_repeat('i', count($product_ids)), ...$product_ids);
+        
         if ($stmt->execute()) {
-            // Also delete related SalesLine entries
-            $sql_line = "DELETE FROM SalesLine WHERE sales_id IN ($placeholders)";
-            $stmt_line = $conn->prepare($sql_line);
-            $stmt_line->bind_param(str_repeat('i', count($ids)), ...$ids);
-            $stmt_line->execute();
-
-            echo json_encode(['success' => true]);
+            $_SESSION['success'] = 'Selected products deleted successfully.';
         } else {
-            echo json_encode(['success' => false, 'error' => 'Failed to delete sales']);
+            throw new Exception('Failed to delete products: ' . $stmt->error);
         }
+        
+        $stmt->close();
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        $_SESSION['error'] = 'Error: ' . $e->getMessage();
     }
 
-    $stmt->close();
-    $conn->close();
-} elseif (isset($_GET['id'])) {
-    // Existing single delete logic
-    $id = intval($_GET['id']);
-    try {
-        $sql = "DELETE FROM Sales WHERE sales_id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-
-        if ($stmt->execute()) {
-            $sql_line = "DELETE FROM SalesLine WHERE sales_id = ?";
-            $stmt_line = $conn->prepare($sql_line);
-            $stmt_line->bind_param("i", $id);
-            $stmt_line->execute();
-
-            $_SESSION['success'] = "Sale deleted successfully!";
-        } else {
-            $_SESSION['error'] = "Failed to delete sale.";
-        }
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Error: " . $e->getMessage();
-    }
-
-    $stmt->close();
     $conn->close();
     header("Location: " . $_SERVER['HTTP_REFERER']);
-    exit();
+    exit;
 } else {
-    echo json_encode(['success' => false, 'error' => 'Invalid request']);
+    $_SESSION['error'] = 'Invalid request method.';
+    header("Location: " . $_SERVER['HTTP_REFERER']);
+    exit;
 }
+?>

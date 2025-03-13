@@ -387,7 +387,7 @@ $supplier_result = $conn->query($supplier_query);
     function updateSupplierStatus(supplierId, newStatus) {
         // Update the dropdown color dynamically
         const dropdown = document.querySelector(`select[onchange="updateSupplierStatus(${supplierId}, this.value)"]`);
-        dropdown.className = `status-dropdown status-${newStatus}`;
+        dropdown.className = `status-dropdown-supplier status-${newStatus}`;
 
         // AJAX request to update the database
         const xhr = new XMLHttpRequest();
@@ -401,7 +401,7 @@ $supplier_result = $conn->query($supplier_query);
                     alert("Failed to update status: " + xhr.responseText);
                     // Revert dropdown on failure
                     dropdown.value = dropdown.dataset.oldValue;
-                    dropdown.className = `status-dropdown status-${dropdown.dataset.oldValue}`;
+                    dropdown.className = `status-dropdown-supplier status-${dropdown.dataset.oldValue}`;
                 }
             }
         };

@@ -460,7 +460,7 @@ while ($row = $product_result->fetch_assoc()) {
                 <button class="btn-invoice" onclick="loadInvoiceModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                     <i class="fa fa-eye"></i> View Details
                 </button>
-                <button class="btn-delete" onclick="confirmDelete(<?= $row['receiving_id'] ?>)">
+                <button class="btn-delete" onclick="confirmDeleteReceive(<?= $row['receiving_id'] ?>)">
                     <i class="fa fa-trash"></i> Delete
                 </button>
             </div>
@@ -572,6 +572,7 @@ while ($row = $product_result->fetch_assoc()) {
 
 <script>
     let productCount = 1;
+    const availableProducts = <?php echo json_encode($products); ?>; // Pass PHP products array to JS
 
     function toggleAddReceivingForm() {
         var form = document.getElementById("orderForm");
@@ -613,6 +614,25 @@ while ($row = $product_result->fetch_assoc()) {
         productCount = 0;
         addProduct();
     }
+
+    // Validate products before form submission
+    document.querySelector('.order-form').addEventListener('submit', function(event) {
+        const productInputs = document.querySelectorAll('.product-card input[name$="[name]"]');
+        let allProductsValid = true;
+
+        productInputs.forEach(input => {
+            const productName = input.value.trim();
+            if (!availableProducts.includes(productName)) {
+                allProductsValid = false;
+                alert(`Product "${productName}" is not available at the moment.`);
+                input.focus(); // Focus on the invalid input
+            }
+        });
+
+        if (!allProductsValid) {
+            event.preventDefault(); // Prevent form submission if any product is invalid
+        }
+    });
 
     function loadReceivingModal(receiving) {
         document.getElementById('view_receiving_id').textContent = receiving.receiving_id;
@@ -687,40 +707,74 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     function updateStatus(receivingId, newStatus) {
-        const statusText = document.getElementById(`status-text-${receivingId}`);
-        const oldStatus = statusText.textContent.trim().toLowerCase();
-        const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
+    const statusText = document.getElementById(`status-text-${receivingId}`);
+    const oldStatus = statusText.textContent.trim().toLowerCase();
+    const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
 
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "../../handlers/update_status_handler.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText); // Parse JSON response
+                            if (response.status === "success") {
+                                console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+                                statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                                statusText.className = `status-text status-${newStatus}`;
+                                // Optionally show success message
+                                // alert(response.message); // Uncomment to display "Order marked as received..."
+                            } else {
+                                console.error("Server response: " + xhr.responseText);
+                                alert("Failed to update status: " + (response.message || "Unknown error"));
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse JSON response: " + xhr.responseText);
+                            alert("Failed to update status: Invalid server response");
+                        }
+                    } else {
+                        console.error("AJAX error: Status " + xhr.status);
+                        alert("AJAX request failed with status: " + xhr.status);
+                    }
+                    dropdown.value = ""; // Reset dropdown
+                }
+            };
+            xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
+        }
+
+    function confirmDeleteReceive(receivingId) {
+        if (confirm("Are you sure you want to delete this receiving record? This action cannot be undone.")) {
+            deleteReceiving(receivingId);
+        }
+    }
+
+    function deleteReceiving(receivingId) {
+        const card = document.querySelector(`.receiving-card:has(button[onclick='confirmDeleteReceive(${receivingId})'])`);
+        
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "../../handlers/update_status_handler.php", true);
+        xhr.open("POST", "../../handlers/deletereceiving_handler.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     if (xhr.responseText === "success") {
-                        console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
-                        // Update the text only on success
-                        statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-                        statusText.className = `status-text status-${newStatus}`;
+                        card.style.transition = "opacity 0.3s ease";
+                        card.style.opacity = "0";
+                        setTimeout(() => card.remove(), 300);
+                        console.log(`Receiving ID ${receivingId} deleted successfully`);
+                        alert("Receiving record deleted successfully!");
                     } else {
                         console.error("Server response: " + xhr.responseText);
-                        alert("Failed to update status: " + xhr.responseText);
+                        alert("Failed to delete record: " + xhr.responseText);
                     }
                 } else {
                     console.error("AJAX error: Status " + xhr.status);
                     alert("AJAX request failed with status: " + xhr.status);
                 }
-                // Reset dropdown to blank after attempt
-                dropdown.value = "";
             }
         };
-        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
-    }
-
-    function confirmDelete(receivingId) {
-        if (confirm("Are you sure you want to delete this receiving record?")) {
-            window.location.href = "../../handlers/deletereceiving_handler.php?id=" + receivingId;
-        }
+        xhr.send(`id=${receivingId}`);
     }
 
     setTimeout(function() {
