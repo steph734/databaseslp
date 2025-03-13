@@ -707,33 +707,41 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     function updateStatus(receivingId, newStatus) {
-        const statusText = document.getElementById(`status-text-${receivingId}`);
-        const oldStatus = statusText.textContent.trim().toLowerCase();
-        const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
+    const statusText = document.getElementById(`status-text-${receivingId}`);
+    const oldStatus = statusText.textContent.trim().toLowerCase();
+    const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "../../handlers/update_status_handler.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    if (xhr.responseText === "success") {
-                        console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
-                        statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-                        statusText.className = `status-text status-${newStatus}`;
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "../../handlers/update_status_handler.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText); // Parse JSON response
+                            if (response.status === "success") {
+                                console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+                                statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                                statusText.className = `status-text status-${newStatus}`;
+                                // Optionally show success message
+                                // alert(response.message); // Uncomment to display "Order marked as received..."
+                            } else {
+                                console.error("Server response: " + xhr.responseText);
+                                alert("Failed to update status: " + (response.message || "Unknown error"));
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse JSON response: " + xhr.responseText);
+                            alert("Failed to update status: Invalid server response");
+                        }
                     } else {
-                        console.error("Server response: " + xhr.responseText);
-                        alert("Failed to update status: " + xhr.responseText);
+                        console.error("AJAX error: Status " + xhr.status);
+                        alert("AJAX request failed with status: " + xhr.status);
                     }
-                } else {
-                    console.error("AJAX error: Status " + xhr.status);
-                    alert("AJAX request failed with status: " + xhr.status);
+                    dropdown.value = ""; // Reset dropdown
                 }
-                dropdown.value = "";
-            }
-        };
-        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
-    }
+            };
+            xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
+        }
 
     function confirmDeleteReceive(receivingId) {
         if (confirm("Are you sure you want to delete this receiving record? This action cannot be undone.")) {
