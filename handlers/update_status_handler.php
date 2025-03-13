@@ -1,5 +1,5 @@
 <?php
-include '../../database/database.php';
+include '../database/database.php';
 session_start();
 
 header('Content-Type: application/json'); // Set response type to JSON
