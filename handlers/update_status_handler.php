@@ -9,9 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] != "POST" || !isset($_POST['receiving_id']) || !i
     exit;
 }
 
-<<<<<<< HEAD
-$conn->close();
-=======
 $receiving_id = intval($_POST['receiving_id']);
 $status = strtolower($_POST['status']);
 $valid_statuses = ['pending', 'received', 'cancelled'];
@@ -93,5 +90,3 @@ try {
 }
 
 $conn->close();
-?>
->>>>>>> 2b6dd6942f4487092884ce7fb512dbc4fb7a7d34
