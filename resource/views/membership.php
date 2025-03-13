@@ -221,7 +221,7 @@ try {
         </header>
 
         <div class="tabs" role="tablist">
-            <span class="active" data-tab="memberships" role="tab" aria-selected="true" tabindex="0">Memberships</span>
+            <span class="active" data-tab="memberships" role="tab" aria-selected="true" tabindex="0">Members</span>
             <span data-tab="customers" role="tab" aria-selected="false" tabindex="0">Customers</span>
         </div>
         <hr>
