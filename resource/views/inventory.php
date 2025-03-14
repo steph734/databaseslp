@@ -438,7 +438,7 @@ $productResult = $conn->query($productQuery);
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
-
+    <!-- updated -->
     <div class="products-table">
         <div class="table-controls">
             <select id="stockLevelFilter" class="custom-select" onchange="applyTableFilters()">
