@@ -256,20 +256,26 @@ if (!$result_supplier) {
         modalFields.innerHTML = `
             <label for="customer_id">Customer ID:</label>
             <input type="number" name="customer_id" required>
+
             <label for="return_reason">Return Reason:</label>
             <input type="text" name="return_reason" required>
+
             <label for="return_date">Return Date:</label>
             <input type="date" name="return_date" required>
+
             <label for="refund_status">Refund Status:</label>
             <select name="refund_status" required>
                 <option value="Pending">Pending</option>
                 <option value="Approved">Refunded</option>
                 <option value="Rejected">Replaced</option>
             </select>
+
             <label for="total_amount">Total Amount:</label>
             <input type="number" name="total_amount" step="0.01" required>
+
             <label for="createdbyid">Created By:</label>
             <input type="text" name="createdbyid" required>
+
             <label for="createdate">Created Date:</label>
             <input type="datetime-local" name="createdate" required>
         `;
@@ -279,20 +285,23 @@ if (!$result_supplier) {
         modalFields.innerHTML = `
             <label for="supplier_id">Supplier ID:</label>
             <input type="number" name="supplier_id" required>
+
             <label for="return_reason">Return Reason:</label>
             <input type="text" name="return_reason" required>
+
             <label for="return_date">Return Date:</label>
             <input type="date" name="return_date" required>
+
             <label for="refund_status">Refund Status:</label>
             <select name="refund_status" required>
                 <option value="Pending">Pending</option>
                 <option value="Approved">Refunded</option>
                 <option value="Rejected">Replaced</option>
             </select>
-            <label for="total_amount">Total Amount:</label>
-            <input type="number" name="total_amount" step="0.01" required>
+
             <label for="createdbyid">Created By:</label>
             <input type="text" name="createdbyid" required>
+
             <label for="createdate">Created Date:</label>
             <input type="datetime-local" name="createdate" required>
         `;
@@ -547,8 +556,8 @@ function deleteSelectedRows() {
                                     '<?= $row['return_date'] ?>',
                                     '<?= $row['refund_status'] ?>',
                                     '<?= $row['total_amount'] ?>',
-                                    '<?= $row['createdbyid'] ?>',
-                                    '<?= $row['createdate'] ?>'
+                                    '<?= $row['updatedbyid'] ?>',
+                                    '<?= $row['updatedate'] ?>'
                                 )">
                                 <i class="fa fa-edit"></i> Edit</button>
 
@@ -568,18 +577,21 @@ function deleteSelectedRows() {
 </div>
 
 
-    <!-- Supplier Return Table -->
+        <!--Supplier Return Table -->
     <div class="returns-table">
         <table id="supplier-table" style="display: none;">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="select-all-supplier" onclick="toggleSelectAll(this)"></th>
-                    <th>Supplier ReturnID</th>
+                    <th>Supplier Return ID</th>
                     <th>Supplier ID</th>
                     <th>Reason</th>
                     <th>Return Date</th>
                     <th>Status</th>
-                    <th>Total Amount</th>
+                    <th>Created By</th>
+                    <th>Created Date</th>
+                    <th>Updated By</th>
+                    <th>Updated Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -590,9 +602,12 @@ function deleteSelectedRows() {
                             <td><input type="checkbox" class="row-checkbox" name="supplier_return_id[]" value="<?= $row['supplier_return_id'] ?>"></td>
                             <td><?= $row['supplier_return_id'] ?></td>
                             <td><?= $row['supplier_id'] ?></td>
-                            <td><?= htmlspecialchars($row['return_reason']) ?></td>
+                            <td><?= htmlspecialchars($row['return_reason'], ENT_QUOTES) ?></td>
                             <td><?= $row['return_date'] ?></td>
                             <td><?= $row['refund_status'] ?></td>
+                            <td><?= $row['createdbyid'] ?></td>
+                            <td><?= $row['createdate'] ?></td>
+                        
                             <td>
                                 <button class="btn btn-sm text-warning action-btn"
                                     onclick="openEditModal(
@@ -600,22 +615,26 @@ function deleteSelectedRows() {
                                         '<?= $row['supplier_id'] ?>',
                                         '<?= htmlspecialchars($row['return_reason'], ENT_QUOTES) ?>',
                                         '<?= $row['return_date'] ?>',
-                                        '<?= $row['refund_status'] ?>'
+                                        '<?= $row['refund_status'] ?>',
+                                        '<?= $row['updatedbyid'] ?>',
+                                        '<?= $row['updatedate'] ?>'
                                     )">
-                                    <i class="fa fa-edit"></i> Edit</button>
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
 
-                                <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['supplier_return_id'] ?>)"><i
-                                    class="fa fa-trash" style="color:rgb(255, 0, 25);"></i>Delete</button>
+                                <button class="btn btn-sm text-danger" onclick="confirmDelete(<?= $row['supplier_return_id'] ?>)">
+                                    <i class="fa fa-trash" style="color:rgb(255, 0, 25);"></i> Delete
+                                </button>
                             </td>
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
-                            No supplier returns found.</td>
+                        <td colspan="12" style="text-align: center; padding: 20px; color: #666;">
+                            No supplier returns found.
+                        </td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-</div>
