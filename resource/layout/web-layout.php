@@ -58,7 +58,7 @@ unset($_SESSION['login']);
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
-    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports'];
+    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports', 'account', 'profileadmin'];
 
     $page_path = __DIR__ . "/../views/{$page}.php";
 
@@ -71,14 +71,16 @@ unset($_SESSION['login']);
 
 
     <?php if (isset($_SESSION['success'])) : ?>
-        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
+            style="width: 290px !important;">
             <?= $_SESSION['success']; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['error'])) : ?>
-        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
+            style="width: 290px !important;">
             <?= $_SESSION['error']; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

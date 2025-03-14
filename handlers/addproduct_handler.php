@@ -14,33 +14,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'] ?? 0;
     $unitofmeasurement = $_POST['unitofmeasurement'] ?? '';
     $category_id = $_POST['category_id'] ?? '';
+    $quantity = (int)($_POST['quantity'] ?? 0); // Default to 0, allow override if provided
+    $supplier_id = $_POST['supplier_id'] ?? NULL; // Optional supplier
     $createdbyid = $_SESSION['admin_id'];
-    $quantity = 0; // Default quantity
-    $supplier_id = NULL; // Supplier is not set here
 
     // Validate required fields
     if (empty($product_name) || empty($unitofmeasurement) || empty($category_id)) {
         $_SESSION['error'] = "All required fields must be filled.";
-        header("Location: ../resource/views/products.php?error=missing_fields");
+        header("Location: ../resource/layout/web-layout.php?page=products&error=missing_fields");
         exit();
     }
 
-    // Call the stored procedure to add the product
-    $stmt = $conn->prepare("CALL AddProduct(?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sidssii", $product_name, $quantity, $price, $unitofmeasurement, $category_id, $supplier_id, $createdbyid);
+    try {
+        // Enable MySQLi Exception Mode
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-    if ($stmt->execute()) {
-        $_SESSION['success'] = "Product added successfully with quantity 0!";
-        header("Location: ../resource/layout/web-layout.php?page=products");
-    } else {
-        $_SESSION['error'] = "Failed to add product: " . $stmt->error;
-        header("Location: ../resource/layout/web-layout.php?page=products&error=database_error");
+        $stmt = $conn->prepare("CALL AddProduct(?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sidssii", $product_name, $quantity, $price, $unitofmeasurement, $category_id, $supplier_id, $createdbyid);
+
+        if ($stmt->execute()) {
+            $_SESSION['success'] = "Product added successfully with quantity $quantity!";
+        } else {
+            $_SESSION['error'] = "Failed to add product: " . $stmt->error;
+        }
+    } catch (mysqli_sql_exception $e) {
+        $_SESSION['error'] = "Error adding product: " . $e->getMessage();
     }
 
-    $stmt->close();
+    if (isset($stmt)) $stmt->close();
+    if (isset($conn)) $conn->close();
+
+    header("Location: ../resource/layout/web-layout.php?page=products");
+    exit();
 } else {
     $_SESSION['error'] = "Invalid request.";
     header("Location: ../resource/layout/web-layout.php?page=products&error=invalid_request");
+    exit();
 }
-
-$conn->close();
