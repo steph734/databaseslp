@@ -15,20 +15,23 @@ if (isset($_GET['search']) && $_GET['search'] === '1') {
     if (isset($_GET['role']) && !empty($_GET['role'])) {
         $whereConditions[] = "a.role = '" . $conn->real_escape_string($_GET['role']) . "'";
     }
+    if (isset($_GET['status']) && !empty($_GET['status'])) {
+        $whereConditions[] = "a.status = '" . $conn->real_escape_string($_GET['status']) . "'";
+    }
 }
 
 if (isset($_GET['order_by']) && !empty($_GET['order_by'])) {
     list($column, $direction) = explode('|', $_GET['order_by']);
     $column = $conn->real_escape_string($column);
     $direction = strtoupper($conn->real_escape_string($direction));
-    if (in_array($column, ['admin_id', 'username', 'role']) && in_array($direction, ['ASC', 'DESC'])) {
+    if (in_array($column, ['admin_id', 'username', 'role', 'status']) && in_array($direction, ['ASC', 'DESC'])) {
         $orderClause = "ORDER BY a.$column $direction";
     }
 }
 
 $whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
 
-$usersQuery = "SELECT a.admin_id, a.username, a.role, a.first_name, a.last_name, a.email, a.phonenumber 
+$usersQuery = "SELECT a.admin_id, a.username, a.role, a.first_name, a.last_name, a.middle_name,a.email, a.phonenumber, a.status 
                FROM admin a 
                $whereClause 
                $orderClause";
@@ -39,9 +42,9 @@ if (!$usersResult) {
     exit;
 }
 
-// Audit Log Query
+// Audit Log Query (unchanged)
 $auditWhereConditions = [];
-$auditOrderClause = "ORDER BY a.timestamp DESC"; // Default ordering
+$auditOrderClause = "ORDER BY a.timestamp DESC";
 
 if (isset($_GET['audit_search']) && $_GET['audit_search'] === '1') {
     if (isset($_GET['audit_user_id']) && !empty($_GET['audit_user_id'])) {
@@ -342,7 +345,38 @@ if (!$auditResult) {
             width: 100%;
         }
     }
+
+    .btn-status-toggle {
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .btn-deactivate {
+        color: #dc3545;
+        border: 1px solid #dc3545;
+        background: white;
+    }
+
+    .btn-activate {
+        color: #28a745;
+        border: 1px solid #28a745;
+        background: white;
+    }
+
+    .btn-deactivate:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-activate:hover {
+        background: #28a745;
+        color: white;
+    }
 </style>
+
 <div class="main-content">
     <header>
         <h1>Account Management</h1>
@@ -366,6 +400,11 @@ if (!$auditResult) {
                     <option value="">All Roles</option>
                     <option value="admin">Admin</option>
                 </select>
+                <select id="searchStatus">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
                 <button class="search-btn" onclick="searchUsers()">SEARCH</button>
                 <button class="clear-btn" onclick="clearUserSearch()">CLEAR</button>
             </div>
@@ -379,6 +418,8 @@ if (!$auditResult) {
                     <option value="admin_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">ID (Ascending)</option>
                     <option value="username|ASC" data-icon="fa-solid fa-arrow-up-a-z">Username (A-Z)</option>
                     <option value="username|DESC" data-icon="fa-solid fa-arrow-down-z-a">Username (Z-A)</option>
+                    <option value="status|ASC" data-icon="fa-solid fa-arrow-up-a-z">Status (A-Z)</option>
+                    <option value="status|DESC" data-icon="fa-solid fa-arrow-down-z-a">Status (Z-A)</option>
                 </select>
             </div>
 
@@ -392,6 +433,7 @@ if (!$auditResult) {
                             <th>Email</th>
                             <th>Phone Number</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -406,22 +448,25 @@ if (!$auditResult) {
                                     <td><?= htmlspecialchars($row['email']) ?></td>
                                     <td><?= htmlspecialchars($row['phonenumber']) ?></td>
                                     <td><?= $row['role'] ?></td>
+                                    <td><?= ucfirst($row['status']) ?></td>
                                     <td>
-                                        <button class="btn btn-sm text-warning"
-                                            onclick='loadEditUserModal(<?= json_encode($row) ?>)' data-bs-toggle="modal"
-                                            data-bs-target="#editUserModal">
-                                            <i class="fa fa-edit" style="color: #ffc107;"></i>
-                                        </button>
-                                        <button class="btn btn-sm text-danger"
-                                            onclick="confirmDeleteUser(<?= $row['admin_id'] ?>)">
-                                            <i class="fa fa-trash" style="color: #dc3545;"></i>
-                                        </button>
+                                        <?php if ($row['status'] === 'active') : ?>
+                                            <button class="btn-status-toggle btn-deactivate"
+                                                onclick="toggleUserStatus(<?= $row['admin_id'] ?>, 'inactive')">
+                                                <i class="fa-solid fa-ban"></i> Deactivate
+                                            </button>
+                                        <?php else : ?>
+                                            <button class="btn-status-toggle btn-activate"
+                                                onclick="toggleUserStatus(<?= $row['admin_id'] ?>, 'active')">
+                                                <i class="fa-solid fa-check"></i> Activate
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 20px; color: #666;">No admin records
+                                <td colspan="8" style="text-align: center; padding: 20px; color: #666;">No admin records
                                     found.</td>
                             </tr>
                         <?php endif; ?>
@@ -431,7 +476,7 @@ if (!$auditResult) {
         </div>
     </div>
 
-    <!-- Audit Log Tab Content -->
+    <!-- Audit Log Tab Content (unchanged) -->
     <div class="tab-content" id="audit-tab">
         <div class="audit-table">
             <h3 style="color: #34502b;">Audit Log</h3>
@@ -441,21 +486,16 @@ if (!$auditResult) {
                 <button class="search-btn" onclick="searchAudit()">SEARCH</button>
                 <button class="clear-btn" onclick="clearAuditSearch()">CLEAR</button>
             </div>
-
             <div class="table-controls">
                 <select id="auditOrderBy" class="custom-select" onchange="applyAuditFilters()">
-                    <option value="timestamp|DESC" data-icon="fa-solid fa-arrow-down-long">Timestamp (Newest)
-                    </option>
+                    <option value="timestamp|DESC" data-icon="fa-solid fa-arrow-down-long">Timestamp (Newest)</option>
                     <option value="timestamp|ASC" data-icon="fa-solid fa-arrow-up-long">Timestamp (Oldest)</option>
                     <option value="log_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Log ID (Descending)</option>
                     <option value="log_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Log ID (Ascending)</option>
-                    <option value="admin_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Admin ID (Low to High)
-                    </option>
-                    <option value="admin_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Admin ID (High to Low)
-                    </option>
+                    <option value="admin_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Admin ID (Low to High)</option>
+                    <option value="admin_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Admin ID (High to Low)</option>
                 </select>
             </div>
-
             <div class="table-responsive rounded-3">
                 <table class="table table-striped">
                     <thead>
@@ -482,8 +522,8 @@ if (!$auditResult) {
                             <?php endwhile; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">No audit logs
-                                    found.</td>
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">No audit logs found.
+                                </td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -492,7 +532,7 @@ if (!$auditResult) {
         </div>
     </div>
 
-    <!-- Add User Modal -->
+    <!-- Add User Modal (unchanged) -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -530,7 +570,7 @@ if (!$auditResult) {
         </div>
     </div>
 
-    <!-- Edit User Modal -->
+    <!-- Edit User Modal (unchanged) -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -597,7 +637,6 @@ if (!$auditResult) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize Select2 for Users
         $('#userOrderBy').select2({
             templateResult: formatOption,
             templateSelection: formatSelection,
@@ -605,8 +644,6 @@ if (!$auditResult) {
             dropdownAutoWidth: true,
             width: '50px'
         });
-
-        // Initialize Select2 for Audit Log
         $('#auditOrderBy').select2({
             templateResult: formatOption,
             templateSelection: formatSelection,
@@ -622,16 +659,15 @@ if (!$auditResult) {
         $('#searchUserID').val(urlParams.get('user_id') || '');
         $('#searchUsername').val(urlParams.get('username') || '');
         $('#searchRole').val(urlParams.get('role') || '');
+        $('#searchStatus').val(urlParams.get('status') || '');
         $('#userOrderBy').val(urlParams.get('order_by') || 'admin_id|DESC');
         $('#searchAuditUserID').val(urlParams.get('audit_user_id') || '');
         $('#searchAction').val(urlParams.get('action') || '');
         $('#auditOrderBy').val(urlParams.get('audit_order_by') || 'timestamp|DESC');
 
-        // Tab switching
         $('.tabs span').on('click', function() {
             $('.tabs span').removeClass('active');
             $(this).addClass('active');
-
             $('.tab-content').removeClass('active');
             const tabId = $(this).data('tab') + '-tab';
             $('#' + tabId).addClass('active');
@@ -648,11 +684,11 @@ if (!$auditResult) {
         return $('<span><i class="' + $(option.element).data('icon') + '"></i></span>');
     }
 
-    // Users Search
     function searchUsers() {
         const userID = $('#searchUserID').val().trim();
         const username = $('#searchUsername').val().trim();
         const role = $('#searchRole').val();
+        const status = $('#searchStatus').val();
         const orderBy = $('#userOrderBy').val();
 
         let url = '../../resource/layout/web-layout.php?page=account&search=1';
@@ -660,6 +696,7 @@ if (!$auditResult) {
         if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
         if (username) params.push(`username=${encodeURIComponent(username)}`);
         if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (status) params.push(`status=${encodeURIComponent(status)}`);
         if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
         appendAuditParams(params);
 
@@ -667,19 +704,20 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Users Table Filters
     function applyUserFilters() {
         const userID = $('#searchUserID').val().trim();
         const username = $('#searchUsername').val().trim();
         const role = $('#searchRole').val();
+        const status = $('#searchStatus').val();
         const orderBy = $('#userOrderBy').val();
 
         let url = '../../resource/layout/web-layout.php?page=account';
         const params = [];
-        if (userID || username || role) params.push('search=1');
+        if (userID || username || role || status) params.push('search=1');
         if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
         if (username) params.push(`username=${encodeURIComponent(username)}`);
         if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (status) params.push(`status=${encodeURIComponent(status)}`);
         if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
         appendAuditParams(params);
 
@@ -687,11 +725,11 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Clear Users Search
     function clearUserSearch() {
         $('#searchUserID').val('');
         $('#searchUsername').val('');
         $('#searchRole').val('');
+        $('#searchStatus').val('');
         const orderBy = $('#userOrderBy').val();
 
         let url = '../../resource/layout/web-layout.php?page=account';
@@ -703,7 +741,6 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Audit Search
     function searchAudit() {
         const auditUserID = $('#searchAuditUserID').val().trim();
         const action = $('#searchAction').val().trim();
@@ -720,7 +757,6 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Audit Table Filters
     function applyAuditFilters() {
         const auditUserID = $('#searchAuditUserID').val().trim();
         const action = $('#searchAction').val().trim();
@@ -738,7 +774,6 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Clear Audit Search
     function clearAuditSearch() {
         $('#searchAuditUserID').val('');
         $('#searchAction').val('');
@@ -753,16 +788,17 @@ if (!$auditResult) {
         window.location.href = url;
     }
 
-    // Helper functions to append parameters
     function appendUserParams(params) {
         const userID = $('#searchUserID').val().trim();
         const username = $('#searchUsername').val().trim();
         const role = $('#searchRole').val();
+        const status = $('#searchStatus').val();
         const orderBy = $('#userOrderBy').val();
-        if (userID || username || role) params.push('search=1');
+        if (userID || username || role || status) params.push('search=1');
         if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
         if (username) params.push(`username=${encodeURIComponent(username)}`);
         if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (status) params.push(`status=${encodeURIComponent(status)}`);
         if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
     }
 
@@ -776,26 +812,13 @@ if (!$auditResult) {
         if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
     }
 
-    // Load Edit User Modal
-    function loadEditUserModal(user) {
-        document.querySelector("#editUserModal input[name='admin_id']").value = user.admin_id;
-        document.querySelector("#editUserModal input[name='first_name']").value = user.first_name;
-        document.querySelector("#editUserModal input[name='middle_name']").value = user.middle_name || '';
-        document.querySelector("#editUserModal input[name='last_name']").value = user.last_name;
-        document.querySelector("#editUserModal input[name='username']").value = user.username;
-        document.querySelector("#editUserModal input[name='email']").value = user.email;
-        document.querySelector("#editUserModal input[name='phonenumber']").value = user.phonenumber;
-        document.querySelector("#editUserModal select[name='role']").value = user.role;
-    }
-
-    // Confirm Delete User
-    function confirmDeleteUser(adminId) {
-        if (confirm("Are you sure you want to delete this admin?")) {
-            window.location.href = "../../handlers/deleteuser_handler.php?id=" + adminId;
+    function toggleUserStatus(adminId, newStatus) {
+        const action = newStatus === 'inactive' ? 'deactivate' : 'activate';
+        if (confirm(`Are you sure you want to ${action} this admin?`)) {
+            window.location.href = "../../handlers/deactivateuser_handler.php?id=" + adminId + "&status=" + newStatus;
         }
     }
 
-    // Notification Handling
     setTimeout(() => {
         const alerts = document.querySelectorAll(".floating-alert");
         alerts.forEach(alert => {

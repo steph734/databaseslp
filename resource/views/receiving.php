@@ -1,7 +1,19 @@
 <?php
 include '../../database/database.php';
 
-// Fetch existing receiving records
+// Pagination settings
+$records_per_page = 6; // Number of records per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $records_per_page;
+
+// Fetch total number of receiving records for pagination
+$total_query = "SELECT COUNT(DISTINCT r.receiving_id) as total FROM receiving r";
+$total_result = $conn->query($total_query);
+$total_row = $total_result->fetch_assoc();
+$total_records = $total_row['total'];
+$total_pages = ceil($total_records / $records_per_page);
+
+// Fetch paginated receiving records, ordered by receiving_date DESC
 $receiving_query = "SELECT 
     r.receiving_id,
     r.supplier_id,
@@ -24,8 +36,13 @@ FROM receiving r
 JOIN Supplier s ON r.supplier_id = s.supplier_id
 JOIN receiving_details rd ON r.receiving_id = rd.receiving_id
 JOIN Product p ON rd.product_id = p.product_id
-GROUP BY r.receiving_id";
-$receiving_result = $conn->query($receiving_query);
+GROUP BY r.receiving_id
+ORDER BY r.receiving_date DESC
+LIMIT ? OFFSET ?";
+$stmt = $conn->prepare($receiving_query);
+$stmt->bind_param("ii", $records_per_page, $offset);
+$stmt->execute();
+$receiving_result = $stmt->get_result();
 
 if (!$receiving_result) {
     die("Query failed: " . $conn->error);
@@ -43,6 +60,7 @@ while ($row = $product_result->fetch_assoc()) {
     $products[] = $row['product_name'];
 }
 ?>
+
 <style>
     .receiving-container {
         padding: 20px;
@@ -93,13 +111,10 @@ while ($row = $product_result->fetch_assoc()) {
         font-weight: bold;
         margin-right: 5px;
         transition: color 0.3s ease, opacity 0.3s ease;
-        /* Smooth color and opacity transition */
     }
 
-    /* Optional: Add a fade effect during text change */
     .status-text.fade {
         opacity: 0;
-        /* Temporarily fade out */
     }
 
     .status-pending {
@@ -112,6 +127,18 @@ while ($row = $product_result->fetch_assoc()) {
 
     .status-cancelled {
         color: #dc3545;
+    }
+
+    .status-box-received {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        background-color: #e6ffe6;
+        border: 1px solid #28a745;
+        color: #28a745;
     }
 
     .status-dropdown {
@@ -132,14 +159,17 @@ while ($row = $product_result->fetch_assoc()) {
         outline: none;
     }
 
-    .status-container::after {
+    .status-container:not(.received)::after {
         content: '\25BC';
-        /* Down arrow */
         font-size: 10px;
         color: #555;
         position: absolute;
         right: 5px;
         pointer-events: none;
+    }
+
+    .status-container.received::after {
+        content: none;
     }
 
     .receiving-details {
@@ -417,6 +447,43 @@ while ($row = $product_result->fetch_assoc()) {
     #confirmReceivedModal .btn-primary:hover {
         background: #2a3f23;
     }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+        gap: 10px;
+    }
+
+    .pagination a,
+    .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #34502b;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .pagination a:hover {
+        background: #34502b;
+        color: white;
+        border-color: #34502b;
+    }
+
+    .pagination .current {
+        background: #34502b;
+        color: white;
+        border-color: #34502b;
+    }
+
+    .pagination .disabled {
+        color: #aaa;
+        border-color: #ddd;
+        pointer-events: none;
+    }
 </style>
 
 <!-- Order Form Section -->
@@ -426,7 +493,7 @@ while ($row = $product_result->fetch_assoc()) {
     </button>
     <div id="orderForm" style="display: none;">
         <h3>Create New Order</h3>
-        <form class="order-form" action="../../handlers/create_order_handler.php" method="POST">
+        <form class="order-form" action="../../handlers/create_order_handler.php" method="POST" id="createOrderForm">
             <select class="supplier-select" name="supplier_id" required>
                 <option value="">Select Supplier</option>
                 <?php while ($supplier = $supplier_result->fetch_assoc()) : ?>
@@ -464,24 +531,28 @@ while ($row = $product_result->fetch_assoc()) {
 </datalist>
 
 <!-- Receiving Cards -->
-<div class="receiving-container">
+<div class="receiving-container" id="receiving-container">
     <?php if ($receiving_result->num_rows > 0) : ?>
         <?php while ($row = $receiving_result->fetch_assoc()) : ?>
-            <div class="receiving-card">
+            <div class="receiving-card" id="card-<?= $row['receiving_id'] ?>">
                 <div class="receiving-header">
                     <span class="supplier-name"><?= htmlspecialchars($row['supplier_name']) ?></span>
-                    <div class="status-container">
-                        <span class="status-text status-<?= strtolower($row['status']) ?>"
-                            id="status-text-<?= $row['receiving_id'] ?>">
-                            <?= ucfirst($row['status']) ?>
-                        </span>
-                        <select class="status-dropdown" onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)"
-                            <?= strtolower($row['status']) === 'received' ? 'disabled' : '' ?>>
-                            <option value="" disabled selected></option>
-                            <option value="pending">Pending</option>
-                            <option value="received">Received</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
+                    <div class="status-container <?= strtolower($row['status']) === 'received' ? 'received' : '' ?>"
+                        id="status-container-<?= $row['receiving_id'] ?>">
+                        <?php if (strtolower($row['status']) === 'received') : ?>
+                            <span class="status-box-received" id="status-text-<?= $row['receiving_id'] ?>">Received</span>
+                        <?php else : ?>
+                            <span class="status-text status-<?= strtolower($row['status']) ?>"
+                                id="status-text-<?= $row['receiving_id'] ?>">
+                                <?= ucfirst($row['status']) ?>
+                            </span>
+                            <select class="status-dropdown" onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)">
+                                <option value="" disabled selected></option>
+                                <option value="pending">Pending</option>
+                                <option value="received">Received</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="receiving-details">
@@ -500,6 +571,29 @@ while ($row = $product_result->fetch_assoc()) {
         <?php endwhile; ?>
     <?php else : ?>
         <div class="no-records">No receiving records found.</div>
+    <?php endif; ?>
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination" id="pagination">
+    <?php if ($page > 1) : ?>
+        <a href="#" onclick="fetchPage(<?= $page - 1 ?>); return false;">« Previous</a>
+    <?php else : ?>
+        <span class="disabled">« Previous</span>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
+        <?php if ($i == $page) : ?>
+            <span class="current"><?= $i ?></span>
+        <?php else : ?>
+            <a href="#" onclick="fetchPage(<?= $i ?>); return false;"><?= $i ?></a>
+        <?php endif; ?>
+    <?php endfor; ?>
+
+    <?php if ($page < $total_pages) : ?>
+        <a href="#" onclick="fetchPage(<?= $page + 1 ?>); return false;">Next »</a>
+    <?php else : ?>
+        <span class="disabled">Next »</span>
     <?php endif; ?>
 </div>
 
@@ -624,8 +718,12 @@ while ($row = $product_result->fetch_assoc()) {
         </div>
     </div>
 </div>
+
 <script>
     let productCount = 1;
+    let currentPage = <?php echo $page; ?>;
+    let totalRecords = <?php echo $total_records; ?>;
+    const recordsPerPage = <?php echo $records_per_page; ?>;
 
     function toggleAddReceivingForm() {
         var form = document.getElementById("orderForm");
@@ -741,51 +839,44 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     function updateStatus(receivingId, newStatus) {
+        const statusContainer = document.getElementById(`status-container-${receivingId}`);
         const statusText = document.getElementById(`status-text-${receivingId}`);
         const oldStatus = statusText.textContent.trim().toLowerCase();
-        const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
+        const dropdown = statusContainer.querySelector('.status-dropdown');
 
-        // Block changes if already "received"
         if (oldStatus === "received") {
             alert("Cannot edit status once the order is marked as received.");
-            dropdown.value = ""; // Reset dropdown
+            dropdown.value = "";
             return;
         }
 
-        // Handle status change
         if (newStatus === "received") {
-            // Show the confirmation modal
             var confirmModal = new bootstrap.Modal(document.getElementById("confirmReceivedModal"));
             confirmModal.show();
 
-            // Remove any existing event listeners to avoid duplicates
             const confirmBtn = document.getElementById("confirmReceivedBtn");
             const cancelBtn = document.getElementById("cancelReceivedBtn");
             confirmBtn.replaceWith(confirmBtn.cloneNode(true));
             cancelBtn.replaceWith(cancelBtn.cloneNode(true));
 
-            // Re-select the buttons after cloning
             const newConfirmBtn = document.getElementById("confirmReceivedBtn");
             const newCancelBtn = document.getElementById("cancelReceivedBtn");
 
-            // Confirm button: proceed with AJAX request
             newConfirmBtn.onclick = function() {
-                sendStatusUpdate(receivingId, newStatus, statusText, dropdown);
+                sendStatusUpdate(receivingId, newStatus, statusContainer, statusText, dropdown);
                 confirmModal.hide();
             };
 
-            // Cancel button: reset dropdown and close modal
             newCancelBtn.onclick = function() {
                 dropdown.value = "";
                 confirmModal.hide();
             };
         } else {
-            // For non-"received" changes, proceed directly
-            sendStatusUpdate(receivingId, newStatus, statusText, dropdown);
+            sendStatusUpdate(receivingId, newStatus, statusContainer, statusText, dropdown);
         }
     }
 
-    function sendStatusUpdate(receivingId, newStatus, statusText, dropdown) {
+    function sendStatusUpdate(receivingId, newStatus, statusContainer, statusText, dropdown) {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "../../handlers/update_status_handler.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -795,38 +886,166 @@ while ($row = $product_result->fetch_assoc()) {
                     const response = JSON.parse(xhr.responseText);
                     if (response.status === "success") {
                         console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
-                        // Add fade-out effect
                         statusText.classList.add("fade");
                         setTimeout(() => {
-                            // Update text and class after fade-out
-                            statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-                            statusText.className = `status-text status-${newStatus}`;
-                            // Fade back in
+                            if (newStatus === "received") {
+                                statusContainer.innerHTML =
+                                    `<span class="status-box-received" id="status-text-${receivingId}">Received</span>`;
+                                statusContainer.classList.add("received");
+                            } else {
+                                statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                                statusText.className = `status-text status-${newStatus}`;
+                                statusContainer.classList.remove("received");
+                            }
                             statusText.classList.remove("fade");
-                        }, 20); // Match the transition duration
-                        // Disable dropdown if status is "received"
-                        if (newStatus === "received") {
-                            dropdown.disabled = true;
-                        }
+                        }, 300);
                     } else {
                         console.error("Server response: " + xhr.responseText);
                         alert("Failed to update status: " + response.message);
+                        dropdown.value = "";
+                    }
+                } else {
+                    console.error("AJAX error: Status " + xhr.status);
+                    alert("AJAX request failed with status: " + xhr.status);
+                    dropdown.value = "";
+                }
+            }
+        };
+        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
+    }
+
+    function confirmDelete(receivingId) {
+        if (confirm("Are you sure you want to delete this receiving record?")) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "../../handlers/deletereceiving_handler.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            console.log(`Receiving ID ${receivingId} deleted successfully`);
+                            const card = document.getElementById(`card-${receivingId}`);
+                            if (card) {
+                                card.remove();
+                                totalRecords--;
+                                updatePagination();
+                            }
+                        } else {
+                            console.error("Server response: " + xhr.responseText);
+                            alert("Failed to delete record: " + response.message);
+                        }
+                    } else {
+                        console.error("AJAX error: Status " + xhr.status);
+                        alert("AJAX request failed with status: " + xhr.status);
+                    }
+                }
+            };
+            xhr.send(`id=${receivingId}`);
+        }
+    }
+
+    function fetchPage(page) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", `../../resource/views/receiving.php?page=${page}`, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xhr.responseText, 'text/html');
+                const newContainer = doc.getElementById('receiving-container');
+                const newPagination = doc.getElementById('pagination');
+
+                document.getElementById('receiving-container').innerHTML = newContainer.innerHTML;
+                document.getElementById('pagination').innerHTML = newPagination.innerHTML;
+
+                currentPage = page;
+                updatePaginationLinks();
+            }
+        };
+        xhr.send();
+    }
+
+    function updatePagination() {
+        const container = document.getElementById('receiving-container');
+        const cards = container.getElementsByClassName('receiving-card').length;
+        const pagination = document.getElementById('pagination');
+        const totalPages = Math.ceil(totalRecords / recordsPerPage);
+
+        if (cards === 0) {
+            if (totalRecords > 0) {
+                // Fetch the next page if available, otherwise previous
+                const newPage = currentPage < totalPages ? currentPage + 1 : (currentPage > 1 ? currentPage - 1 : 1);
+                fetchPage(newPage);
+            } else {
+                container.innerHTML = '<div class="no-records">No receiving records found.</div>';
+                pagination.innerHTML = '';
+            }
+        } else {
+            let paginationHTML = '';
+
+            if (currentPage > 1) {
+                paginationHTML += `<a href="#" onclick="fetchPage(${currentPage - 1}); return false;">« Previous</a>`;
+            } else {
+                paginationHTML += `<span class="disabled">« Previous</span>`;
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<span class="current">${i}</span>`;
+                } else {
+                    paginationHTML += `<a href="#" onclick="fetchPage(${i}); return false;">${i}</a>`;
+                }
+            }
+
+            if (currentPage < totalPages) {
+                paginationHTML += `<a href="#" onclick="fetchPage(${currentPage + 1}); return false;">Next »</a>`;
+            } else {
+                paginationHTML += `<span class="disabled">Next »</span>`;
+            }
+
+            pagination.innerHTML = paginationHTML;
+        }
+    }
+
+    function updatePaginationLinks() {
+        const paginationLinks = document.querySelectorAll('#pagination a');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = parseInt(this.textContent) || (this.textContent.includes('Previous') ?
+                    currentPage - 1 : currentPage + 1);
+                fetchPage(page);
+            });
+        });
+    }
+
+    document.getElementById('createOrderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "../../handlers/create_order_handler.php", true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.status === "success") {
+                        console.log("Order created successfully");
+                        totalRecords++;
+                        fetchPage(1); // Fetch the first page to show the new order
+                        toggleAddReceivingForm(); // Close the form
+                    } else {
+                        console.error("Server response: " + xhr.responseText);
+                        alert("Failed to create order: " + response.message);
                     }
                 } else {
                     console.error("AJAX error: Status " + xhr.status);
                     alert("AJAX request failed with status: " + xhr.status);
                 }
-                dropdown.value = "";
             }
         };
-        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
-    }
-    // update
-    function confirmDelete(receivingId) {
-        if (confirm("Are you sure you want to delete this receiving record?")) {
-            window.location.href = "../../handlers/deletereceiving_handler.php?id=" + receivingId;
-        }
-    }
+        xhr.send(formData);
+    });
 
     setTimeout(function() {
         let alert = document.querySelector(".floating-alert");
@@ -835,4 +1054,7 @@ while ($row = $product_result->fetch_assoc()) {
             setTimeout(() => alert.remove(), 500);
         }
     }, 4000);
+
+    // Initialize pagination links
+    updatePaginationLinks();
 </script>
