@@ -513,11 +513,11 @@ $productResult = $conn->query($productQuery);
                                     <button class="btn btn-sm text-warning action-btn"
                                         onclick='loadEditModal(<?= json_encode($row) ?>)' data-bs-toggle="modal"
                                         data-bs-target="#editInventoryModal">
-                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Update
+                                        <i class="fa fa-edit" style="color: #ffc107;"></i>
                                     </button>
                                     <button class="btn btn-sm text-danger action-btn"
                                         onclick="confirmDelete(<?= $row['inventory_id'] ?>)">
-                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Remove
+                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i>
                                     </button>
                                 </td>
                             </tr>
