@@ -5,7 +5,6 @@ include '../../database/database.php';
 $whereConditions = [];
 $orderClause = "ORDER BY a.admin_id DESC"; // Default ordering
 
-// Handle search filters
 if (isset($_GET['search']) && $_GET['search'] === '1') {
     if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
         $whereConditions[] = "a.admin_id = '" . $conn->real_escape_string($_GET['user_id']) . "'";
@@ -77,258 +76,287 @@ if (!$auditResult) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    html,
+    body {
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Management</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <style>
-        html,
-        body {
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+    .main-content {
+        margin-left: 250px;
+        /* Assuming a sidebar exists in your layout */
+        width: calc(100% - 250px);
+        padding: 20px;
+        overflow: hidden;
+    }
 
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 20px;
+        padding: 10px 0;
+    }
+
+    .tabs span {
+        padding: 8px 15px;
+        cursor: pointer;
+        font-size: 16px;
+        color: #555;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .tabs span.active {
+        background: #34502b;
+        color: white;
+        font-weight: bold;
+    }
+
+    .tabs span:hover:not(.active) {
+        background: #e0e0e0;
+        color: #34502b;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .search-container {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .search-container input,
+    .search-container select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-btn,
+    .clear-btn {
+        padding: 8px 15px;
+        border: none;
+        background: #34502b;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .clear-btn {
+        background: white;
+        color: #34502b;
+        border: 1px solid #34502b;
+        width: 70px;
+    }
+
+    .accounts-table,
+    .audit-table {
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+
+    .table-controls {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 10px;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .create-btn {
+        background: #34502b;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .create-btn:hover {
+        background: white;
+        color: #34502b;
+        border: 1px solid #34502b;
+    }
+
+    .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    th {
+        color: rgb(41, 40, 40) !important;
+        text-align: center !important;
+        padding: 10px;
+    }
+
+    th,
+    td {
+        text-align: center;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-warning {
+        background: #ffc107;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+    }
+
+    .modal-content {
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .modal-header {
+        color: #34502b;
+        padding: 15px;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .custom-select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        width: 50px;
+    }
+
+    .select2-container {
+        width: 50px !important;
+    }
+
+    .select2-selection__rendered {
+        display: flex;
+        align-items: center;
+        padding: 0 5px;
+        justify-content: center;
+    }
+
+    .select2-selection__rendered i {
+        font-size: 16px;
+    }
+
+    .custom-select:focus {
+        outline: none;
+        border-color: #34502b;
+        box-shadow: 0 0 5px rgba(52, 80, 43, 0.5);
+    }
+
+    .select2-dropdown {
+        width: 200px !important;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .select2-results__option {
+        padding: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .floating-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        width: auto !important;
+        padding-right: 2.5rem !important;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-link.toggle-message {
+        padding: 0;
+        font-size: 0.9em;
+        color: #fff;
+        text-decoration: underline;
+    }
+
+    .btn-link.toggle-message:hover {
+        color: #ddd;
+    }
+
+    @media (max-width: 768px) {
         .main-content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            padding: 20px;
-            overflow: hidden;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
+            margin-left: 200px;
+            width: calc(100% - 200px);
         }
 
         .search-container {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            flex-direction: column;
         }
 
-        .search-container input,
-        .search-container select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .search-btn,
-        .clear-btn {
-            padding: 8px 15px;
-            border: none;
-            background: #34502b;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .clear-btn {
-            background: white;
-            color: #34502b;
-            border: 1px solid #34502b;
-            width: 70px;
-        }
-
-        .accounts-table,
-        .audit-table {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            overflow-x: auto;
-        }
-
-        .table-controls {
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 10px;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .create-btn {
-            background: #34502b;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .create-btn:hover {
-            background: white;
-            color: #34502b;
-            border: 1px solid #34502b;
-        }
-
-        .table-responsive {
-            max-width: 100%;
-            overflow-x: auto;
-        }
-
-        th {
-            color: rgb(41, 40, 40) !important;
-            text-align: center !important;
-            padding: 10px;
-        }
-
-        th,
-        td {
-            text-align: center;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .btn {
-            padding: 5px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .modal-content {
-            padding: 20px;
-            border-radius: 5px;
-        }
-
-        .modal-header {
-            color: #34502b;
-            padding: 15px;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .custom-select {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            background-color: white;
-            cursor: pointer;
-            width: 50px;
-        }
-
-        .select2-container {
-            width: 50px !important;
-        }
-
-        .select2-selection__rendered {
-            display: flex;
-            align-items: center;
-            padding: 0 5px;
-            justify-content: center;
-        }
-
-        .select2-selection__rendered i {
-            font-size: 16px;
-        }
-
-        .custom-select:focus {
-            outline: none;
-            border-color: #34502b;
-            box-shadow: 0 0 5px rgba(52, 80, 43, 0.5);
-        }
-
-        .select2-dropdown {
-            width: 200px !important;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .select2-results__option {
-            padding: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .floating-alert {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-            width: auto !important;
-            padding-right: 2.5rem !important;
-        }
-
-        .alert-content {
-            display: flex;
-            align-items: center;
+        .tabs {
+            flex-direction: column;
             gap: 10px;
         }
+    }
 
-        .btn-link.toggle-message {
-            padding: 0;
-            font-size: 0.9em;
-            color: #fff;
-            text-decoration: underline;
+    @media (max-width: 500px) {
+        .main-content {
+            margin-left: 0;
+            width: 100%;
         }
+    }
+</style>
+<div class="main-content">
+    <header>
+        <h1>Account Management</h1>
+    </header>
 
-        .btn-link.toggle-message:hover {
-            color: #ddd;
-        }
+    <!-- Tabs -->
+    <div class="tabs">
+        <span class="active" data-tab="accounts">Accounts</span>
+        <span data-tab="audit">Audit Log</span>
+    </div>
+    <hr>
 
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 200px;
-                width: calc(100% - 200px);
-            }
-
-            .search-container {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 500px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="main-content">
-        <header>
-            <h1>Account Management</h1>
-            <div class="search-profile">
-                <?php include __DIR__ . '/searchbar.php'; ?>
-                <?php include __DIR__ . '/profile.php'; ?>
-            </div>
-        </header>
-
-        <hr>
-
-        <!-- Users Section -->
+    <!-- Accounts Tab Content -->
+    <div class="tab-content active" id="accounts-tab">
         <div class="accounts-table">
             <h3 style="color: #34502b;">Admins</h3>
             <div class="search-container">
@@ -352,7 +380,6 @@ if (!$auditResult) {
                     <option value="username|ASC" data-icon="fa-solid fa-arrow-up-a-z">Username (A-Z)</option>
                     <option value="username|DESC" data-icon="fa-solid fa-arrow-down-z-a">Username (Z-A)</option>
                 </select>
-
             </div>
 
             <div class="table-responsive rounded-3">
@@ -402,19 +429,30 @@ if (!$auditResult) {
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- Audit Log Section -->
+    <!-- Audit Log Tab Content -->
+    <div class="tab-content" id="audit-tab">
         <div class="audit-table">
             <h3 style="color: #34502b;">Audit Log</h3>
+            <div class="search-container">
+                <input type="text" id="searchAuditUserID" placeholder="Admin ID">
+                <input type="text" id="searchAction" placeholder="Action">
+                <button class="search-btn" onclick="searchAudit()">SEARCH</button>
+                <button class="clear-btn" onclick="clearAuditSearch()">CLEAR</button>
+            </div>
 
             <div class="table-controls">
                 <select id="auditOrderBy" class="custom-select" onchange="applyAuditFilters()">
-                    <option value="timestamp|DESC" data-icon="fa-solid fa-arrow-down-long">Timestamp (Newest)</option>
+                    <option value="timestamp|DESC" data-icon="fa-solid fa-arrow-down-long">Timestamp (Newest)
+                    </option>
                     <option value="timestamp|ASC" data-icon="fa-solid fa-arrow-up-long">Timestamp (Oldest)</option>
                     <option value="log_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Log ID (Descending)</option>
                     <option value="log_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Log ID (Ascending)</option>
-                    <option value="admin_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Admin ID (Low to High)</option>
-                    <option value="admin_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Admin ID (High to Low)</option>
+                    <option value="admin_id|ASC" data-icon="fa-solid fa-arrow-up-1-9">Admin ID (Low to High)
+                    </option>
+                    <option value="admin_id|DESC" data-icon="fa-solid fa-arrow-down-9-1">Admin ID (High to Low)
+                    </option>
                 </select>
             </div>
 
@@ -444,8 +482,8 @@ if (!$auditResult) {
                             <?php endwhile; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">No audit logs found.
-                                </td>
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #666;">No audit logs
+                                    found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -552,226 +590,234 @@ if (!$auditResult) {
         </div>
         <?php unset($_SESSION['error']); ?>
     <?php endif ?>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2 for Users
-            $('#userOrderBy').select2({
-                templateResult: formatOption,
-                templateSelection: formatSelection,
-                minimumResultsForSearch: Infinity,
-                dropdownAutoWidth: true,
-                width: '50px'
-            });
-
-            // Initialize Select2 for Audit Log
-            $('#auditOrderBy').select2({
-                templateResult: formatOption,
-                templateSelection: formatSelection,
-                minimumResultsForSearch: Infinity,
-                dropdownAutoWidth: true,
-                width: '50px'
-            });
-
-            $('#userOrderBy').on('change', applyUserFilters);
-            $('#auditOrderBy').on('change', applyAuditFilters);
-
-            const urlParams = new URLSearchParams(window.location.search);
-            $('#searchUserID').val(urlParams.get('user_id') || '');
-            $('#searchUsername').val(urlParams.get('username') || '');
-            $('#searchRole').val(urlParams.get('role') || '');
-            $('#userOrderBy').val(urlParams.get('order_by') || 'admin_id|DESC');
-            $('#searchAuditUserID').val(urlParams.get('audit_user_id') || '');
-            $('#searchAction').val(urlParams.get('action') || '');
-            $('#auditOrderBy').val(urlParams.get('audit_order_by') || 'timestamp|DESC');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 for Users
+        $('#userOrderBy').select2({
+            templateResult: formatOption,
+            templateSelection: formatSelection,
+            minimumResultsForSearch: Infinity,
+            dropdownAutoWidth: true,
+            width: '50px'
         });
 
-        function formatOption(option) {
-            if (!option.element) return option.text;
-            return $('<span><i class="' + $(option.element).data('icon') + ' me-2"></i>' + option.text + '</span>');
+        // Initialize Select2 for Audit Log
+        $('#auditOrderBy').select2({
+            templateResult: formatOption,
+            templateSelection: formatSelection,
+            minimumResultsForSearch: Infinity,
+            dropdownAutoWidth: true,
+            width: '50px'
+        });
+
+        $('#userOrderBy').on('change', applyUserFilters);
+        $('#auditOrderBy').on('change', applyAuditFilters);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        $('#searchUserID').val(urlParams.get('user_id') || '');
+        $('#searchUsername').val(urlParams.get('username') || '');
+        $('#searchRole').val(urlParams.get('role') || '');
+        $('#userOrderBy').val(urlParams.get('order_by') || 'admin_id|DESC');
+        $('#searchAuditUserID').val(urlParams.get('audit_user_id') || '');
+        $('#searchAction').val(urlParams.get('action') || '');
+        $('#auditOrderBy').val(urlParams.get('audit_order_by') || 'timestamp|DESC');
+
+        // Tab switching
+        $('.tabs span').on('click', function() {
+            $('.tabs span').removeClass('active');
+            $(this).addClass('active');
+
+            $('.tab-content').removeClass('active');
+            const tabId = $(this).data('tab') + '-tab';
+            $('#' + tabId).addClass('active');
+        });
+    });
+
+    function formatOption(option) {
+        if (!option.element) return option.text;
+        return $('<span><i class="' + $(option.element).data('icon') + ' me-2"></i>' + option.text + '</span>');
+    }
+
+    function formatSelection(option) {
+        if (!option.element) return option.text;
+        return $('<span><i class="' + $(option.element).data('icon') + '"></i></span>');
+    }
+
+    // Users Search
+    function searchUsers() {
+        const userID = $('#searchUserID').val().trim();
+        const username = $('#searchUsername').val().trim();
+        const role = $('#searchRole').val();
+        const orderBy = $('#userOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account&search=1';
+        const params = [];
+        if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
+        if (username) params.push(`username=${encodeURIComponent(username)}`);
+        if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+        appendAuditParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Users Table Filters
+    function applyUserFilters() {
+        const userID = $('#searchUserID').val().trim();
+        const username = $('#searchUsername').val().trim();
+        const role = $('#searchRole').val();
+        const orderBy = $('#userOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account';
+        const params = [];
+        if (userID || username || role) params.push('search=1');
+        if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
+        if (username) params.push(`username=${encodeURIComponent(username)}`);
+        if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+        appendAuditParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Clear Users Search
+    function clearUserSearch() {
+        $('#searchUserID').val('');
+        $('#searchUsername').val('');
+        $('#searchRole').val('');
+        const orderBy = $('#userOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account';
+        const params = [];
+        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+        appendAuditParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Audit Search
+    function searchAudit() {
+        const auditUserID = $('#searchAuditUserID').val().trim();
+        const action = $('#searchAction').val().trim();
+        const auditOrderBy = $('#auditOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account&audit_search=1';
+        const params = [];
+        if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
+        if (action) params.push(`action=${encodeURIComponent(action)}`);
+        if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
+        appendUserParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Audit Table Filters
+    function applyAuditFilters() {
+        const auditUserID = $('#searchAuditUserID').val().trim();
+        const action = $('#searchAction').val().trim();
+        const auditOrderBy = $('#auditOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account';
+        const params = [];
+        if (auditUserID || action) params.push('audit_search=1');
+        if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
+        if (action) params.push(`action=${encodeURIComponent(action)}`);
+        if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
+        appendUserParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Clear Audit Search
+    function clearAuditSearch() {
+        $('#searchAuditUserID').val('');
+        $('#searchAction').val('');
+        const auditOrderBy = $('#auditOrderBy').val();
+
+        let url = '../../resource/layout/web-layout.php?page=account';
+        const params = [];
+        if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
+        appendUserParams(params);
+
+        if (params.length > 0) url += '&' + params.join('&');
+        window.location.href = url;
+    }
+
+    // Helper functions to append parameters
+    function appendUserParams(params) {
+        const userID = $('#searchUserID').val().trim();
+        const username = $('#searchUsername').val().trim();
+        const role = $('#searchRole').val();
+        const orderBy = $('#userOrderBy').val();
+        if (userID || username || role) params.push('search=1');
+        if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
+        if (username) params.push(`username=${encodeURIComponent(username)}`);
+        if (role) params.push(`role=${encodeURIComponent(role)}`);
+        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+    }
+
+    function appendAuditParams(params) {
+        const auditUserID = $('#searchAuditUserID').val().trim();
+        const action = $('#searchAction').val().trim();
+        const auditOrderBy = $('#auditOrderBy').val();
+        if (auditUserID || action) params.push('audit_search=1');
+        if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
+        if (action) params.push(`action=${encodeURIComponent(action)}`);
+        if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
+    }
+
+    // Load Edit User Modal
+    function loadEditUserModal(user) {
+        document.querySelector("#editUserModal input[name='admin_id']").value = user.admin_id;
+        document.querySelector("#editUserModal input[name='first_name']").value = user.first_name;
+        document.querySelector("#editUserModal input[name='middle_name']").value = user.middle_name || '';
+        document.querySelector("#editUserModal input[name='last_name']").value = user.last_name;
+        document.querySelector("#editUserModal input[name='username']").value = user.username;
+        document.querySelector("#editUserModal input[name='email']").value = user.email;
+        document.querySelector("#editUserModal input[name='phonenumber']").value = user.phonenumber;
+        document.querySelector("#editUserModal select[name='role']").value = user.role;
+    }
+
+    // Confirm Delete User
+    function confirmDeleteUser(adminId) {
+        if (confirm("Are you sure you want to delete this admin?")) {
+            window.location.href = "../../handlers/deleteuser_handler.php?id=" + adminId;
         }
+    }
 
-        function formatSelection(option) {
-            if (!option.element) return option.text;
-            return $('<span><i class="' + $(option.element).data('icon') + '"></i></span>');
-        }
+    // Notification Handling
+    setTimeout(() => {
+        const alerts = document.querySelectorAll(".floating-alert");
+        alerts.forEach(alert => {
+            alert.style.opacity = "0";
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 20000);
 
-        // Users Search
-        function searchUsers() {
-            const userID = $('#searchUserID').val().trim();
-            const username = $('#searchUsername').val().trim();
-            const role = $('#searchRole').val();
-            const orderBy = $('#userOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account&search=1';
-            const params = [];
-            if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
-            if (username) params.push(`username=${encodeURIComponent(username)}`);
-            if (role) params.push(`role=${encodeURIComponent(role)}`);
-            if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-            appendAuditParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Users Table Filters
-        function applyUserFilters() {
-            const userID = $('#searchUserID').val().trim();
-            const username = $('#searchUsername').val().trim();
-            const role = $('#searchRole').val();
-            const orderBy = $('#userOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account';
-            const params = [];
-            if (userID || username || role) params.push('search=1');
-            if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
-            if (username) params.push(`username=${encodeURIComponent(username)}`);
-            if (role) params.push(`role=${encodeURIComponent(role)}`);
-            if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-            appendAuditParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Clear Users Search
-        function clearUserSearch() {
-            $('#searchUserID').val('');
-            $('#searchUsername').val('');
-            $('#searchRole').val('');
-            const orderBy = $('#userOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account';
-            const params = [];
-            if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-            appendAuditParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Audit Search
-        function searchAudit() {
-            const auditUserID = $('#searchAuditUserID').val().trim();
-            const action = $('#searchAction').val().trim();
-            const auditOrderBy = $('#auditOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account&audit_search=1';
-            const params = [];
-            if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
-            if (action) params.push(`action=${encodeURIComponent(action)}`);
-            if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
-            appendUserParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Audit Table Filters
-        function applyAuditFilters() {
-            const auditUserID = $('#searchAuditUserID').val().trim();
-            const action = $('#searchAction').val().trim();
-            const auditOrderBy = $('#auditOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account';
-            const params = [];
-            if (auditUserID || action) params.push('audit_search=1');
-            if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
-            if (action) params.push(`action=${encodeURIComponent(action)}`);
-            if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
-            appendUserParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Clear Audit Search
-        function clearAuditSearch() {
-            $('#searchAuditUserID').val('');
-            $('#searchAction').val('');
-            const auditOrderBy = $('#auditOrderBy').val();
-
-            let url = '../../resource/layout/web-layout.php?page=account';
-            const params = [];
-            if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
-            appendUserParams(params);
-
-            if (params.length > 0) url += '&' + params.join('&');
-            window.location.href = url;
-        }
-
-        // Helper functions to append parameters
-        function appendUserParams(params) {
-            const userID = $('#searchUserID').val().trim();
-            const username = $('#searchUsername').val().trim();
-            const role = $('#searchRole').val();
-            const orderBy = $('#userOrderBy').val();
-            if (userID || username || role) params.push('search=1');
-            if (userID) params.push(`user_id=${encodeURIComponent(userID)}`);
-            if (username) params.push(`username=${encodeURIComponent(username)}`);
-            if (role) params.push(`role=${encodeURIComponent(role)}`);
-            if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-        }
-
-        function appendAuditParams(params) {
-            const auditUserID = $('#searchAuditUserID').val().trim();
-            const action = $('#searchAction').val().trim();
-            const auditOrderBy = $('#auditOrderBy').val();
-            if (auditUserID || action) params.push('audit_search=1');
-            if (auditUserID) params.push(`audit_user_id=${encodeURIComponent(auditUserID)}`);
-            if (action) params.push(`action=${encodeURIComponent(action)}`);
-            if (auditOrderBy) params.push(`audit_order_by=${encodeURIComponent(auditOrderBy)}`);
-        }
-
-        // Load Edit User Modal
-        function loadEditUserModal(user) {
-            document.querySelector("#editUserModal input[name='admin_id']").value = user.admin_id;
-            document.querySelector("#editUserModal input[name='first_name']").value = user.first_name;
-            document.querySelector("#editUserModal input[name='middle_name']").value = user.middle_name || '';
-            document.querySelector("#editUserModal input[name='last_name']").value = user.last_name;
-            document.querySelector("#editUserModal input[name='username']").value = user.username;
-            document.querySelector("#editUserModal input[name='email']").value = user.email;
-            document.querySelector("#editUserModal input[name='phonenumber']").value = user.phonenumber;
-            document.querySelector("#editUserModal select[name='role']").value = user.role;
-        }
-
-        // Confirm Delete User
-        function confirmDeleteUser(adminId) {
-            if (confirm("Are you sure you want to delete this admin?")) {
-                window.location.href = "../../handlers/deleteuser_handler.php?id=" + adminId;
+    document.querySelectorAll('.toggle-message').forEach(button => {
+        button.addEventListener('click', () => {
+            const alert = button.closest('.alert');
+            const short = alert.querySelector('.alert-short');
+            const full = alert.querySelector('.alert-full');
+            if (short.classList.contains('d-none')) {
+                short.classList.remove('d-none');
+                full.classList.add('d-none');
+                button.textContent = 'Show More';
+            } else {
+                short.classList.add('d-none');
+                full.classList.remove('d-none');
+                button.textContent = 'Show Less';
             }
-        }
-
-        // Notification Handling
-        setTimeout(() => {
-            const alerts = document.querySelectorAll(".floating-alert");
-            alerts.forEach(alert => {
-                alert.style.opacity = "0";
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 20000);
-
-        document.querySelectorAll('.toggle-message').forEach(button => {
-            button.addEventListener('click', () => {
-                const alert = button.closest('.alert');
-                const short = alert.querySelector('.alert-short');
-                const full = alert.querySelector('.alert-full');
-                if (short.classList.contains('d-none')) {
-                    short.classList.remove('d-none');
-                    full.classList.add('d-none');
-                    button.textContent = 'Show More';
-                } else {
-                    short.classList.add('d-none');
-                    full.classList.remove('d-none');
-                    button.textContent = 'Show Less';
-                }
-            });
         });
-    </script>
-</body>
-
-</html>
+    });
+</script>
