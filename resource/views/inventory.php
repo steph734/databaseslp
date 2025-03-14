@@ -471,7 +471,6 @@ $productResult = $conn->query($productQuery);
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
                         <th>ID</th>
                         <th>Product</th>
                         <th>Price</th>
@@ -492,7 +491,6 @@ $productResult = $conn->query($productQuery);
                     <?php if ($result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <tr>
-                                <td><input type="checkbox"></td>
                                 <td><?= $row['inventory_id'] ?></td>
                                 <td><?= htmlspecialchars($row['product_name']) ?></td>
                                 <td><?= number_format($row['price'], 2) ?></td>
@@ -515,10 +513,10 @@ $productResult = $conn->query($productQuery);
                                         data-bs-target="#editInventoryModal">
                                         <i class="fa fa-edit" style="color: #ffc107;"></i>
                                     </button>
-                                    <button class="btn btn-sm text-danger action-btn"
+                                    <!-- <button class="btn btn-sm text-danger action-btn"
                                         onclick="confirmDelete(<?= $row['inventory_id'] ?>)">
                                         <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i>
-                                    </button>
+                                    </button> -->
                                 </td>
                             </tr>
                         <?php endwhile; ?>
