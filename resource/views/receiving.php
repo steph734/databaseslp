@@ -821,7 +821,7 @@ while ($row = $product_result->fetch_assoc()) {
         };
         xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
     }
-
+    // update
     function confirmDelete(receivingId) {
         if (confirm("Are you sure you want to delete this receiving record?")) {
             window.location.href = "../../handlers/deletereceiving_handler.php?id=" + receivingId;

@@ -17,7 +17,7 @@ if (!in_array($status, $valid_statuses)) {
     echo json_encode(['status' => 'error', 'message' => 'Invalid status value']);
     exit;
 }
-
+// update
 $conn->begin_transaction();
 try {
     // Get current status
