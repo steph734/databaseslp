@@ -1,3 +1,4 @@
+
 <div class="main-content">
     <header>
         <h1>Reports</h1>
@@ -7,59 +8,145 @@
         </div>
     </header>
 
-    <div class="search-container">
-        <input type="text" id="searchAdjustmentID" placeholder="Adjustment ID">
-        <input type="text" id="searchProductID" placeholder="Product ID">
-        <input type="text" id="searchDateAdjusted" placeholder="Date Adjusted" onfocus="(this.type='date')" onblur="(this.type='text')">
-        <button class="search-btn">SEARCH</button>
-        <button class="clear-btn">CLEAR</button>
-    </div>
 
-    <div class="supplier-table">
-        <div class="table-controls">
-            <button class="create-btn">CREATE NEW <span>+</span></button>
-            <button class="edit-btn">EDIT <span>✏️</span></button>
-            <button class="delete-btn">DELETE <span>🗑️</span></button>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: #f1f1f1;
+            border-radius: 20px;
+            padding: 8px 12px;
+            width: 250px;
+        }
+
+        .search-container input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            padding: 5px;
+        }
+
+        .search-container i {
+            color: #777;
+            font-size: 16px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 30px;
+        }
+
+        .tabs span {
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tabs span.active {
+            border-bottom: 3px solid #007bff;
+            color: #007bff;
+        }
+
+        .tabs span i {
+            font-size: 22px;
+        }
+
+        hr {
+            margin-top: -5px;
+            border: none;
+            height: 2px;
+            background: #ddd;
+            width: 100%;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <span class="active" data-type="invoice" onclick="showTab('invoice')">
+            <i class="fas fa-file-invoice"></i> Invoice
+        </span>
+        <span data-type="stock_adjustment" onclick="showTab('stock_adjustment')">
+            <i class="fas fa-boxes"></i> Stock Adjustment
+        </span>
+        <span data-type="damage" onclick="showTab('damage')">
+            <i class="fas fa-exclamation-triangle"></i> Damage
+        </span>
+    </div>
+    <hr>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <div id="invoice" class="tab-panel active">
+            <h2>Invoice Report</h2>
+          
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select-all"></th>
-                    <th>AdjustmentID</th>
-                    <th>ProductID</th>
-                    <th>Adjusted Quantity</th>
-                    <th>Description</th>
-                    <th>Date Adjusted</th>
-                </tr>
-            </thead>
-            <tbody id="reports-table-body">
-                <!-- Data will be loaded dynamically -->
-            </tbody>
-        </table>
+        <div id="stock_adjustment" class="tab-panel">
+            <h2>Stock Adjustment Report</h2>
+          
+        </div>
+        <div id="damage" class="tab-panel">
+            <h2>Damage Report</h2>
+           
+        </div>
     </div>
 </div>
 
-<!-- Create/Edit Modal -->
-<div id="recordModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="modal-title">Create Report</h2>
-        <form id="recordForm">
-            <input type="hidden" id="adjustmentID">
-            <label>Product ID:</label>
-            <input type="text" id="productID" required>
-            <label>Adjusted Quantity:</label>
-            <input type="number" id="adjustedQuantity" required>
-            <label>Description:</label>
-            <input type="text" id="description">
-            <label>Date Adjusted:</label>
-            <input type="date" id="dateAdjusted" required>
-            <button type="submit">Save</button>
-        </form>
-    </div>
-</div>
+<script>
+    function showTab(tabId) {
+        // Remove active class from all tabs
+        document.querySelectorAll('.tabs span').forEach(tab => tab.classList.remove('active'));
 
-<script src="script.js"></script>
-</body>
+        // Hide all tab panels
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
 
-</html>
+        // Activate selected tab
+        document.querySelector(`.tabs span[data-type="${tabId}"]`).classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+</script>
