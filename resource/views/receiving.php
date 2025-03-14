@@ -92,6 +92,14 @@ while ($row = $product_result->fetch_assoc()) {
         font-size: 14px;
         font-weight: bold;
         margin-right: 5px;
+        transition: color 0.3s ease, opacity 0.3s ease;
+        /* Smooth color and opacity transition */
+    }
+
+    /* Optional: Add a fade effect during text change */
+    .status-text.fade {
+        opacity: 0;
+        /* Temporarily fade out */
     }
 
     .status-pending {
@@ -385,6 +393,30 @@ while ($row = $product_result->fetch_assoc()) {
         margin: 0 0 15px 0;
         color: #555;
     }
+
+    #confirmReceivedModal .modal-header {
+        background: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #confirmReceivedModal .modal-title {
+        font-weight: 300;
+        color: #34502b;
+    }
+
+    #confirmReceivedModal .modal-body {
+        color: #555;
+        font-size: 16px;
+    }
+
+    #confirmReceivedModal .btn-primary {
+        background: #34502b;
+        border: none;
+    }
+
+    #confirmReceivedModal .btn-primary:hover {
+        background: #2a3f23;
+    }
 </style>
 
 <!-- Order Form Section -->
@@ -443,7 +475,8 @@ while ($row = $product_result->fetch_assoc()) {
                             id="status-text-<?= $row['receiving_id'] ?>">
                             <?= ucfirst($row['status']) ?>
                         </span>
-                        <select class="status-dropdown" onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)">
+                        <select class="status-dropdown" onchange="updateStatus(<?= $row['receiving_id'] ?>, this.value)"
+                            <?= strtolower($row['status']) === 'received' ? 'disabled' : '' ?>>
                             <option value="" disabled selected></option>
                             <option value="pending">Pending</option>
                             <option value="received">Received</option>
@@ -460,7 +493,7 @@ while ($row = $product_result->fetch_assoc()) {
                 <button class="btn-invoice" onclick="loadInvoiceModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                     <i class="fa fa-eye"></i> View Details
                 </button>
-                <button class="btn-delete" onclick="confirmDeleteReceive(<?= $row['receiving_id'] ?>)">
+                <button class="btn-delete" onclick="confirmDelete(<?= $row['receiving_id'] ?>)">
                     <i class="fa fa-trash"></i> Delete
                 </button>
             </div>
@@ -570,9 +603,29 @@ while ($row = $product_result->fetch_assoc()) {
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmReceivedModal" tabindex="-1" aria-labelledby="confirmReceivedModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmReceivedModalLabel">Confirm Status Change</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Marking this order as 'Received' will update product quantities in inventory and set supplier
+                    details. This action cannot be undone via status change. Do you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    id="cancelReceivedBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmReceivedBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     let productCount = 1;
-    const availableProducts = <?php echo json_encode($products); ?>; // Pass PHP products array to JS
 
     function toggleAddReceivingForm() {
         var form = document.getElementById("orderForm");
@@ -614,25 +667,6 @@ while ($row = $product_result->fetch_assoc()) {
         productCount = 0;
         addProduct();
     }
-
-    // Validate products before form submission
-    document.querySelector('.order-form').addEventListener('submit', function(event) {
-        const productInputs = document.querySelectorAll('.product-card input[name$="[name]"]');
-        let allProductsValid = true;
-
-        productInputs.forEach(input => {
-            const productName = input.value.trim();
-            if (!availableProducts.includes(productName)) {
-                allProductsValid = false;
-                alert(`Product "${productName}" is not available at the moment.`);
-                input.focus(); // Focus on the invalid input
-            }
-        });
-
-        if (!allProductsValid) {
-            event.preventDefault(); // Prevent form submission if any product is invalid
-        }
-    });
 
     function loadReceivingModal(receiving) {
         document.getElementById('view_receiving_id').textContent = receiving.receiving_id;
@@ -707,74 +741,91 @@ while ($row = $product_result->fetch_assoc()) {
     }
 
     function updateStatus(receivingId, newStatus) {
-    const statusText = document.getElementById(`status-text-${receivingId}`);
-    const oldStatus = statusText.textContent.trim().toLowerCase();
-    const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
+        const statusText = document.getElementById(`status-text-${receivingId}`);
+        const oldStatus = statusText.textContent.trim().toLowerCase();
+        const dropdown = document.querySelector(`select[onchange="updateStatus(${receivingId}, this.value)"]`);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "../../handlers/update_status_handler.php", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        try {
-                            const response = JSON.parse(xhr.responseText); // Parse JSON response
-                            if (response.status === "success") {
-                                console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
-                                statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-                                statusText.className = `status-text status-${newStatus}`;
-                                // Optionally show success message
-                                // alert(response.message); // Uncomment to display "Order marked as received..."
-                            } else {
-                                console.error("Server response: " + xhr.responseText);
-                                alert("Failed to update status: " + (response.message || "Unknown error"));
-                            }
-                        } catch (e) {
-                            console.error("Failed to parse JSON response: " + xhr.responseText);
-                            alert("Failed to update status: Invalid server response");
-                        }
-                    } else {
-                        console.error("AJAX error: Status " + xhr.status);
-                        alert("AJAX request failed with status: " + xhr.status);
-                    }
-                    dropdown.value = ""; // Reset dropdown
-                }
-            };
-            xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
+        // Block changes if already "received"
+        if (oldStatus === "received") {
+            alert("Cannot edit status once the order is marked as received.");
+            dropdown.value = ""; // Reset dropdown
+            return;
         }
 
-    function confirmDeleteReceive(receivingId) {
-        if (confirm("Are you sure you want to delete this receiving record? This action cannot be undone.")) {
-            deleteReceiving(receivingId);
+        // Handle status change
+        if (newStatus === "received") {
+            // Show the confirmation modal
+            var confirmModal = new bootstrap.Modal(document.getElementById("confirmReceivedModal"));
+            confirmModal.show();
+
+            // Remove any existing event listeners to avoid duplicates
+            const confirmBtn = document.getElementById("confirmReceivedBtn");
+            const cancelBtn = document.getElementById("cancelReceivedBtn");
+            confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+            cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+
+            // Re-select the buttons after cloning
+            const newConfirmBtn = document.getElementById("confirmReceivedBtn");
+            const newCancelBtn = document.getElementById("cancelReceivedBtn");
+
+            // Confirm button: proceed with AJAX request
+            newConfirmBtn.onclick = function() {
+                sendStatusUpdate(receivingId, newStatus, statusText, dropdown);
+                confirmModal.hide();
+            };
+
+            // Cancel button: reset dropdown and close modal
+            newCancelBtn.onclick = function() {
+                dropdown.value = "";
+                confirmModal.hide();
+            };
+        } else {
+            // For non-"received" changes, proceed directly
+            sendStatusUpdate(receivingId, newStatus, statusText, dropdown);
         }
     }
 
-    function deleteReceiving(receivingId) {
-        const card = document.querySelector(`.receiving-card:has(button[onclick='confirmDeleteReceive(${receivingId})'])`);
-        
+    function sendStatusUpdate(receivingId, newStatus, statusText, dropdown) {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "../../handlers/deletereceiving_handler.php", true);
+        xhr.open("POST", "../../handlers/update_status_handler.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    if (xhr.responseText === "success") {
-                        card.style.transition = "opacity 0.3s ease";
-                        card.style.opacity = "0";
-                        setTimeout(() => card.remove(), 300);
-                        console.log(`Receiving ID ${receivingId} deleted successfully`);
-                        alert("Receiving record deleted successfully!");
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.status === "success") {
+                        console.log(`Status updated to ${newStatus} for receiving ID ${receivingId}`);
+                        // Add fade-out effect
+                        statusText.classList.add("fade");
+                        setTimeout(() => {
+                            // Update text and class after fade-out
+                            statusText.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                            statusText.className = `status-text status-${newStatus}`;
+                            // Fade back in
+                            statusText.classList.remove("fade");
+                        }, 20); // Match the transition duration
+                        // Disable dropdown if status is "received"
+                        if (newStatus === "received") {
+                            dropdown.disabled = true;
+                        }
                     } else {
                         console.error("Server response: " + xhr.responseText);
-                        alert("Failed to delete record: " + xhr.responseText);
+                        alert("Failed to update status: " + response.message);
                     }
                 } else {
                     console.error("AJAX error: Status " + xhr.status);
                     alert("AJAX request failed with status: " + xhr.status);
                 }
+                dropdown.value = "";
             }
         };
-        xhr.send(`id=${receivingId}`);
+        xhr.send(`receiving_id=${receivingId}&status=${newStatus}`);
+    }
+    // update
+    function confirmDelete(receivingId) {
+        if (confirm("Are you sure you want to delete this receiving record?")) {
+            window.location.href = "../../handlers/deletereceiving_handler.php?id=" + receivingId;
+        }
     }
 
     setTimeout(function() {
