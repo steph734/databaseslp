@@ -221,7 +221,7 @@ try {
 <body>
     <div class="main-content">
         <header>
-            <h1>Membership & Customer Management</h1>
+            <h1>Membership</h1>
             <div class="search-profile">
                 <?php include __DIR__ . '/searchbar.php'; ?>
                 <?php include __DIR__ . '/profile.php'; ?>
@@ -229,7 +229,7 @@ try {
         </header>
 
         <div class="tabs" role="tablist">
-            <span class="active" data-tab="customers" role="tab" aria-selected="true" tabindex="0">Customer</span>
+           
             <span data-tab="memberships" role="tab" aria-selected="false" tabindex="0">Member</span>
         </div>
         <hr>

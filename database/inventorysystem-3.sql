@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 10, 2025 at 08:15 AM
+-- Generation Time: Mar 14, 2025 at 12:30 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -25,14 +25,38 @@ DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddProduct` (IN `p_product_name` VARCHAR(255), IN `p_quantity` INT, IN `p_price` DECIMAL(10,2), IN `p_unitofmeasurement` VARCHAR(50), IN `p_category_id` VARCHAR(25), IN `p_supplier_id` INT, IN `p_createdbyid` INT)   BEGIN
-    INSERT INTO Product (product_name, quantity, price, unitofmeasurement, category_id, supplier_id, createdbyid)
-    VALUES (p_product_name, p_quantity, p_price, p_unitofmeasurement, p_category_id, p_supplier_id, p_createdbyid);
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddProduct` (IN `p_product_name` VARCHAR(255), IN `p_quantity` INT, IN `p_price` DECIMAL(10,2), IN `p_unitofmeasurement` VARCHAR(50), IN `p_category_id` VARCHAR(50), IN `p_supplier_id` INT, IN `p_createdbyid` INT)   BEGIN
+    DECLARE p_status ENUM('available', 'unavailable');
+    
+    -- Set status based on quantity
+    SET p_status = IF(p_quantity > 0, 'available', 'unavailable');
+
+    INSERT INTO Product (
+        product_name, 
+        quantity, 
+        price, 
+        unitofmeasurement, 
+        category_id, 
+        supplier_id, 
+        createdbyid, 
+        createdate, 
+        status
+    ) VALUES (
+        p_product_name, 
+        p_quantity, 
+        p_price, 
+        p_unitofmeasurement, 
+        p_category_id, 
+        p_supplier_id, 
+        p_createdbyid, 
+        NOW(), 
+        p_status
+    );
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AddSupplier` (IN `p_supplier_name` VARCHAR(255), IN `p_contact_info` VARCHAR(255), IN `p_address` VARCHAR(255), IN `p_createdbyid` INT(11))   BEGIN
-    INSERT INTO Supplier (supplier_name, contact_info, address, createdbyid)
-    VALUES (p_supplier_name, p_contact_info, p_address, p_createdbyid);
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddSupplier` (IN `p_supplier_name` VARCHAR(255), IN `p_contact_info` VARCHAR(255), IN `p_address` VARCHAR(255), IN `p_status` ENUM('active','inactive'), IN `p_createdbyid` INT(11))   BEGIN
+    INSERT INTO Supplier (supplier_name, contact_info, address, status, createdbyid)
+    VALUES (p_supplier_name, p_contact_info, p_address, p_status, p_createdbyid);
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `add_customer` (IN `p_name` VARCHAR(250), IN `p_contact` VARCHAR(20), IN `p_address` VARCHAR(250), IN `p_is_member` BOOLEAN, IN `p_type_id` INT, IN `p_createdbyid` INT)   BEGIN
@@ -401,8 +425,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateInventoryStock` (IN `p_produc
     COMMIT;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProduct` (IN `p_product_id` INT, IN `p_product_name` VARCHAR(255), IN `p_quantity` INT, IN `p_price` DECIMAL(10,2), IN `p_unitofmeasurement` VARCHAR(50), IN `p_category_id` VARCHAR(25), IN `p_supplier_id` INT, IN `p_updatedbyid` INT)   BEGIN
-    UPDATE Product
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProduct` (IN `p_product_id` INT, IN `p_product_name` VARCHAR(255), IN `p_quantity` INT, IN `p_price` DECIMAL(10,2), IN `p_unitofmeasurement` VARCHAR(50), IN `p_category_id` VARCHAR(50), IN `p_supplier_id` INT, IN `p_updatedbyid` INT)   BEGIN
+    DECLARE p_status ENUM('available', 'unavailable');
+    
+    -- Set status based on quantity
+    SET p_status = IF(p_quantity > 0, 'available', 'unavailable');
+
+    UPDATE Product 
     SET 
         product_name = p_product_name,
         quantity = p_quantity,
@@ -411,7 +440,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProduct` (IN `p_product_id` I
         category_id = p_category_id,
         supplier_id = p_supplier_id,
         updatedbyid = p_updatedbyid,
-        updatedate = NOW()
+        updatedate = NOW(),
+        status = p_status
     WHERE product_id = p_product_id;
 END$$
 
@@ -470,21 +500,34 @@ CREATE TABLE `admin` (
 INSERT INTO `admin` (`admin_id`, `first_name`, `middle_name`, `last_name`, `username`, `password`, `email`, `phonenumber`, `role`) VALUES
 (1, 'admin', 'admin', 'admin', 'admin', '$2y$10$C1WbHbFtldWGq4LBB3lmiu0g6RRaF5UP7FqsJ4Kqj8W6L06OVb/DC', 'admin@gmail.com', '09663050832', 'admin'),
 (3, 'asd', 'dsa', 'hjbh', 'ali', '$2y$10$n7tuECu0vTmoBKDvxTjj7eHG8sLR7sP/tfLbViHhkRII6iIYLTabW', 'iuib@gmail.com', '004234932', 'admin'),
-(4, 'wda', 'daw', 'daw', 'eli', '$2y$10$2GVhPOujgJzRzMWRVdPM2etDkHSV2Sc.Ih7BFSFMPGIQ.W.Vw/ToK', 'dwa@gmail.com', '124', 'admin');
+(4, 'wda', 'daw', 'daw', 'eli', '$2y$10$2GVhPOujgJzRzMWRVdPM2etDkHSV2Sc.Ih7BFSFMPGIQ.W.Vw/ToK', 'dwa@gmail.com', '124', 'admin'),
+(5, 'Elisio', 'Corpin', 'Soroño', 'admin1', '$2y$10$Z4LdC2Bfpuw/Sher5N4X0engQySBW.pnUt2ylQuAGTtfV815UCKdm', 'sronoile@gmail.com', '09663050832', 'admin');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `audit_log`
+-- Table structure for table `auditlog`
 --
 
-CREATE TABLE `audit_log` (
-  `auditlog_id` int(11) NOT NULL,
-  `login_datetime` datetime NOT NULL,
-  `admin_id` int(11) DEFAULT NULL,
-  `description` varchar(255) NOT NULL,
-  `status` enum('Success','Failed','Pending','Cancelled') NOT NULL
+CREATE TABLE `auditlog` (
+  `log_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `timestamp` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `auditlog`
+--
+
+INSERT INTO `auditlog` (`log_id`, `admin_id`, `action`, `description`, `timestamp`) VALUES
+(1, 1, 'Login', 'User logged in from IP 192.168.1.1', '2025-03-14 10:00:00'),
+(2, 1, 'Add User', 'Added new user with username \"staff1\"', '2025-03-14 10:05:00'),
+(3, 3, 'Update Inventory', 'Updated stock for Product ID 101 by +5 units', '2025-03-14 11:00:00'),
+(4, 1, 'Delete User', 'Deleted user with ID 4', '2025-03-14 12:00:00'),
+(5, 4, 'Login', 'User logged in from IP 10.0.0.1', '2025-03-14 13:00:00'),
+(6, 5, 'Update Profile', 'Admin updated their profile details', '2025-03-14 19:20:28');
 
 -- --------------------------------------------------------
 
@@ -538,7 +581,14 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`customer_id`, `name`, `contact`, `address`, `is_member`, `type_id`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
-(1, 'Eli Soroño', '124234', 'P-5 Brgy. Mambago-A', 1, NULL, 1, '2025-03-10 15:04:56', NULL, NULL);
+(1, 'Eli Corpin Soroño', '124234', 'P-5 Brgy. Mambago-A', 1, 1, 1, '2025-03-10 15:04:56', 1, '2025-03-10 15:23:20'),
+(2, 'Stephen', '124234', 'Davao City', 1, 2, 1, '2025-03-10 15:23:52', 1, '2025-03-10 15:26:20'),
+(3, 'Eli Soroño', '124234', 'P-5 Brgy. Mambago-A', 0, NULL, 1, '2025-03-11 10:06:27', NULL, NULL),
+(4, 'Eli Soroño', '124234', 'P-5 Brgy. Mambago-A', 0, NULL, 1, '2025-03-11 10:06:40', NULL, NULL),
+(5, 'Eli Corpin Soroño', '124234', 'P-5 Brgy. Mambago-A', 0, NULL, 1, '2025-03-11 10:06:59', NULL, NULL),
+(6, 'Eli Corpin Soroño', '124234', 'P-5 Brgy. Mambago-A', 0, NULL, 1, '2025-03-11 10:07:16', NULL, NULL),
+(7, 'Eli Corpin Soroño', '124234', 'P-5 Brgy. Mambago-A', 0, NULL, 1, '2025-03-11 10:19:16', NULL, NULL),
+(8, 'Eli Corpin Soroño', '124234', 'P-5 Brgy. Mambago-A', 1, NULL, 1, '2025-03-11 10:24:30', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -619,7 +669,11 @@ CREATE TABLE `inventory` (
 --
 
 INSERT INTO `inventory` (`inventory_id`, `product_id`, `price`, `stock_quantity`, `total_value`, `received_date`, `last_restock_date`, `damage_stock`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
-(6, 17, 23.00, 12, 276.00, '2025-03-10', '2025-03-10', 0, 1, '2025-03-10', NULL, NULL);
+(7, 12, 8.00, 0, 40.00, '2025-03-10', '2025-03-10', 0, 1, '2025-03-10', 1, '2025-03-11'),
+(8, 25, 12.00, 60, 1452.00, '2025-03-11', '2025-03-11', 0, 1, '2025-03-11', 1, '2025-03-11'),
+(10, 8, 10.00, 0, 80.00, '2025-03-11', '2025-03-11', 0, 1, '2025-03-11', NULL, NULL),
+(12, 9, 12.00, 0, 24.00, '2025-03-11', '2025-03-11', 0, 1, '2025-03-11', 1, '2025-03-11'),
+(13, 13, 21.00, 12, 294.00, '2025-03-14', '2025-03-14', 0, 1, '2025-03-14', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -638,6 +692,13 @@ CREATE TABLE `membership` (
   `updatedbyid` int(11) DEFAULT NULL,
   `updatedate` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `membership`
+--
+
+INSERT INTO `membership` (`membership_id`, `customer_id`, `status`, `date_repairs`, `date_renewal`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(1, NULL, 'on going', '2025-03-20', '2025-03-20', 1, '2025-03-11 09:40:06', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -681,6 +742,7 @@ CREATE TABLE `product` (
   `product_id` int(11) NOT NULL,
   `product_name` varchar(255) NOT NULL,
   `quantity` int(11) DEFAULT 0,
+  `status` enum('available','unavailable') NOT NULL DEFAULT 'available',
   `price` decimal(10,2) NOT NULL,
   `unitofmeasurement` varchar(50) NOT NULL,
   `category_id` varchar(25) DEFAULT NULL,
@@ -695,19 +757,19 @@ CREATE TABLE `product` (
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `quantity`, `price`, `unitofmeasurement`, `category_id`, `supplier_id`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
-(4, 'carne nortes', 0, 25.00, 'can', 'carne', 7, 1, '2025-03-08 13:32:06', 1, '2025-03-10 08:03:17'),
-(6, 'tunas', 0, 38.00, 'can', 'carne', 6, 1, '2025-03-08 13:46:36', 1, '2025-03-09 17:04:27'),
-(7, 'MEGA sardines', 0, 25.00, 'can', 'carne', NULL, 1, '2025-03-08 13:49:01', 1, '2025-03-10 08:02:58'),
-(8, 'sardinas ni nene', 8, 20.00, 'can', 'carne', NULL, 1, '2025-03-08 14:04:34', 1, '2025-03-08 00:00:00'),
-(9, 'sardines', 8, 25.00, 'can', 'carne', 3, 1, '2025-03-08 14:56:51', 1, '2025-03-09 22:15:11'),
-(10, 'sardinessd', 81, 25.00, 'can', 'carne', 5, 1, '2025-03-08 14:58:00', 1, '2025-03-09 22:14:22'),
-(12, 'sardinessds', 8, 25.00, 'can', 'carne', NULL, 1, '2025-03-08 15:02:33', NULL, NULL),
-(13, 'tunaflakeswithchili', 8, 30.00, 'can', 'carne', NULL, 1, '2025-03-08 15:04:14', 1, '2025-03-08 18:42:41'),
-(14, 'tunaflakes', 0, 25.00, 'can', 'carne', 3, 1, '2025-03-08 15:06:37', 1, '2025-03-10 08:02:54'),
-(17, 'corn beef loaf ni daddy', 0, 25.00, 'can', 'carne', NULL, NULL, '2025-03-08 16:05:26', 1, '2025-03-10 08:02:56'),
-(25, 'carne norte', 1, 2.00, '2', 'carne', 4, 1, '2025-03-09 02:32:18', NULL, NULL),
-(26, 'meat loafs', 23, 2313.00, 'pcs', 'carne', 6, 1, '2025-03-09 14:55:47', NULL, NULL);
+INSERT INTO `product` (`product_id`, `product_name`, `quantity`, `status`, `price`, `unitofmeasurement`, `category_id`, `supplier_id`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(7, 'MEGA sardines', 0, 'available', 25.00, 'can', 'carne', NULL, 1, '2025-03-08 13:49:01', 1, '2025-03-14 15:09:08'),
+(8, 'sardinas ni nene', 8, 'available', 20.00, 'can', 'carne', NULL, 1, '2025-03-08 14:04:34', 1, '2025-03-14 14:51:33'),
+(9, 'sardines', 31, 'available', 25.00, 'can', 'carne', 4, 1, '2025-03-08 14:56:51', 1, '2025-03-14 14:51:56'),
+(10, 'sardinessd', 0, 'available', 25.00, 'can', 'carne', 5, 1, '2025-03-08 14:58:00', 1, '2025-03-14 15:09:11'),
+(12, 'sardinessds', 8, 'available', 25.00, 'can', 'carne', NULL, 1, '2025-03-08 15:02:33', NULL, NULL),
+(13, 'tunaflakeswithchili', 14, 'available', 30.00, 'can', 'carne', 3, 1, '2025-03-08 15:04:14', 1, '2025-03-13 21:13:22'),
+(14, 'tunaflakes', 3, 'available', 25.00, 'can', 'carne', 3, 1, '2025-03-08 15:06:37', 1, '2025-03-11 08:44:06'),
+(17, 'corn beef loaf ni daddy', 0, 'available', 25.00, 'can', 'carne', NULL, NULL, '2025-03-08 16:05:26', 1, '2025-03-13 08:31:02'),
+(25, 'carne norte', 1, 'available', 2.00, '2', 'carne', 4, 1, '2025-03-09 02:32:18', NULL, NULL),
+(26, 'meat loafs', 23, 'available', 2313.00, 'pcs', 'carne', 6, 1, '2025-03-09 14:55:47', NULL, NULL),
+(27, 'sinigang', 12, 'available', 12.00, 'kg', 'carne', 3, 1, '2025-03-11 08:36:44', NULL, NULL),
+(28, 'hello', 12, 'available', 2.00, 'kg', 'beverage', 4, 1, '2025-03-13 20:58:25', NULL, '2025-03-13 20:58:56');
 
 -- --------------------------------------------------------
 
@@ -717,13 +779,27 @@ INSERT INTO `product` (`product_id`, `product_name`, `quantity`, `price`, `unito
 
 CREATE TABLE `receiving` (
   `receiving_id` int(11) NOT NULL,
-  `order_id` int(11) DEFAULT NULL,
   `supplier_id` int(11) DEFAULT NULL,
   `receiving_date` date NOT NULL,
   `total_quantity` int(11) NOT NULL,
   `total_cost` decimal(10,2) DEFAULT NULL,
-  `status` enum('Received','Pending','Cancelled') NOT NULL DEFAULT 'Pending'
+  `status` enum('Received','Pending','Cancelled') NOT NULL DEFAULT 'Pending',
+  `createdbyid` int(11) DEFAULT NULL,
+  `createdate` datetime NOT NULL DEFAULT current_timestamp(),
+  `updatedbyid` int(11) DEFAULT NULL,
+  `updatedate` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `receiving`
+--
+
+INSERT INTO `receiving` (`receiving_id`, `supplier_id`, `receiving_date`, `total_quantity`, `total_cost`, `status`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(1, 3, '2025-03-11', 3, 36.00, 'Received', NULL, '2025-03-13 20:54:19', NULL, '2025-03-13 21:13:22'),
+(2, 4, '2025-03-11', 23, 276.00, 'Received', NULL, '2025-03-13 20:54:19', NULL, '2025-03-13 21:17:14'),
+(3, 4, '2025-03-13', 12, 24.00, 'Received', NULL, '2025-03-13 20:58:41', NULL, '2025-03-13 20:58:56'),
+(4, 4, '2025-03-13', 13, 26.00, 'Cancelled', NULL, '2025-03-13 21:17:32', NULL, '2025-03-14 12:26:18'),
+(5, 10, '2025-03-13', 50, 600.00, 'Received', NULL, '2025-03-13 22:44:04', NULL, '2025-03-13 22:44:27');
 
 -- --------------------------------------------------------
 
@@ -745,6 +821,16 @@ CREATE TABLE `receiving_details` (
   `updatedate` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `receiving_details`
+--
+
+INSERT INTO `receiving_details` (`receiving_detail_id`, `receiving_id`, `product_id`, `quantity_furnished`, `unit_cost`, `subtotal_cost`, `condition`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(1, 1, 13, 3, 12.00, 36.00, 'Good', 1, '2025-03-11', NULL, NULL),
+(2, 2, 9, 23, 12.00, 276.00, 'Good', 1, '2025-03-11', NULL, NULL),
+(3, 3, 28, 12, 2.00, 24.00, 'Good', 1, '2025-03-13', NULL, NULL),
+(4, 4, 25, 13, 2.00, 26.00, 'Good', 1, '2025-03-13', NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -763,6 +849,20 @@ CREATE TABLE `sales` (
   `updatedate` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `sales`
+--
+
+INSERT INTO `sales` (`sales_id`, `customer_id`, `sale_date`, `total_amount`, `payment_method`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(4, NULL, '2025-03-11', 46.00, 'Cash', 1, '2025-03-11 15:36:34', NULL, NULL),
+(5, NULL, '2025-03-14', 856.00, 'Cash', NULL, '2025-03-14 15:10:01', NULL, NULL),
+(6, NULL, '2025-03-14', 120.00, 'Cash', NULL, '2025-03-14 15:25:55', NULL, NULL),
+(7, NULL, '2025-03-14', 120.00, 'Cash', NULL, '2025-03-14 15:33:27', NULL, NULL),
+(8, NULL, '2025-03-14', 120.00, 'Cash', NULL, '2025-03-14 15:41:28', NULL, NULL),
+(9, NULL, '2025-03-14', 20.00, 'Cash', NULL, '2025-03-14 15:48:58', NULL, NULL),
+(10, NULL, '2025-03-14', 1.00, 'Cash', NULL, '2025-03-14 15:49:43', NULL, NULL),
+(11, NULL, '2025-03-14', 14.00, 'Cash', NULL, '2025-03-14 16:36:28', NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -777,6 +877,21 @@ CREATE TABLE `salesline` (
   `unit_price` decimal(10,2) NOT NULL CHECK (`unit_price` > 0),
   `subtotal_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `salesline`
+--
+
+INSERT INTO `salesline` (`salesline_id`, `sales_id`, `product_id`, `quantity`, `unit_price`, `subtotal_price`) VALUES
+(7, 4, 17, 2, 23.00, 46.00),
+(8, 5, 8, 8, 23.00, 184.00),
+(9, 5, 25, 21, 32.00, 672.00),
+(10, 6, 25, 10, 12.00, 120.00),
+(11, 7, 25, 10, 12.00, 120.00),
+(12, 8, 25, 10, 12.00, 120.00),
+(13, 9, 13, 2, 10.00, 20.00),
+(14, 10, 25, 1, 1.00, 1.00),
+(15, 11, 25, 7, 2.00, 14.00);
 
 -- --------------------------------------------------------
 
@@ -804,6 +919,7 @@ CREATE TABLE `supplier` (
   `supplier_name` varchar(255) NOT NULL,
   `contact_info` varchar(255) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
+  `status` enum('active','inactive','','') NOT NULL,
   `createdbyid` int(11) DEFAULT NULL,
   `createdate` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedbyid` int(11) DEFAULT NULL,
@@ -814,12 +930,13 @@ CREATE TABLE `supplier` (
 -- Dumping data for table `supplier`
 --
 
-INSERT INTO `supplier` (`supplier_id`, `supplier_name`, `contact_info`, `address`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
-(3, 'NCCCs', '01234', 'Bruno Gempesaw St, Poblacion District, Davao City, Davao del Sur.', 1, '2025-03-08 23:23:15', 1, '2025-03-10 15:14:49'),
-(4, 'SM Ecoland', '09213', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 1, '2025-03-08 23:23:31', NULL, NULL),
-(5, 'Gmall', '01234', 'Bajada 8000 Davao City, Philippines Davao Region ·', 1, '2025-03-08 23:24:45', NULL, NULL),
-(6, 'SM Lanang', '092213', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 1, '2025-03-08 23:24:53', 1, '2025-03-08 23:25:08'),
-(7, 'Unitop', '0214', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 1, '2025-03-08 23:40:10', NULL, NULL);
+INSERT INTO `supplier` (`supplier_id`, `supplier_name`, `contact_info`, `address`, `status`, `createdbyid`, `createdate`, `updatedbyid`, `updatedate`) VALUES
+(3, 'NCCCs', '01234', 'Bruno Gempesaw St, Poblacion District, Davao City, Davao del Sur.', 'active', 1, '2025-03-08 23:23:15', 1, '2025-03-12 13:40:37'),
+(4, 'SM Ecoland', '09213', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 'active', 1, '2025-03-08 23:23:31', NULL, '2025-03-12 13:40:46'),
+(5, 'Gmall', '01234', 'Bajada 8000 Davao City, Philippines Davao Region ·', 'active', 1, '2025-03-08 23:24:45', NULL, '2025-03-12 13:40:48'),
+(6, 'SM Lanang', '092213', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 'active', 1, '2025-03-08 23:24:53', 1, '2025-03-12 13:40:51'),
+(7, 'Unitop', '0214', 'Quimpo Blvd cor. Tulip and Ecoland Drive, Ecoland Subd., Matina, Davao City, Philippines.', 'active', 1, '2025-03-08 23:40:10', NULL, '2025-03-13 22:45:05'),
+(10, 'Abreeza', '12342', 'J.P Laurel, Bajada', 'active', 1, '2025-03-12 13:49:42', NULL, '2025-03-13 22:45:03');
 
 -- --------------------------------------------------------
 
@@ -871,11 +988,12 @@ ALTER TABLE `admin`
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- Indexes for table `audit_log`
+-- Indexes for table `auditlog`
 --
-ALTER TABLE `audit_log`
-  ADD PRIMARY KEY (`auditlog_id`),
-  ADD KEY `admin_id` (`admin_id`);
+ALTER TABLE `auditlog`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `idx_admin_id` (`admin_id`),
+  ADD KEY `idx_timestamp` (`timestamp`);
 
 --
 -- Indexes for table `category`
@@ -969,7 +1087,9 @@ ALTER TABLE `product`
 --
 ALTER TABLE `receiving`
   ADD PRIMARY KEY (`receiving_id`),
-  ADD KEY `supplier_id` (`supplier_id`);
+  ADD KEY `supplier_id` (`supplier_id`),
+  ADD KEY `createdbyid` (`createdbyid`),
+  ADD KEY `updatedbyid` (`updatedbyid`);
 
 --
 -- Indexes for table `receiving_details`
@@ -1043,19 +1163,19 @@ ALTER TABLE `adjustmentline`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `audit_log`
+-- AUTO_INCREMENT for table `auditlog`
 --
-ALTER TABLE `audit_log`
-  MODIFY `auditlog_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `auditlog`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `customerreturn`
@@ -1079,13 +1199,13 @@ ALTER TABLE `customer_type`
 -- AUTO_INCREMENT for table `inventory`
 --
 ALTER TABLE `inventory`
-  MODIFY `inventory_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `inventory_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `membership`
 --
 ALTER TABLE `membership`
-  MODIFY `membership_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `membership_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `points`
@@ -1103,31 +1223,31 @@ ALTER TABLE `points_details`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `receiving`
 --
 ALTER TABLE `receiving`
-  MODIFY `receiving_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `receiving_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `receiving_details`
 --
 ALTER TABLE `receiving_details`
-  MODIFY `receiving_detail_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `receiving_detail_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `sales`
 --
 ALTER TABLE `sales`
-  MODIFY `sales_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `sales_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `salesline`
 --
 ALTER TABLE `salesline`
-  MODIFY `salesline_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `salesline_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `stockadjustmentdetails`
@@ -1139,7 +1259,7 @@ ALTER TABLE `stockadjustmentdetails`
 -- AUTO_INCREMENT for table `supplier`
 --
 ALTER TABLE `supplier`
-  MODIFY `supplier_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `supplier_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `supplierreturn`
@@ -1166,10 +1286,10 @@ ALTER TABLE `adjustmentline`
   ADD CONSTRAINT `adjustmentline_ibfk_3` FOREIGN KEY (`updatedbyid`) REFERENCES `admin` (`admin_id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `audit_log`
+-- Constraints for table `auditlog`
 --
-ALTER TABLE `audit_log`
-  ADD CONSTRAINT `audit_log_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
+ALTER TABLE `auditlog`
+  ADD CONSTRAINT `auditlog_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `category`
@@ -1245,7 +1365,9 @@ ALTER TABLE `product`
 -- Constraints for table `receiving`
 --
 ALTER TABLE `receiving`
-  ADD CONSTRAINT `receiving_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `receiving_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`supplier_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `receiving_ibfk_2` FOREIGN KEY (`createdbyid`) REFERENCES `admin` (`admin_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `receiving_ibfk_3` FOREIGN KEY (`updatedbyid`) REFERENCES `admin` (`admin_id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `receiving_details`
