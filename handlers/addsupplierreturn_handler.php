@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("INSERT INTO supplierreturn (supplier_id, return_reason, return_date, refund_status, createdbyid, createdate) 
                         VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isssi", $supplier_id, $return_reason, $return_date, $refund_status, $createdbyid, $createdate);
+    $stmt->bind_param("isssis", $supplier_id, $return_reason, $return_date, $refund_status, $createdbyid, $createdate);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Supplier return added successfully!";
