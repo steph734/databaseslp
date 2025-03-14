@@ -11,7 +11,7 @@ if (!isset($_SESSION['admin_id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $product_id = $_POST['product_id'];
     $product_name = $_POST['product_name'];
-    $quantity = $_POST['quantity'];
+    $quantity = (int)$_POST['quantity']; // Cast to int
     $price = $_POST['price'];
     $unitofmeasurement = $_POST['unitofmeasurement'];
     $category_id = $_POST['category_id'];
@@ -39,11 +39,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-
     if (isset($stmt)) $stmt->close();
     if (isset($conn)) $conn->close();
 
     // Redirect back to the products page
+    header("Location: ../resource/layout/web-layout.php?page=products");
+    exit();
+} else {
+    $_SESSION['error'] = "Invalid request.";
     header("Location: ../resource/layout/web-layout.php?page=products");
     exit();
 }

@@ -2,76 +2,99 @@
 session_start();
 include '../database/database.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $customer_id = !empty($_POST['customer_id']) ? $_POST['customer_id'] : null;
-    $sale_date = $_POST['sale_date'];
-    $product_ids = $_POST['product_id'];
-    $quantities = $_POST['quantity'];
-    $unit_prices = $_POST['unit_price'];
-    $payment_method = $_POST['payment_method'];
-    $createdbyid = 1; // Replace with actual logged-in admin ID
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
+    exit;
+}
 
+// Get form data
+$customer_id = !empty($_POST['customer_id']) ? $_POST['customer_id'] : null;
+$sale_date = $_POST['sale_date'] ?? date('Y-m-d');
+$payment_method = $_POST['payment_method'] ?? '';
+$product_ids = $_POST['product_id'] ?? [];
+$quantities = $_POST['quantity'] ?? [];
+$unit_prices = $_POST['unit_price'] ?? [];
+
+if (empty($product_ids) || empty($quantities) || empty($unit_prices) || count($product_ids) !== count($quantities) || count($product_ids) !== count($unit_prices)) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Missing or mismatched product data']);
+    exit;
+}
+
+try {
+    // Begin transaction
     $conn->begin_transaction();
 
-    try {
-        // Calculate total amount and check stock
-        $total_amount = 0;
-        $errors = [];
+    // Calculate total amount
+    $total_amount = 0;
+    $deductions = [];
+    for ($i = 0; $i < count($product_ids); $i++) {
+        $quantity = intval($quantities[$i]);
+        $unit_price = floatval($unit_prices[$i]);
+        $total_amount += $quantity * $unit_price;
 
-        for ($i = 0; $i < count($product_ids); $i++) {
-            $product_id = $product_ids[$i];
-            $quantity = $quantities[$i];
-            $unit_price = $unit_prices[$i];
-            $subtotal_price = $quantity * $unit_price;
-            $total_amount += $subtotal_price;
-
-            // Check stock in Inventory
-            $stmt = $conn->prepare("SELECT stock_quantity FROM Inventory WHERE product_id = ?");
-            $stmt->bind_param("i", $product_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-
-            if (!$row || $row['stock_quantity'] < $quantity) {
-                $errors[] = "Insufficient stock for Product ID $product_id. Available: " . ($row ? $row['stock_quantity'] : 0);
-            }
-        }
-
-        if (!empty($errors)) {
-            throw new Exception(implode("; ", $errors));
-        }
-
-        // Insert into Sales
-        $stmt = $conn->prepare("INSERT INTO Sales (customer_id, sale_date, total_amount, payment_method, createdbyid) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("isdsi", $customer_id, $sale_date, $total_amount, $payment_method, $createdbyid);
+        // Validate stock availability
+        $stock_query = "SELECT stock_quantity FROM Inventory WHERE product_id = ?";
+        $stmt = $conn->prepare($stock_query);
+        $stmt->bind_param('i', $product_ids[$i]);
         $stmt->execute();
-        $sales_id = $conn->insert_id;
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $current_stock = $row['stock_quantity'] ?? 0;
+        $stmt->close();
 
-        // Insert into SalesLine and update Inventory
-        for ($i = 0; $i < count($product_ids); $i++) {
-            $product_id = $product_ids[$i];
-            $quantity = $quantities[$i];
-            $unit_price = $unit_prices[$i];
-            $subtotal_price = $quantity * $unit_price;
-
-            // Insert into SalesLine
-            $stmt = $conn->prepare("INSERT INTO SalesLine (sales_id, product_id, quantity, unit_price, subtotal_price) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("iiidd", $sales_id, $product_id, $quantity, $unit_price, $subtotal_price);
-            $stmt->execute();
-
-            // Deduct from Inventory
-            $stmt = $conn->prepare("UPDATE Inventory SET stock_quantity = stock_quantity - ?, updatedbyid = ?, updatedate = NOW() WHERE product_id = ?");
-            $stmt->bind_param("iii", $quantity, $createdbyid, $product_id);
-            $stmt->execute();
+        if ($quantity > $current_stock) {
+            throw new Exception("Insufficient stock for Product ID: {$product_ids[$i]}");
         }
 
-        $conn->commit();
-        $_SESSION['success'] = "Sale added successfully!";
-    } catch (Exception $e) {
-        $conn->rollback();
-        $_SESSION['error'] = "Failed to add sale: " . $e->getMessage();
+        $deductions[] = [
+            'product_id' => $product_ids[$i],
+            'quantity_deducted' => $quantity
+        ];
     }
 
-    header("Location: ../resource/layout/web-layout.php?page=sales");
-    exit();
+    // Insert into Sales table
+    $stmt = $conn->prepare("INSERT INTO Sales (customer_id, sale_date, payment_method, total_amount, createdate) 
+        VALUES (?, ?, ?, ?, NOW())");
+    $stmt->bind_param("sssd", $customer_id, $sale_date, $payment_method, $total_amount);
+    $stmt->execute();
+    $sales_id = $conn->insert_id;
+    $stmt->close();
+
+    // Insert into SalesLine and update Inventory
+    $stmt = $conn->prepare("INSERT INTO SalesLine (sales_id, product_id, quantity, unit_price, subtotal_price) 
+        VALUES (?, ?, ?, ?, ?)");
+    $inventory_stmt = $conn->prepare("UPDATE Inventory SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
+
+    for ($i = 0; $i < count($product_ids); $i++) {
+        $subtotal = $quantities[$i] * $unit_prices[$i];
+        $stmt->bind_param("iiidd", $sales_id, $product_ids[$i], $quantities[$i], $unit_prices[$i], $subtotal);
+        $stmt->execute();
+
+        // Update inventory
+        $inventory_stmt->bind_param("ii", $quantities[$i], $product_ids[$i]);
+        $inventory_stmt->execute();
+    }
+
+    $stmt->close();
+    $inventory_stmt->close();
+
+    // Commit transaction
+    $conn->commit();
+
+    // Return JSON response
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'message' => 'Sale added successfully!',
+        'deductions' => $deductions
+    ]);
+} catch (Exception $e) {
+    $conn->rollback();
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Error adding sale: ' . $e->getMessage()]);
 }
+
+$conn->close();
+exit;

@@ -1,15 +1,12 @@
 <?php
-
 session_start();
 if (!isset($_SESSION['username'])) {
     header("Location: ../resource/login.php");
     exit();
 }
 $username = ucfirst($_SESSION['username']);
-
 $login = isset($_SESSION['login']) ? $_SESSION['login'] : '';
 unset($_SESSION['login']);
-
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +16,6 @@ unset($_SESSION['login']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory</title>
-    <!-- css -->
     <link rel="stylesheet" href="../css/dashboard.css">
     <link rel="stylesheet" href="../css/inventory.css">
     <link rel="stylesheet" href="../css/customer.css">
@@ -30,7 +26,6 @@ unset($_SESSION['login']);
     <link rel="stylesheet" href="../css/returns.css">
     <link rel="stylesheet" href="../css/sidebar.css">
     <link rel="stylesheet" href="../css/membership.css">
-    <!-- css -->
     <link rel="stylesheet" href="../../statics/css/bootstrap.min.css">
     <script src="../../statics/js/bootstrap.bundle.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -40,7 +35,6 @@ unset($_SESSION['login']);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
     <style>
         html,
         body {
@@ -51,15 +45,11 @@ unset($_SESSION['login']);
 </head>
 
 <body>
-
     <?php include __DIR__ . '/../views/sidebar.php'; ?>
 
-    <!-- main content -->
     <?php
     $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-
-    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports'];
-
+    $allowed_pages = ['dashboard', 'customer', 'membership', 'points', 'sales', 'products', 'inventory', 'supplier', 'returns', 'reports', 'account', 'profileadmin'];
     $page_path = __DIR__ . "/../views/{$page}.php";
 
     if (in_array($page, $allowed_pages) && file_exists($page_path)) {
@@ -69,16 +59,17 @@ unset($_SESSION['login']);
     }
     ?>
 
-
     <?php if (isset($_SESSION['success'])) : ?>
-        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
+            style="width: 290px !important;">
             <?= $_SESSION['success']; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['error'])) : ?>
-        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert" style="width: 290px !important;">
+        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
+            style="width: 290px !important;">
             <?= $_SESSION['error']; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

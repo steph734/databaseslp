@@ -17,7 +17,7 @@ if (!in_array($status, $valid_statuses)) {
     echo json_encode(['status' => 'error', 'message' => 'Invalid status value']);
     exit;
 }
-
+// update
 $conn->begin_transaction();
 try {
     // Get current status
@@ -33,18 +33,26 @@ try {
     $current_status = strtolower($current_row['status']);
     $current_stmt->close();
 
+    // Block changes if already "received"
+    if ($current_status === "received") {
+        throw new Exception("Cannot edit status once the order is marked as received.");
+    }
+
     // Update receiving status
-    $user_id = $_SESSION['user_id'] ?? null; // Optional: track user
-    $stmt = $conn->prepare("UPDATE Receiving SET status = ?, createdbyid = ?, createdate = NOW() WHERE receiving_id = ?");
-    $stmt->bind_param("sii", $status, $user_id, $receiving_id);
+    $stmt = $conn->prepare("UPDATE Receiving SET status = ? WHERE receiving_id = ?");
+    $stmt->bind_param("si", $status, $receiving_id);
     $stmt->execute();
+
     if ($stmt->affected_rows === 0) {
-        throw new Exception("Failed to update receiving status");
+        if ($status === $current_status) {
+            $response = ['status' => 'success', 'message' => 'Status unchanged, no update needed'];
+        } else {
+            throw new Exception("Failed to update receiving status");
+        }
+    } else {
+        $response = ['status' => 'success', 'message' => 'Status updated successfully'];
     }
     $stmt->close();
-
-    // Response array
-    $response = ['status' => 'success', 'message' => 'Status updated successfully'];
 
     // Handle status-specific logic
     if ($status === "received" && $current_status !== "received") {
@@ -76,6 +84,7 @@ try {
 
         $response['message'] = "Order marked as received. Product quantities and supplier updated.";
     } elseif ($status === "cancelled" && $current_status === "received") {
+        // This won't happen due to the earlier check, but kept for clarity
         $response['message'] = "Order cancelled. Products were already received and added to inventory. If you need to return the products, please use the return transaction process.";
         error_log("Receiving ID $receiving_id cancelled after being received. No automatic Product reversion applied.");
     } elseif ($status === "cancelled") {

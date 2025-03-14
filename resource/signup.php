@@ -11,18 +11,34 @@
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
+    <style>
+        body {
+            font-size: 12px !important;
+        }
 
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<style>
-    body{
-        font-size: 12px !important;
-    }
-</style>
+
 <body>
     <div class="container-custom">
         <div class="row align-items-center">
             <div class="col-md-6 signup-box">
                 <h2 class="signup-title">SIGN UP</h2>
+                <?php
+                if (isset($_GET['error'])) {
+                    if ($_GET['error'] === 'username_taken') {
+                        echo '<div class="error-message">Username already exists. Please choose a different username.</div>';
+                    } elseif ($_GET['error'] === 'phone_required') {
+                        echo '<div class="error-message">Phone number is required.</div>';
+                    }
+                }
+                ?>
                 <form action="../handlers/signin_handler.php" method="POST" onsubmit="return validateForm()">
                     <div class="form-row">
                         <div class="form-group">
@@ -77,21 +93,14 @@
                     </div>
                     <div class="d-flex justify-content-center gap-3">
                         <div class="mt-1">
-                            <button type="submit" class="btn btn-signup btn-success w-100 custom-signup-btn">
-                                Sign Up
-                            </button>
-
-                            <style>
-
-                            </style>
-
+                            <button type="submit" class="btn btn-signup btn-success w-100 custom-signup-btn">Sign
+                                Up</button>
                         </div>
                         <div class="mt-1 text-center">
                             <button type="button" class="btn btn-outline-success custom-btn"
                                 onclick="window.location.href='login.php'">
                                 <i class="fa-solid fa-right-from-bracket"></i> Back
                             </button>
-
                         </div>
                     </div>
                 </form>
@@ -105,6 +114,20 @@
         </div>
     </div>
 
+    <!-- Bootstrap JS (for form styling) -->
+    <script src="../statics/js/bootstrap.bundle.js"></script>
+    <script>
+        function validateForm() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match. Please try again.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 
 </html>
