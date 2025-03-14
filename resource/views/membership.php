@@ -6,27 +6,36 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    // Customer Query
+    // Query for ALL customers (Customer tab)
     if (isset($_SESSION['search_results'])) {
-        $customer_result = $_SESSION['search_results'];
+        $all_customer_result = $_SESSION['search_results'];
         unset($_SESSION['search_results']);
     } else {
-        $customer_query = "SELECT i.customer_id, i.name, i.contact, i.address, 
-                         c.type_name, c.type_id, i.createdbyid, i.createdate,
-                         i.updatedbyid, i.updatedate
-                         FROM Customer i 
-                         JOIN customer_type c ON i.type_id = c.type_id";
-        $customer_result = $conn->query($customer_query);
+        $all_customer_query = "SELECT i.customer_id, i.name, i.contact, i.address, 
+                             c.type_name, c.type_id, i.createdbyid, i.createdate,
+                             i.updatedbyid, i.updatedate
+                             FROM Customer i 
+                             JOIN customer_type c ON i.type_id = c.type_id";
+        $all_customer_result = $conn->query($all_customer_query);
     }
+
+    // Query for member customers only (Member tab dropdown)
+    $member_customer_query = "SELECT i.customer_id, i.name, i.contact, i.address, 
+                            c.type_name, c.type_id, i.createdbyid, i.createdate,
+                            i.updatedbyid, i.updatedate
+                            FROM Customer i 
+                            JOIN customer_type c ON i.type_id = c.type_id
+                            INNER JOIN membership m ON i.customer_id = m.customer_id";
+    $member_customer_result = $conn->query($member_customer_query);
 
     // Membership Query
     $membership_query = "SELECT m.membership_id, m.customer_id, m.status, 
-                        m.date_repairs AS start_date, m.date_renewal AS renewal_date,
-                        m.createdbyid, m.createdate, m.updatedbyid, m.updatedate,
-                        c.name AS customer_name
-                        FROM membership m
-                        LEFT JOIN Customer c ON m.customer_id = c.customer_id
-                        ORDER BY m.membership_id DESC";
+                    m.date_repairs AS start_date, m.date_renewal AS renewal_date,
+                    m.createdbyid, m.createdate, m.updatedbyid, m.updatedate,
+                    c.name AS customer_name
+                    FROM membership m
+                    INNER JOIN Customer c ON m.customer_id = c.customer_id
+                    ORDER BY m.membership_id DESC";
     $membership_stmt = $conn->prepare($membership_query);
     $membership_stmt->execute();
     $membership_result = $membership_stmt->get_result();
@@ -46,7 +55,6 @@ try {
     <title>Membership & Customer Management</title>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
-        /* [Your original CSS remains unchanged, included here for completeness] */
         .card-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -191,8 +199,8 @@ try {
             cursor: pointer;
         }
         .status-active { color: #28a745; }
-        .status-inactive { color: #dc3545; }
-        .status-pending { color: #ffc107; }
+        .status-inactive { color:  #808080; }
+        .status-blocked { color: #dc3545; }
         .ui-autocomplete {
             background: white;
             border: 1px solid #ddd;
@@ -221,8 +229,8 @@ try {
         </header>
 
         <div class="tabs" role="tablist">
-            <span class="active" data-tab="memberships" role="tab" aria-selected="true" tabindex="0">Memberships</span>
-            <span data-tab="customers" role="tab" aria-selected="false" tabindex="0">Customers</span>
+            <span class="active" data-tab="customers" role="tab" aria-selected="true" tabindex="0">Customer</span>
+            <span data-tab="memberships" role="tab" aria-selected="false" tabindex="0">Member</span>
         </div>
         <hr>
 
@@ -242,7 +250,7 @@ try {
                         <option value="" disabled selected>Select Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
-                        <option value="pending">Pending</option>
+                        <option value="blocked">Blocked</option>
                     </select>
                     <input type="date" name="start_date" max="<?php echo date('Y-m-d'); ?>">
                     <input type="date" name="renewal_date" min="<?php echo date('Y-m-d'); ?>">
@@ -252,7 +260,7 @@ try {
 
             <div class="card-container">
                 <?php if ($membership_result->num_rows === 0): ?>
-                    <p>No memberships found.</p>
+                    <p>No members found.</p>
                 <?php else: ?>
                     <?php while ($row = $membership_result->fetch_assoc()): ?>
                         <div class="membership-card">
@@ -261,7 +269,7 @@ try {
                                 <select class="status-dropdown status-<?php echo strtolower($row['status']); ?>"
                                         onchange="updateMembershipStatus(<?php echo $row['membership_id']; ?>, this.value)">
                                     <?php
-                                    $statuses = ['active', 'inactive', 'pending'];
+                                    $statuses = ['active', 'inactive', 'blocked'];
                                     foreach ($statuses as $status) {
                                         $selected = $row['status'] === $status ? 'selected' : '';
                                         echo "<option value='$status' $selected class='status-$status'>" . ucfirst($status) . "</option>";
@@ -309,9 +317,9 @@ try {
             </div>
 
             <div class="card-container">
-                <?php if ($customer_result && $customer_result->num_rows > 0): ?>
-                    <?php $customer_result->data_seek(0); ?>
-                    <?php while ($row = $customer_result->fetch_assoc()): ?>
+                <?php if ($all_customer_result && $all_customer_result->num_rows > 0): ?>
+                    <?php $all_customer_result->data_seek(0); ?>
+                    <?php while ($row = $all_customer_result->fetch_assoc()): ?>
                         <div class="customer-card">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h3>#<?php echo htmlspecialchars($row['customer_id']); ?></h3>
@@ -342,7 +350,6 @@ try {
                                 </button>
                             </div>
                         </div>
-                        <!-- Customer Edit/Delete Modals (placeholders) -->
                         <div class="modal fade" id="editCustomer<?php echo $row['customer_id']; ?>" tabindex="-1">
                             <!-- Add your edit modal content here -->
                         </div>
@@ -372,8 +379,8 @@ try {
                             <label>Customer</label>
                             <select class="form-control" id="editCustomerId" name="customer_id" required>
                                 <?php
-                                $customer_result->data_seek(0);
-                                while ($customer = $customer_result->fetch_assoc()) {
+                                $member_customer_result->data_seek(0);
+                                while ($customer = $member_customer_result->fetch_assoc()) {
                                     echo "<option value='{$customer['customer_id']}'>{$customer['name']}</option>";
                                 }
                                 ?>
@@ -384,7 +391,7 @@ try {
                             <select class="form-control" id="editStatus" name="status" required>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
-                                <option value="pending">Pending</option>
+                                <option value="pending">Blocked</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -409,7 +416,8 @@ try {
 
     <?php
     $membership_result->free();
-    $customer_result->free();
+    $all_customer_result->free();
+    $member_customer_result->free();
     $membership_stmt->close();
     $conn->close();
     ?>
@@ -463,7 +471,7 @@ try {
         dropdown.dataset.oldValue = dropdown.value;
         xhr.send(`membership_id=${membershipId}&status=${newStatus}`);
     }
-
+                    
     document.querySelectorAll('.tabs span').forEach(tab => {
         tab.addEventListener('click', function() {
             document.querySelectorAll('.tabs span').forEach(t => {
@@ -480,7 +488,6 @@ try {
         });
     });
 
-    // Autocomplete for customer_id
     $(document).ready(function() {
         $('input[name="customer_id"]').autocomplete({
             source: function(request, response) {

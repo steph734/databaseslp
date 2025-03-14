@@ -132,9 +132,9 @@ if (isset($_SESSION['search_results'])) {
                             <tr>
                                 <td><input type="checkbox"></td>
                                 <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
-                                <td><?php echo htmlspecialchars($row['name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['contact']); ?></td>
-                                <td><?php echo htmlspecialchars($row['address']); ?></td>
+                                <td><?php echo htmlspecialchars($row['name']?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['contact']?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['address']?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['type_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdbyid'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdate'] ?? '-'); ?></td>
@@ -185,17 +185,17 @@ if (isset($_SESSION['search_results'])) {
                                                 <div class="mb-3">
                                                     <label class="form-label">Name</label>
                                                     <input type="text" name="name" id="edit_name_<?php echo $row['customer_id']; ?>" 
-                                                        class="form-control" value="<?php echo htmlspecialchars($row['name']); ?>" required>
+                                                        class="form-control" value="<?php echo htmlspecialchars($row['name']); ?>" >
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Contact</label>
                                                     <input type="text" name="contact" id="edit_contact_<?php echo $row['customer_id']; ?>" 
-                                                        class="form-control" value="<?php echo htmlspecialchars($row['contact']); ?>" required>
+                                                        class="form-control" value="<?php echo htmlspecialchars($row['contact']); ?>" >
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Address</label>
                                                     <input type="text" name="address" id="edit_address_<?php echo $row['customer_id']; ?>" 
-                                                        class="form-control" value="<?php echo htmlspecialchars($row['address']); ?>" required>
+                                                        class="form-control" value="<?php echo htmlspecialchars($row['address']); ?>">
                                                 </div>
                                                 <div class="mb-3">
                                                     <label class="form-label">Customer Type</label>
@@ -243,15 +243,15 @@ if (isset($_SESSION['search_results'])) {
                     <form action="../../handlers/createcustomer.php" method="POST">
                         <div class="mb-3">
                             <label class="form-label">Name</label>
-                            <input type="text" name="name" id="create_name" class="form-control" required>
+                            <input type="text" name="name" id="create_name" class="form-control" >
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Contact</label>
-                            <input type="text" name="contact" id="create_contact" class="form-control" required>
+                            <input type="text" name="contact" id="create_contact" class="form-control" >
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Address</label>
-                            <input type="text" name="address" id="create_address" class="form-control" required>
+                            <input type="text" name="address" id="create_address" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Customer Type</label>
@@ -278,59 +278,58 @@ if (isset($_SESSION['search_results'])) {
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        function toggleFields(select, nameInput, contactInput, addressInput) {
-            const REGULAR_CUSTOMER_ID = '1'; // Adjust based on your "Regular" type_id
-            const MEMBER_CUSTOMER_ID = '2'; // Adjust based on your "Member" type_id
-            
-            const isRegularCustomer = select.value === REGULAR_CUSTOMER_ID;
-            const isMemberCustomer = select.value === MEMBER_CUSTOMER_ID;
-            
-            // Enable/disable fields based on customer type
-            nameInput.disabled = isRegularCustomer || isMemberCustomer;
-            contactInput.disabled = isRegularCustomer || isMemberCustomer;
-            addressInput.disabled = isRegularCustomer || isMemberCustomer;
-            
-            // Add visual feedback
-            [nameInput, contactInput, addressInput].forEach(input => {
-                input.classList.toggle('disabled-field', isRegularCustomer || isMemberCustomer);
-                input.title = (isRegularCustomer || isMemberCustomer) ? 'Disabled for Regular/Member customers' : '';
+    function toggleFields(select, nameInput, contactInput, addressInput) {
+        const REGULAR_CUSTOMER_ID = '2'; // Adjust based on your "Regular" type_id
+        const MEMBER_CUSTOMER_ID = '1'; // Adjust based on your "Member" type_id
+        
+        const isRegularCustomer = select.value === REGULAR_CUSTOMER_ID;
+        
+        // Enable fields for Member, disable for Regular
+        nameInput.disabled = isRegularCustomer;
+        contactInput.disabled = isRegularCustomer;
+        addressInput.disabled = isRegularCustomer;
+        
+        // Add visual feedback
+        [nameInput, contactInput, addressInput].forEach(input => {
+            input.classList.toggle('disabled-field', isRegularCustomer);
+            input.title = isRegularCustomer ? 'Disabled for Regular customers' : '';
+        });
+    }
+
+    function setupModal(modal) {
+        const select = modal.querySelector('select[name="customertype"]');
+        const nameInput = modal.querySelector('input[name="name"]');
+        const contactInput = modal.querySelector('input[name="contact"]');
+        const addressInput = modal.querySelector('input[name="address"]');
+
+        if (select && nameInput && contactInput && addressInput) {
+            // Set initial state when modal opens
+            modal.addEventListener('shown.bs.modal', () => {
+                toggleFields(select, nameInput, contactInput, addressInput);
             });
-        }
+            
+            // Update when customer type changes
+            select.addEventListener('change', () => {
+                toggleFields(select, nameInput, contactInput, addressInput);
+            });
 
-        function setupModal(modal) {
-            const select = modal.querySelector('select[name="customertype"]');
-            const nameInput = modal.querySelector('input[name="name"]');
-            const contactInput = modal.querySelector('input[name="contact"]');
-            const addressInput = modal.querySelector('input[name="address"]');
-
-            if (select && nameInput && contactInput && addressInput) {
-                // Set initial state when modal opens
-                modal.addEventListener('shown.bs.modal', () => {
-                    toggleFields(select, nameInput, contactInput, addressInput);
+            // Handle reset button in Create modal
+            const resetButton = modal.querySelector('button[type="reset"]');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    setTimeout(() => toggleFields(select, nameInput, contactInput, addressInput), 0);
                 });
-                
-                // Update when customer type changes
-                select.addEventListener('change', () => {
-                    toggleFields(select, nameInput, contactInput, addressInput);
-                });
-
-                // Handle reset button in Create modal
-                const resetButton = modal.querySelector('button[type="reset"]');
-                if (resetButton) {
-                    resetButton.addEventListener('click', () => {
-                        setTimeout(() => toggleFields(select, nameInput, contactInput, addressInput), 0);
-                    });
-                }
             }
         }
+    }
 
-        // Setup all edit modals
-        document.querySelectorAll('.modal[id^="edit"]').forEach(setupModal);
-        
-        // Setup create modal
-        const createModal = document.getElementById('create');
-        if (createModal) setupModal(createModal);
-    });
+    // Setup all edit modals
+    document.querySelectorAll('.modal[id^="edit"]').forEach(setupModal);
+    
+    // Setup create modal
+    const createModal = document.getElementById('create');
+    if (createModal) setupModal(createModal);
+});
     </script>
 </body>
 </html>

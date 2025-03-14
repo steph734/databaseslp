@@ -12,11 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $createdById = $_SESSION['admin_id'] ?? null; // Fetch admin_id from session
 
     // Check if all required fields are provided, including admin_id
-    if (empty($name) || empty($contact) || empty($address) || !$customerType || !$createdById) {
-        $_SESSION['error'] = "All fields are required, or you are not logged in as an admin.";
-        header("Location: ../resource/layout/web-layout.php?page=customer");
-        exit();
-    }
+//     if (empty($name) || empty($contact) || empty($address) || !$customerType || !$createdById) {
+//         $_SESSION['error'] = "All fields are required, or you are not logged in as an admin.";
+//         header("Location: ../resource/layout/web-layout.php?page=customer");
+//         exit();
+//   }
+
+
 
     try {
         // Prepare the SQL statement
