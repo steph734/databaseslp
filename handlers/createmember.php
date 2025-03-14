@@ -11,7 +11,7 @@ try {
     $status = $_POST['status'] ?? '';
     $start_date = $_POST['start_date'] ?? '';
     $renewal_date = $_POST['renewal_date'] ?? '';
-    $createdbyid = $_SESSION['user_id'] ?? 1; // Assuming you have user_id in session
+    $createdbyid = $_SESSION['admin_id'] ?? 1; // Assuming you have user_id in session
 
     if (empty($customer_id) || empty($status)) {
         throw new Exception('Customer ID and status are required');

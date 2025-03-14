@@ -6,7 +6,7 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    // Points Query (unchanged)
+    // Points Query
     $points_query = "SELECT p.points_id, p.membership_id, p.sales_id, p.total_purchase, p.points_amount,
                     m.customer_id, c.name AS customer_name
                     FROM points p
@@ -17,7 +17,7 @@ try {
     $points_stmt->execute();
     $points_result = $points_stmt->get_result();
 
-    // Points Details Query (unchanged)
+    // Points Details Query
     $points_details_query = "SELECT pd.pd_id, pd.points_id, pd.total_points, pd.redeemable_date, 
                            pd.redeemed_amount, pd.createdbyid, pd.createdate, pd.updatedbyid, 
                            pd.updatedate, p.membership_id, c.name AS customer_name
@@ -30,13 +30,13 @@ try {
     $points_details_stmt->execute();
     $points_details_result = $points_details_stmt->get_result();
 
-    // Membership Query (unchanged)
+    // Membership Query
     $membership_query = "SELECT m.membership_id, c.name AS customer_name
                         FROM membership m
                         INNER JOIN Customer c ON m.customer_id = c.customer_id";
     $membership_result = $conn->query($membership_query);
 
-    // Sales Query (adapted from sales code)
+    // Sales Query
     $sales_query = "SELECT s.sales_id, s.sale_date, c.name AS customer_name
                     FROM Sales s
                     LEFT JOIN Customer c ON s.customer_id = c.customer_id
@@ -63,8 +63,8 @@ try {
     <title>Points Management</title>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Same styles from your previous points management code */
         .card-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -231,7 +231,7 @@ try {
         </div>
         <hr>
 
-        <!-- Points Content -->
+        <!-- Points Tab -->
         <div id="points-content" role="tabpanel">
             <div class="header-supplier">
                 <button class="btn-add" onclick="toggleAddPointsForm()">
@@ -258,8 +258,11 @@ try {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="number" step="0.01" name="total_purchase" placeholder="Total Purchase" required min="0">
-                    <input type="number" name="points_amount" placeholder="Points Amount" required min="0">
+                    <div class="purchase-input">
+                        <input type="number" step="0.01" name="total_purchase" placeholder="Total Purchase" required min="0">
+                        <small class="form-text text-muted">10 points per 1000 pesos</small>
+                    </div>
+                    <input type="number" name="points_amount" placeholder="Points Amount" required min="0" readonly>
                     <button type="submit" class="btn-save">Save</button>
                 </form>
             </div>
@@ -275,7 +278,6 @@ try {
                                 <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
                             </button>
                             <div class="points-info">
-                                <!-- Add audit info if available in your points table -->
                                 <p><strong>Created by:</strong> N/A</p>
                                 <p><strong>Created:</strong> N/A</p>
                                 <p><strong>Updated by:</strong> N/A</p>
@@ -304,7 +306,7 @@ try {
             </div>
         </div>
 
-        <!-- Points Details Content -->
+        <!-- Points Details Tab -->
         <div id="pointsdetails-content" style="display: none;" role="tabpanel">
             <div class="header-supplier">
                 <button class="btn-add" onclick="toggleAddPointsDetailsForm()">
@@ -363,7 +365,7 @@ try {
         </div>
     </div>
 
-    <!-- Points Edit Modal -->
+    <!-- Edit Points Modal -->
     <div class="modal fade" id="editPointsModal" tabindex="-1" aria-labelledby="editPointsModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -391,10 +393,11 @@ try {
                         <div class="mb-3">
                             <label>Total Purchase</label>
                             <input type="number" step="0.01" class="form-control" id="editTotalPurchase" name="total_purchase" required>
+                            <small class="form-text text-muted">10 points per 1000 pesos</small>
                         </div>
                         <div class="mb-3">
                             <label>Points Amount</label>
-                            <input type="number" class="form-control" id="editPointsAmount" name="points_amount" required>
+                            <input type="number" class="form-control" id="editPointsAmount" name="points_amount" required readonly>
                         </div>
                         <button type="submit" class="btn btn-success">Save Changes</button>
                     </form>
@@ -403,7 +406,7 @@ try {
         </div>
     </div>
 
-    <!-- Points Details Edit Modal (unchanged) -->
+    <!-- Edit Points Details Modal -->
     <div class="modal fade" id="editPointsDetailsModal" tabindex="-1" aria-labelledby="editPointsDetailsModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -447,8 +450,7 @@ try {
     $conn->close();
     ?>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+   
     <script>
     function toggleAddPointsForm() {
         var form = document.getElementById("addPointsForm");
@@ -519,7 +521,29 @@ try {
         });
     });
 
+    function setupPointsCalculation() {
+        const addTotalPurchase = document.querySelector('#addPointsForm input[name="total_purchase"]');
+        const addPointsAmount = document.querySelector('#addPointsForm input[name="points_amount"]');
+        const editTotalPurchase = document.getElementById('editTotalPurchase');
+        const editPointsAmount = document.getElementById('editPointsAmount');
+
+        function calculatePoints(purchaseInput, pointsOutput) {
+            if (purchaseInput && pointsOutput) {
+                purchaseInput.addEventListener('input', function() {
+                    const purchaseValue = parseFloat(this.value) || 0;
+                    const calculatedPoints = Math.floor(purchaseValue / 1000) * 10;
+                    pointsOutput.value = calculatedPoints > 0 ? calculatedPoints : '';
+                });
+            }
+        }
+
+        calculatePoints(addTotalPurchase, addPointsAmount);
+        calculatePoints(editTotalPurchase, editPointsAmount);
+    }
+
     $(document).ready(function() {
+        setupPointsCalculation();
+
         $('input[name="points_id"]').autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -535,11 +559,10 @@ try {
             minLength: 1
         });
 
-        // Optional: Add autocomplete for sales_id if desired
         $('input[name="sales_id"]').autocomplete({
             source: function(request, response) {
                 $.ajax({
-                    url: '../../handlers/get_sales.php', // You'll need to create this handler
+                    url: '../../handlers/get_sales.php',
                     method: 'POST',
                     data: { term: request.term },
                     dataType: 'json',
@@ -550,6 +573,10 @@ try {
             },
             minLength: 1
         });
+    });
+
+    $('#editPointsModal').on('shown.bs.modal', function () {
+        setupPointsCalculation();
     });
     </script>
 </body>
