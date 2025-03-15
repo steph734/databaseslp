@@ -54,11 +54,11 @@ if (!$result_supplier) {
     }
 
     .search-container input {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 150px;
-    }
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 290px; /* Increased from 150px */
+}
 
     .search-btn,
     .clear-btn,
@@ -227,32 +227,37 @@ if (!$result_supplier) {
 
 <script>
     function showTable(type) {
-        console.log("Switching to:", type); // Debugging log
+    console.log("Switching to:", type);
 
-        let customerTable = document.getElementById('customer_returns-table-body');
-        let supplierTable = document.getElementById('supplier-table');
+    let customerTable = document.getElementById('customer_returns-table-body');
+    let supplierTable = document.getElementById('supplier-table');
+    let customerSearch = document.getElementById('customer-search');
+    let supplierSearch = document.getElementById('supplier-search');
 
-        if (type === 'customer') {
-            customerTable.style.display = 'table';
-            supplierTable.style.display = 'none';
-        } else {
-            customerTable.style.display = 'none';
-            supplierTable.style.display = 'table';
-        }
-
-        // Ensure tabs are highlighted correctly
-        document.querySelectorAll('.tabs span').forEach(tab => tab.classList.remove('active'));
-        document.querySelector(`.tabs span[data-type="${type}"]`).classList.add('active');
-
-        // Update form actions
-        document.getElementById('create-form').action = (type === 'customer') ? 'handlers/addcustomerreturn_handler.php' :
-            'handlers/addsupplierreturn_handler.php';
-        document.getElementById('edit-form').action = (type === 'customer') ? 'handlers/editcustomerreturn_handler.php' :
-            'handlers/editsupplierreturn_handler.php';
-        
-        document.getElementById('delete-form').action = (type === 'customer') ?
-            'handlers/deletecustomerreturn_handler.php' : 'handlers/deletesupplierreturn_handler.php';
+    if (type === 'customer') {
+        customerTable.style.display = 'table';
+        supplierTable.style.display = 'none';
+        customerSearch.style.display = 'block';
+        supplierSearch.style.display = 'none';
+    } else {
+        customerTable.style.display = 'none';
+        supplierTable.style.display = 'table';
+        customerSearch.style.display = 'none';
+        supplierSearch.style.display = 'block';
     }
+
+    // Ensure tabs are highlighted correctly
+    document.querySelectorAll('.tabs span').forEach(tab => tab.classList.remove('active'));
+    document.querySelector(`.tabs span[data-type="${type}"]`).classList.add('active');
+
+    // Update form actions
+    document.getElementById('create-form').action = (type === 'customer') ? 'handlers/addcustomerreturn_handler.php' :
+        'handlers/addsupplierreturn_handler.php';
+    document.getElementById('edit-form').action = (type === 'customer') ? 'handlers/editcustomerreturn_handler.php' :
+        'handlers/editsupplierreturn_handler.php';
+    document.getElementById('delete-form').action = (type === 'customer') ?
+        'handlers/deletecustomerreturn_handler.php' : 'handlers/deletesupplierreturn_handler.php';
+}
 
     function openModal(modalId) {
         document.getElementById(modalId).style.display = "flex";
@@ -454,6 +459,94 @@ function deleteSelectedRows() {
     form.submit();
 }
 
+function searchTable() {
+    const activeTab = document.querySelector('.tabs span.active').getAttribute('data-type');
+    const tableBody = activeTab === 'customer' 
+        ? document.getElementById('customer_returns-table-body').getElementsByTagName('tbody')[0]
+        : document.getElementById('supplier-table').getElementsByTagName('tbody')[0];
+    
+    const rows = tableBody.getElementsByTagName('tr');
+    
+    if (activeTab === 'customer') {
+        const returnIdInput = document.getElementById('search-customer-return-id').value.toLowerCase();
+        const customerIdInput = document.getElementById('search-customer-id').value.toLowerCase();
+        const createdDateInput = document.getElementById('search-customer-created-date').value;
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            
+            const returnId = cells[1] ? cells[1].textContent.toLowerCase() : '';
+            const customerId = cells[2] ? cells[2].textContent.toLowerCase() : '';
+            const createdDate = cells[8] ? cells[8].textContent : '';
+            
+            const matchesReturnId = !returnIdInput || returnId.includes(returnIdInput);
+            const matchesCustomerId = !customerIdInput || customerId.includes(customerIdInput);
+            const matchesCreatedDate = !createdDateInput || createdDate.startsWith(createdDateInput);
+            
+            if (matchesReturnId && matchesCustomerId && matchesCreatedDate) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    } else {
+        const returnIdInput = document.getElementById('search-supplier-return-id').value.toLowerCase();
+        const supplierIdInput = document.getElementById('search-supplier-id').value.toLowerCase();
+        const returnDateInput = document.getElementById('search-supplier-return-date').value;
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            
+            const returnId = cells[1] ? cells[1].textContent.toLowerCase() : '';
+            const supplierId = cells[2] ? cells[2].textContent.toLowerCase() : '';
+            const returnDate = cells[4] ? cells[4].textContent : ''; // Return Date is in column 4 for supplier
+            
+            const matchesReturnId = !returnIdInput || returnId.includes(returnIdInput);
+            const matchesSupplierId = !supplierIdInput || supplierId.includes(supplierIdInput);
+            const matchesReturnDate = !returnDateInput || returnDate.startsWith(returnDateInput);
+            
+            if (matchesReturnId && matchesSupplierId && matchesReturnDate) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+}
+
+function clearSearch() {
+    const activeTab = document.querySelector('.tabs span.active').getAttribute('data-type');
+    const tableBody = activeTab === 'customer' 
+        ? document.getElementById('customer_returns-table-body').getElementsByTagName('tbody')[0]
+        : document.getElementById('supplier-table').getElementsByTagName('tbody')[0];
+    
+    if (activeTab === 'customer') {
+        document.getElementById('search-customer-return-id').value = '';
+        document.getElementById('search-customer-id').value = '';
+        document.getElementById('search-customer-created-date').value = '';
+    } else {
+        document.getElementById('search-supplier-return-id').value = '';
+        document.getElementById('search-supplier-id').value = '';
+        document.getElementById('search-supplier-return-date').value = '';
+    }
+    
+    const rows = tableBody.getElementsByTagName('tr');
+    for (let i = 0; i < rows.length; i++) {
+        rows[i].style.display = '';
+    }
+}
+
+// Add event listener for Enter key
+document.querySelectorAll('.search-container input').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchTable();
+        }
+    });
+});
+
 
 
 </script>
@@ -473,14 +566,31 @@ function deleteSelectedRows() {
         <span data-type="supplier" onclick="showTable('supplier')">Supplier</span>
     </div>
     <hr>
-    <!-- Search Fields -->
-    <div class="search-container">
-        <input type="text" placeholder="Customer Return ID">
-        <input type="text" placeholder="Sales ID">
-        <input type="text" placeholder="Product ID">
-        <input type="text" placeholder="Reason">
-        <button class="search-btn">SEARCH</button>
-        <button class="clear-btn">CLEAR</button>
+
+
+        <!-- Search Fields -->
+<div class="search-container" id="customer-search" style="display: block;">
+    <input type="text" id="search-customer-return-id" placeholder="Customer Return ID">
+    <input type="text" id="search-customer-id" placeholder="Customer ID">
+    <input type="date" id="search-customer-created-date" placeholder="Created Date">
+    <button class="search-btn" onclick="searchTable()">SEARCH</button>
+    <button class="clear-btn" onclick="clearSearch()">CLEAR</button>
+</div>
+
+<div class="search-container" id="supplier-search" style="display: none;">
+    <input type="text" id="search-supplier-return-id" placeholder="Supplier Return ID">
+    <input type="text" id="search-supplier-id" placeholder="Supplier ID">
+    <input type="date" id="search-supplier-return-date" placeholder="Return Date">
+    <button class="search-btn" onclick="searchTable()">SEARCH</button>
+    <button class="clear-btn" onclick="clearSearch()">CLEAR</button>
+</div>
+
+    <div class="search-container" id="supplier-search" style="display: none;">
+        <input type="text" id="search-supplier-return-id" placeholder="Supplier Return ID">
+        <input type="text" id="search-supplier-id" placeholder="Supplier ID">
+        <input type="date" id="search-supplier-return-date" placeholder="Return Date">
+        <button class="search-btn" onclick="searchTable()">SEARCH</button>
+        <button class="clear-btn" onclick="clearSearch()">CLEAR</button>
     </div>
 
 
