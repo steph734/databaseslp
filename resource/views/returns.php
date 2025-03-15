@@ -81,7 +81,19 @@ if (!$result_supplier) {
     }
 
     .create-btn {
-        background: #6b8e5e;
+        background-color: rgb(255, 255, 255);
+        color: rgb(81, 2, 2);
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid rgb(81, 2, 2);
+    }
+
+    .create-btn:hover {
+        background-color: rgb(81, 2, 2);
+        color: white;
     }
 
     .edit-btn {
@@ -90,7 +102,12 @@ if (!$result_supplier) {
     }
 
     .delete-btn {
-        background: #ff6347;
+        background: #34502b;
+    }
+
+    .delete-btn:hover {
+        background-color:  #34502b;
+        color: white;
     }
 
     /* Table Styling */
@@ -466,13 +483,12 @@ function deleteSelectedRows() {
         <button class="clear-btn">CLEAR</button>
     </div>
 
+
     <!-- Table Controls -->
     <div class="table-controls">
-        <button type="button" class="create-btn" onclick="openCreateModal()">
-            CREATE NEW <i class="fa fa-plus"></i>
+        <button type="btn-add active" class="create-btn" onclick="openCreateModal()"> CREATE NEW <i class="fa fa-add"></i>
         </button>
-        <button type="button" class="delete-btn" onclick="deleteSelectedRows()">
-            DELETE <i class="fa fa-trash"></i>
+        <button type="btn-delete active" class="delete-btn" onclick="deleteSelectedRows()"> DELETE <i class="fa fa-trash"></i>
         </button>
     </div>
 

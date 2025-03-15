@@ -231,105 +231,47 @@ if (isset($_SESSION['search_results'])) {
         </div>
     </div>
 
-    <!-- Create Modal -->
-    <div class="modal fade" id="create" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="../../handlers/createcustomer.php" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" name="name" id="create_name" class="form-control" >
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Contact</label>
-                            <input type="text" name="contact" id="create_contact" class="form-control" >
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <input type="text" name="address" id="create_address" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Customer Type</label>
-                            <select name="customertype" id="create_customertype" class="form-control" required>
-                                <option value="">Select Customer Type</option>
-                                <?php
-                                $typeResult = $conn->query("SELECT type_id, type_name FROM Customer_Type");
-                                while ($row = $typeResult->fetch_assoc()) {
-                                    echo "<option value='{$row['type_id']}'>{$row['type_name']}</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="submit" name="submit" class="btn btn-success">Submit</button>
-                            <button type="reset" class="btn btn-primary">Clear</button>
-                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </form>
-                </div>
+<!-- Create Modal -->
+<div class="modal fade" id="create" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="../../handlers/createcustomer.php" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact</label>
+                        <input type="text" name="contact" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="address" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Customer Type</label>
+                        <select name="customertype" class="form-control" required>
+                            <option value="">Select Customer Type</option>
+                            <?php
+                            $typeResult = $conn->query("SELECT type_id, type_name FROM Customer_Type");
+                            while ($row = $typeResult->fetch_assoc()) {
+                                echo "<option value='{$row['type_id']}'>{$row['type_name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="submit" class="btn btn-success">Submit</button>
+                        <button type="reset" class="btn btn-primary">Clear</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    function toggleFields(select, nameInput, contactInput, addressInput) {
-        const REGULAR_CUSTOMER_ID = '2'; // Adjust based on your "Regular" type_id
-        const MEMBER_CUSTOMER_ID = '1'; // Adjust based on your "Member" type_id
-        
-        const isRegularCustomer = select.value === REGULAR_CUSTOMER_ID;
-        
-        // Enable fields for Member, disable for Regular
-        nameInput.disabled = isRegularCustomer;
-        contactInput.disabled = isRegularCustomer;
-        addressInput.disabled = isRegularCustomer;
-        
-        // Add visual feedback
-        [nameInput, contactInput, addressInput].forEach(input => {
-            input.classList.toggle('disabled-field', isRegularCustomer);
-            input.title = isRegularCustomer ? 'Disabled for Regular customers' : '';
-        });
-    }
-
-    function setupModal(modal) {
-        const select = modal.querySelector('select[name="customertype"]');
-        const nameInput = modal.querySelector('input[name="name"]');
-        const contactInput = modal.querySelector('input[name="contact"]');
-        const addressInput = modal.querySelector('input[name="address"]');
-
-        if (select && nameInput && contactInput && addressInput) {
-            // Set initial state when modal opens
-            modal.addEventListener('shown.bs.modal', () => {
-                toggleFields(select, nameInput, contactInput, addressInput);
-            });
-            
-            // Update when customer type changes
-            select.addEventListener('change', () => {
-                toggleFields(select, nameInput, contactInput, addressInput);
-            });
-
-            // Handle reset button in Create modal
-            const resetButton = modal.querySelector('button[type="reset"]');
-            if (resetButton) {
-                resetButton.addEventListener('click', () => {
-                    setTimeout(() => toggleFields(select, nameInput, contactInput, addressInput), 0);
-                });
-            }
-        }
-    }
-
-    // Setup all edit modals
-    document.querySelectorAll('.modal[id^="edit"]').forEach(setupModal);
-    
-    // Setup create modal
-    const createModal = document.getElementById('create');
-    if (createModal) setupModal(createModal);
-});
-    </script>
-</body>
-</html>
+</div>
