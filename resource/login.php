@@ -16,44 +16,45 @@ unset($_SESSION['error']); // Clear error after displaying
     <link rel="stylesheet" href="../statics/css/bootstrap.min.css">
 
     <style>
-        body{
-            font-size: 16px !important;
-        }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
+    body {
+        font-size: 16px !important;
+    }
 
-        .custom-login-btn {
-            background-color: #3a5d39;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            border-radius: 5px;
-        }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
 
-        .custom-login-btn i {
-            color: white;
-            transition: color 0.3s ease-in-out;
-        }
+    .custom-login-btn {
+        background-color: #3a5d39;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        border-radius: 5px;
+    }
 
-        .custom-login-btn:hover {
-            background-color: rgb(253, 255, 253);
-            color: #3a5d39;
-            border: 1px solid #3a5d39;
-        }
+    .custom-login-btn i {
+        color: white;
+        transition: color 0.3s ease-in-out;
+    }
 
-        .custom-login-btn:hover i {
-            color: #3a5d39;
-        }
+    .custom-login-btn:hover {
+        background-color: rgb(253, 255, 253);
+        color: #3a5d39;
+        border: 1px solid #3a5d39;
+    }
+
+    .custom-login-btn:hover i {
+        color: #3a5d39;
+    }
     </style>
 </head>
 
@@ -62,20 +63,25 @@ unset($_SESSION['error']); // Clear error after displaying
         <h2>ADMIN LOGIN</h2>
 
         <?php if ($error == "invalid") : ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
-                Incorrect password. Please try again.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
+            Incorrect password. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <?php elseif ($error == "notfound") : ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
-                User not found. Please check your username.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:12px;">
+            User not found. Please check your username.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <?php elseif ($error == "method") : ?>
-            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size:12px;">
-                Invalid request method.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size:12px;">
+            Invalid request method.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php elseif ($error == "deactivated") : ?>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" style="font-size:12px;">
+            Account deactivated.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <?php endif; ?>
 
         <form action="../handlers/login_handler.php" method="POST">

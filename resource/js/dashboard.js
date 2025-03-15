@@ -1,8 +1,3 @@
-// Sample data (Replace with dynamic data from your database)
-const salesData = [1200, 1500, 1000, 1800, 2200, 2500, 2700];
-const stockData = [50, 30, 80, 20, 60]; // Stock levels for different categories
-const productLabels = ["Rice", "Cans", "Noodles", "Shampoo", "Soap"];
-
 // Sales Trend Chart (Line Chart)
 const ctx1 = document.getElementById("salesChart").getContext("2d");
 new Chart(ctx1, {
@@ -25,7 +20,7 @@ new Chart(ctx1, {
     datasets: [
       {
         label: "Monthly Sales (₱)",
-        data: salesData,
+        data: monthlySales,
         borderColor: "blue",
         borderWidth: 2,
         fill: false,
@@ -40,7 +35,7 @@ const ctx2 = document.getElementById("stockChart").getContext("2d");
 new Chart(ctx2, {
   type: "pie",
   data: {
-    labels: productLabels,
+    labels: stockLabels,
     datasets: [
       {
         data: stockData,
@@ -65,7 +60,7 @@ new Chart(ctx3, {
     datasets: [
       {
         label: "Units Sold",
-        data: [500, 700, 400, 650, 300],
+        data: productData,
         backgroundColor: "rgb(52, 102, 165)",
       },
     ],

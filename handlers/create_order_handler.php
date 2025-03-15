@@ -44,13 +44,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt = $conn->prepare($receiving_details_query);
 
         foreach ($products as $product) {
-            $product_id = getProductId($conn, $product['name']);
+            $product_id = $product['product_id'];
             $quantity = $product['quantity'];
             $unit_cost = $product['unit_cost'];
             $subtotal = $quantity * $unit_cost;
-            $created_by = $_SESSION['admin_id']; // Use session admin ID
+            $created_by = $_SESSION['admin_id'];
 
-            $stmt->bind_param("iiiidi", $receiving_id, $product_id, $quantity, $unit_cost, $subtotal, $created_by);
+            // Validate product_id exists
+            $check_query = "SELECT product_id FROM Product WHERE product_id = ?";
+            $check_stmt = $conn->prepare($check_query);
+            $check_stmt->bind_param("i", $product_id);
+            $check_stmt->execute();
+            $result = $check_stmt->get_result();
+            if ($result->num_rows === 0) {
+                throw new Exception("Product not found with ID: " . htmlspecialchars($product_id));
+            }
+            $check_stmt->close();
+
+            $stmt->bind_param("iiiddi", $receiving_id, $product_id, $quantity, $unit_cost, $subtotal, $created_by);
             $stmt->execute();
         }
         $stmt->close();
@@ -70,19 +81,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $_SESSION['error'] = "Invalid request.";
 header("Location: ../resource/layout/web-layout.php?page=supplier&error=invalid_request");
 exit();
-
-function getProductId($conn, $product_name) {
-    $query = "SELECT product_id FROM Product WHERE product_name = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $product_name);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $stmt->close();
-
-    if ($row) {
-        return $row['product_id'];
-    } else {
-        throw new Exception("Product not found: " . htmlspecialchars($product_name));
-    }
-}

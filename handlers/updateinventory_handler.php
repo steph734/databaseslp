@@ -50,20 +50,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Call the stored procedure
-    $stmt = $conn->prepare("CALL UpdateInventoryStock(?, ?, ?, ?, ?)");
-    $stmt->bind_param("idisi", $product_id, $price, $quantity_to_add, $received_date, $createdbyid);
+    // Begin transaction to ensure both inventory update and audit log entry succeed together
+    $conn->begin_transaction();
 
-    // Try to run it
-    if ($stmt->execute()) {
+    try {
+        // Call the stored procedure
+        $stmt = $conn->prepare("CALL UpdateInventoryStock(?, ?, ?, ?, ?)");
+        $stmt->bind_param("idisi", $product_id, $price, $quantity_to_add, $received_date, $createdbyid);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Failed to update inventory: " . $stmt->error);
+        }
+        $stmt->close();
+
+        // Insert into AuditLog table with a short description
+        $logQuery = "INSERT INTO AuditLog (admin_id, action, description, timestamp) 
+                     VALUES (?, 'Update Inventory', 'Added $quantity_to_add units', NOW())";
+        $logStmt = $conn->prepare($logQuery);
+        $logStmt->bind_param("i", $createdbyid);
+        $logStmt->execute();
+        $logStmt->close();
+
+        // Commit transaction
+        $conn->commit();
+
         $_SESSION['success'] = "Inventory updated!";
         header("Location: ../resource/layout/web-layout.php?page=inventory");
-    } else {
-        $_SESSION['error'] = "Something failed: " . $stmt->error;
+    } catch (Exception $e) {
+        $conn->rollback(); // Rollback if anything fails
+        $_SESSION['error'] = "Something failed: " . $e->getMessage();
         header("Location: ../resource/layout/web-layout.php?page=inventory&error=failed");
     }
-
-    $stmt->close();
 } else {
     $_SESSION['error'] = "Wrong request type!";
     header("Location: ../resource/layout/web-layout.php?page=inventory&error=wrong_request");

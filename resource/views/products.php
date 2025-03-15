@@ -95,323 +95,323 @@ $units = [
 ?>
 
 <style>
-    /* Your existing CSS remains unchanged, with additions for Select2 */
-    html,
-    body {
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
+/* Your existing CSS remains unchanged, with additions for Select2 */
+html,
+body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.main-content {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 20px;
+    overflow: hidden;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: black;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.search-profile {
+    display: flex;
+    align-items: center;
+}
+
+.search-container {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.search-container input,
+.search-container select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-btn,
+.clear-btn {
+    padding: 8px 15px;
+    border: none;
+    background: #34502b;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.clear-btn {
+    border: 1px solid #34502b;
+    background: white;
+    width: 70px;
+    color: #34502b;
+}
+
+.products-table {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+.table-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    gap: 10px;
+    align-items: center;
+}
+
+.create-btn {
+    background: #34502b;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.create-btn:hover {
+    background: white;
+    color: #34502b;
+    border: 1px solid #34502b;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    color: rgb(22, 21, 21) !important;
+}
+
+tr:hover {
+    background: #f1f1f1;
+}
+
+tr.unavailable {
+    background-color: #f8d7da;
+    color: #6c757d;
+}
+
+.btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+}
+
+.btn-warning {
+    background: #ffc107;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-primary {
+    background: white !important;
+    border: 1px solid #34502b !important;
+    color: #34502b;
+}
+
+.btn-add-product {
+    background: #34502b;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: white;
+    color: #34502b;
+    padding: 8px 12px;
+    border: 1px solid #34502b;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content {
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.modal-header {
+    color: #34502b;
+    padding: 15px;
+    border-radius: 5px 5px 0 0;
+}
+
+.modal-footer {
+    display: flex;
+}
+
+.supplier-dropdown,
+.form-control {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.category-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.category-table th,
+.category-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.category-table th {
+    background-color: #e6c200;
+    color: white;
+}
+
+.category-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.btn-delete {
+    background-color: white;
+    color: rgb(81, 2, 2);
+    padding: 8px 15px;
+    border: 1px solid rgb(81, 2, 2);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: rgb(81, 2, 2);
+    color: white;
+}
+
+/* Custom styling for dropdowns */
+.custom-select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    width: 50px;
+}
+
+.select2-container {
+    width: 50px !important;
+}
+
+.select2-selection__rendered {
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    justify-content: center;
+}
+
+.select2-selection__rendered i {
+    font-size: 16px;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #34502b;
+    box-shadow: 0 0 5px rgba(52, 80, 43, 0.5);
+}
+
+.select2-dropdown {
+    width: 200px !important;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+}
+
+.select2-results__option {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
     }
 
     .main-content {
-        margin-left: 250px;
-        width: calc(100% - 250px);
-        padding: 20px;
-        overflow: hidden;
-    }
-
-    header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: black;
-        padding: 15px;
-        border-radius: 5px;
-    }
-
-    .search-profile {
-        display: flex;
-        align-items: center;
+        margin-left: 200px;
+        width: calc(100% - 200px);
     }
 
     .search-container {
-        margin: 20px 0;
-        display: flex;
-        gap: 10px;
-    }
-
-    .search-container input,
-    .search-container select {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    .search-btn,
-    .clear-btn {
-        padding: 8px 15px;
-        border: none;
-        background: #34502b;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 12px;
-    }
-
-    .clear-btn {
-        border: 1px solid #34502b;
-        background: white;
-        width: 70px;
-        color: #34502b;
-    }
-
-    .products-table {
-        background: white;
-        padding: 15px;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        overflow-x: auto;
+        flex-direction: column;
     }
 
     .table-controls {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 10px;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .create-btn {
-        background: #34502b;
-        color: white;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-    }
-
-    .create-btn:hover {
-        background: white;
-        color: #34502b;
-        border: 1px solid #34502b;
-        transform: translateY(-1px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .table-responsive {
-        max-width: 100%;
-        overflow-x: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th,
-    td {
-        text-align: center;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        color: rgb(22, 21, 21) !important;
-    }
-
-    tr:hover {
-        background: #f1f1f1;
-    }
-
-    tr.unavailable {
-        background-color: #f8d7da;
-        color: #6c757d;
-    }
-
-    .btn {
-        padding: 5px 10px;
-        border-radius: 5px;
-        text-decoration: none;
-        color: white;
-    }
-
-    .btn-warning {
-        background: #ffc107;
-    }
-
-    .btn-danger {
-        background: #dc3545;
-    }
-
-    .btn-primary {
-        background: white !important;
-        border: 1px solid #34502b !important;
-        color: #34502b;
-    }
-
-    .btn-add-product {
-        background: #34502b;
-        color: white;
-        padding: 8px 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-cancel {
-        background: white;
-        color: #34502b;
-        padding: 8px 12px;
-        border: 1px solid #34502b;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .modal-content {
-        padding: 20px;
-        border-radius: 5px;
-    }
-
-    .modal-header {
-        color: #34502b;
-        padding: 15px;
-        border-radius: 5px 5px 0 0;
-    }
-
-    .modal-footer {
-        display: flex;
-    }
-
-    .supplier-dropdown,
-    .form-control {
-        width: 100%;
-        padding: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: white;
-    }
-
-    .category-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
-
-    .category-table th,
-    .category-table td {
-        padding: 8px;
-        border-bottom: 1px solid #ddd;
-        text-align: center;
-    }
-
-    .category-table th {
-        background-color: #e6c200;
-        color: white;
-    }
-
-    .category-table tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .btn-delete {
-        background-color: white;
-        color: rgb(81, 2, 2);
-        padding: 8px 15px;
-        border: 1px solid rgb(81, 2, 2);
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-delete:hover {
-        background-color: rgb(81, 2, 2);
-        color: white;
-    }
-
-    /* Custom styling for dropdowns */
-    .custom-select {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 14px;
-        background-color: white;
-        cursor: pointer;
-        width: 50px;
-    }
-
-    .select2-container {
-        width: 50px !important;
-    }
-
-    .select2-selection__rendered {
-        display: flex;
-        align-items: center;
-        padding: 0 5px;
+        flex-wrap: wrap;
         justify-content: center;
     }
 
-    .select2-selection__rendered i {
-        font-size: 16px;
+    .custom-select,
+    .select2-container {
+        width: 50px !important;
+    }
+}
+
+@media (max-width: 500px) {
+    .sidebar {
+        display: none;
     }
 
-    .custom-select:focus {
-        outline: none;
-        border-color: #34502b;
-        box-shadow: 0 0 5px rgba(52, 80, 43, 0.5);
+    .main-content {
+        margin-left: 0;
+        width: 100%;
     }
 
-    .select2-dropdown {
-        width: 200px !important;
-        background-color: white;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 1050;
+    header {
+        flex-direction: column;
+        text-align: center;
     }
 
-    .select2-results__option {
-        padding: 8px;
-        display: flex;
-        align-items: center;
+    .custom-select,
+    .select2-container {
+        width: 50px !important;
     }
-
-    @media (max-width: 768px) {
-        .sidebar {
-            width: 200px;
-        }
-
-        .main-content {
-            margin-left: 200px;
-            width: calc(100% - 200px);
-        }
-
-        .search-container {
-            flex-direction: column;
-        }
-
-        .table-controls {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .custom-select,
-        .select2-container {
-            width: 50px !important;
-        }
-    }
-
-    @media (max-width: 500px) {
-        .sidebar {
-            display: none;
-        }
-
-        .main-content {
-            margin-left: 0;
-            width: 100%;
-        }
-
-        header {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .custom-select,
-        .select2-container {
-            width: 50px !important;
-        }
-    }
+}
 </style>
 
 <div class="main-content">
@@ -488,45 +488,45 @@ $units = [
                 </thead>
                 <tbody id="products-table-body">
                     <?php if ($result->num_rows > 0) : ?>
-                        <?php while ($row = $result->fetch_assoc()) : ?>
-                            <tr class="<?= $row['status'] === 'unavailable' ? 'unavailable' : '' ?>">
-                                <td><input type="checkbox" class="product-checkbox" data-id="<?= $row['product_id'] ?>"></td>
-                                <td><?= $row['product_id'] ?></td>
-                                <td><?= htmlspecialchars($row['product_name']) ?></td>
-                                <td><?= $row['quantity'] ?></td>
-                                <td><?= number_format($row['price'], 2) ?></td>
-                                <td><?= htmlspecialchars($row['unitofmeasurement']) ?></td>
-                                <td><?= $row['category_id'] ?? '-' ?></td>
-                                <td><?= htmlspecialchars($row['supplier_name'] ?? '-') ?></td>
-                                <td><?= ucfirst($row['status']) ?></td>
-                                <td><?= $row['createdbyid'] ?? '-' ?></td>
-                                <td><?= $row['createdate'] ?></td>
-                                <td><?= $row['updatedbyid'] ?? '-' ?></td>
-                                <td><?= $row['updatedate'] ?? '-' ?></td>
-                                <td>
-                                    <button class="btn btn-sm text-warning" onclick='loadEditModal(<?= json_encode($row) ?>)'
-                                        data-bs-toggle="modal" data-bs-target="#editProductModal">
-                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
-                                    </button>
-                                    <?php if ($row['status'] === 'available') : ?>
-                                        <button class="btn btn-sm text-danger"
-                                            onclick="confirmMarkUnavailable(<?= $row['product_id'] ?>)">
-                                            <i class="fa-solid fa-xmark" style="color: rgb(255, 0, 25);"></i> Mark Unavailable
-                                        </button>
-                                    <?php else : ?>
-                                        <button class="btn btn-sm text-success"
-                                            onclick="confirmMarkAvailable(<?= $row['product_id'] ?>)">
-                                            <i class="fa fa-check" style="color: green;"></i> Mark Available
-                                        </button>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
+                    <?php while ($row = $result->fetch_assoc()) : ?>
+                    <tr class="<?= $row['status'] === 'unavailable' ? 'unavailable' : '' ?>">
+                        <td><input type="checkbox" class="product-checkbox" data-id="<?= $row['product_id'] ?>"></td>
+                        <td><?= $row['product_id'] ?></td>
+                        <td><?= htmlspecialchars($row['product_name']) ?></td>
+                        <td><?= $row['quantity'] ?></td>
+                        <td><?= number_format($row['price'], 2) ?></td>
+                        <td><?= htmlspecialchars($row['unitofmeasurement']) ?></td>
+                        <td><?= $row['category_id'] ?? '-' ?></td>
+                        <td><?= htmlspecialchars($row['supplier_name'] ?? '-') ?></td>
+                        <td><?= ucfirst($row['status']) ?></td>
+                        <td><?= $row['createdbyid'] ?? '-' ?></td>
+                        <td><?= $row['createdate'] ?></td>
+                        <td><?= $row['updatedbyid'] ?? '-' ?></td>
+                        <td><?= $row['updatedate'] ?? '-' ?></td>
+                        <td>
+                            <button class="btn btn-sm text-warning" onclick='loadEditModal(<?= json_encode($row) ?>)'
+                                data-bs-toggle="modal" data-bs-target="#editProductModal">
+                                <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
+                            </button>
+                            <?php if ($row['status'] === 'available') : ?>
+                            <button class="btn btn-sm text-danger"
+                                onclick="confirmMarkUnavailable(<?= $row['product_id'] ?>)">
+                                <i class="fa-solid fa-xmark" style="color: rgb(255, 0, 25);"></i> Mark Unavailable
+                            </button>
+                            <?php else : ?>
+                            <button class="btn btn-sm text-success"
+                                onclick="confirmMarkAvailable(<?= $row['product_id'] ?>)">
+                                <i class="fa fa-check" style="color: green;"></i> Mark Available
+                            </button>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
                     <?php else: ?>
-                        <tr>
-                            <td colspan="14" style="text-align: center; padding: 20px; color: #666;">
-                                No products found.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="14" style="text-align: center; padding: 20px; color: #666;">
+                            No products found.</td>
+                    </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -547,21 +547,21 @@ $units = [
                     <label class="my-2">Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
                     <label class="my-2">Quantity:</label>
-                    <input type="number" name="quantity" class="form-control" min="0" value="0" required>
+                    <input type="number" name="quantity" class="form-control" min="0" value="0" disabled>
                     <label class="my-2">Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
                     <label class="my-2">Unit of Measurement:</label>
                     <select name="unitofmeasurement" class="form-control" required>
                         <option value="">Select Unit</option>
                         <?php foreach ($units as $value => $label) : ?>
-                            <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
+                        <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <label class="my-2">Category:</label>
                     <select name="category_id" class="form-control" required>
                         <option value="">Select Category</option>
                         <?php foreach ($categories as $id => $name) : ?>
-                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -588,28 +588,28 @@ $units = [
                     <label>Product Name:</label>
                     <input type="text" name="product_name" class="form-control" required>
                     <label>Quantity:</label>
-                    <input type="number" name="quantity" class="form-control" min="0" required>
+                    <input type="number" name="quantity" class="form-control" min="0" disabled>
                     <label>Price:</label>
                     <input type="number" step="0.01" name="price" class="form-control" required>
                     <label>Unit:</label>
                     <select name="unitofmeasurement" class="form-control" required>
                         <option value="">Select Unit</option>
                         <?php foreach ($units as $value => $label) : ?>
-                            <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
+                        <option value="<?= $value ?>"><?= htmlspecialchars($label) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <label>Category:</label>
                     <select name="category_id" class="form-control" required>
                         <option value="">Select Category</option>
                         <?php foreach ($categories as $id => $name) : ?>
-                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <label>Supplier:</label>
                     <select name="supplier_id" class="form-control">
                         <option value="">Select Supplier</option>
                         <?php foreach ($suppliers as $id => $name) : ?>
-                            <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
+                        <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -652,21 +652,21 @@ $units = [
                     </thead>
                     <tbody id="category-table-body">
                         <?php foreach ($categories as $id => $name) : ?>
-                            <tr class="text-center">
-                                <td><?= htmlspecialchars($id) ?></td>
-                                <td><?= htmlspecialchars($name) ?></td>
-                                <td>
-                                    <button class="btn btn-sm text-warning"
-                                        onclick="loadEditCategory('<?= htmlspecialchars($id) ?>', '<?= htmlspecialchars($name) ?>')"
-                                        data-bs-toggle="modal" data-bs-target="#editCategoryModal">
-                                        <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
-                                    </button>
-                                    <button class="btn btn-sm text-danger"
-                                        onclick="confirmDeleteCategory('<?= htmlspecialchars($id) ?>')">
-                                        <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Delete
-                                    </button>
-                                </td>
-                            </tr>
+                        <tr class="text-center">
+                            <td><?= htmlspecialchars($id) ?></td>
+                            <td><?= htmlspecialchars($name) ?></td>
+                            <td>
+                                <button class="btn btn-sm text-warning"
+                                    onclick="loadEditCategory('<?= htmlspecialchars($id) ?>', '<?= htmlspecialchars($name) ?>')"
+                                    data-bs-toggle="modal" data-bs-target="#editCategoryModal">
+                                    <i class="fa fa-edit" style="color: #ffc107;"></i> Edit
+                                </button>
+                                <!-- <button class="btn btn-sm text-danger"
+                                    onclick="confirmDeleteCategory('<?= htmlspecialchars($id) ?>')">
+                                    <i class="fa fa-trash" style="color: rgb(255, 0, 25);"></i> Delete
+                                </button> -->
+                            </td>
+                        </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
@@ -706,284 +706,284 @@ $units = [
 </div>
 
 <?php if (isset($_SESSION['success'])) : ?>
-    <div class="alert alert-success alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
-        style="width: auto !important; padding-right: 2.5rem !important;">
-        <?= $_SESSION['success']; ?>
-        <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
+<div class="alert alert-success alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
+    style="width: auto !important; padding-right: 2.5rem !important;">
+    <?= $_SESSION['success']; ?>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<?php unset($_SESSION['success']); ?>
 <?php elseif (isset($_SESSION['error'])) : ?>
-    <div class="alert alert-danger alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
-        style="width: auto !important; padding-right: 2.5rem !important;">
-        <?= $_SESSION['error']; ?>
-        <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error']); ?>
+<div class="alert alert-danger alert-dismissible fade show floating-alert d-flex align-items-center" role="alert"
+    style="width: auto !important; padding-right: 2.5rem !important;">
+    <?= $_SESSION['error']; ?>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<?php unset($_SESSION['error']); ?>
 <?php endif ?>
 
 <!-- Include jQuery and Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Initialize Select2 for statusFilter
-        $('#statusFilter').select2({
-            templateResult: formatOption,
-            templateSelection: formatSelection,
-            minimumResultsForSearch: Infinity,
-            dropdownAutoWidth: true,
-            width: '50px'
-        });
-
-        // Initialize Select2 for orderBy
-        $('#orderBy').select2({
-            templateResult: formatOption,
-            templateSelection: formatSelection,
-            minimumResultsForSearch: Infinity,
-            dropdownAutoWidth: true,
-            width: '50px'
-        });
-
-        // Preserve onchange functionality
-        $('#statusFilter, #orderBy').on('change', function() {
-            applyTableFilters();
-        });
-
-        // Load URL parameters into inputs
-        const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('searchProductID').value = urlParams.get('product_id') || '';
-        document.getElementById('searchCategoryID').value = urlParams.get('category_id') || '';
-        document.getElementById('searchName').value = urlParams.get('product_name') || '';
-        document.getElementById('searchPrice').value = urlParams.get('price') || '';
-        document.getElementById('searchStatus').value = urlParams.get('status') || '';
-        document.getElementById('statusFilter').value = urlParams.get('status_filter') || '';
-        document.getElementById('orderBy').value = urlParams.get('order_by') || 'product_id|ASC';
+$(document).ready(function() {
+    // Initialize Select2 for statusFilter
+    $('#statusFilter').select2({
+        templateResult: formatOption,
+        templateSelection: formatSelection,
+        minimumResultsForSearch: Infinity,
+        dropdownAutoWidth: true,
+        width: '50px'
     });
 
-    // Format dropdown options (icon + text)
-    function formatOption(option) {
-        if (!option.element) return option.text;
-        return $('<span><i class="' + $(option.element).data('icon') + ' me-2"></i>' + option.text + '</span>');
-    }
+    // Initialize Select2 for orderBy
+    $('#orderBy').select2({
+        templateResult: formatOption,
+        templateSelection: formatSelection,
+        minimumResultsForSearch: Infinity,
+        dropdownAutoWidth: true,
+        width: '50px'
+    });
 
-    // Format selected option (only icon)
-    function formatSelection(option) {
-        if (!option.element) return option.text;
-        return $('<span><i class="' + $(option.element).data('icon') + '"></i></span>');
-    }
+    // Preserve onchange functionality
+    $('#statusFilter, #orderBy').on('change', function() {
+        applyTableFilters();
+    });
 
-    function toggleSelectAll() {
-        const selectAllCheckbox = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.product-checkbox');
-        checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
-    }
+    // Load URL parameters into inputs
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById('searchProductID').value = urlParams.get('product_id') || '';
+    document.getElementById('searchCategoryID').value = urlParams.get('category_id') || '';
+    document.getElementById('searchName').value = urlParams.get('product_name') || '';
+    document.getElementById('searchPrice').value = urlParams.get('price') || '';
+    document.getElementById('searchStatus').value = urlParams.get('status') || '';
+    document.getElementById('statusFilter').value = urlParams.get('status_filter') || '';
+    document.getElementById('orderBy').value = urlParams.get('order_by') || 'product_id|ASC';
+});
 
-    function getSelectedProductIds() {
-        const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
-        return Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
-    }
+// Format dropdown options (icon + text)
+function formatOption(option) {
+    if (!option.element) return option.text;
+    return $('<span><i class="' + $(option.element).data('icon') + ' me-2"></i>' + option.text + '</span>');
+}
 
-    function markSelectedUnavailable() {
-        const selectedIds = getSelectedProductIds();
-        if (selectedIds.length === 0) {
-            alert("Please select at least one product to mark as unavailable.");
-            return;
-        }
-        fetch('../../handlers/check_status_handler.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product_ids: selectedIds
-                })
+// Format selected option (only icon)
+function formatSelection(option) {
+    if (!option.element) return option.text;
+    return $('<span><i class="' + $(option.element).data('icon') + '"></i></span>');
+}
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
+}
+
+function getSelectedProductIds() {
+    const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+    return Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
+}
+
+function markSelectedUnavailable() {
+    const selectedIds = getSelectedProductIds();
+    if (selectedIds.length === 0) {
+        alert("Please select at least one product to mark as unavailable.");
+        return;
+    }
+    fetch('../../handlers/check_status_handler.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_ids: selectedIds
             })
-            .then(response => response.json())
-            .then(data => {
-                const alreadyUnavailable = data.filter(item => item.status === 'unavailable');
-                if (alreadyUnavailable.length > 0) {
-                    const unavailableIds = alreadyUnavailable.map(item => item.product_id).join(', ');
-                    alert(`The following product(s) are already unavailable: ${unavailableIds}`);
-                    if (alreadyUnavailable.length === selectedIds.length) return;
-                    selectedIds = selectedIds.filter(id => !alreadyUnavailable.some(item => item.product_id == id));
-                    if (selectedIds.length === 0) return;
-                }
-                if (confirm(`Are you sure you want to mark ${selectedIds.length} product(s) as unavailable?`)) {
-                    fetch('../../handlers/mark_unavailable_handler.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                product_ids: selectedIds
-                            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const alreadyUnavailable = data.filter(item => item.status === 'unavailable');
+            if (alreadyUnavailable.length > 0) {
+                const unavailableIds = alreadyUnavailable.map(item => item.product_id).join(', ');
+                alert(`The following product(s) are already unavailable: ${unavailableIds}`);
+                if (alreadyUnavailable.length === selectedIds.length) return;
+                selectedIds = selectedIds.filter(id => !alreadyUnavailable.some(item => item.product_id == id));
+                if (selectedIds.length === 0) return;
+            }
+            if (confirm(`Are you sure you want to mark ${selectedIds.length} product(s) as unavailable?`)) {
+                fetch('../../handlers/mark_unavailable_handler.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_ids: selectedIds
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) location.reload();
-                            else alert('Error: ' + data.error);
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred while marking products as unavailable.');
-                        });
-                }
-            })
-            .catch(error => {
-                console.error('Error checking status:', error);
-                alert('An error occurred while checking product statuses.');
-            });
-    }
-
-    function confirmMarkUnavailable(productId) {
-        fetch('../../handlers/check_status_handler.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product_ids: [productId]
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data[0] && data[0].status === 'unavailable') {
-                    alert('This product is already unavailable.');
-                    return;
-                }
-                if (confirm("Are you sure you want to mark this product as unavailable?")) {
-                    window.location.href = "../../handlers/mark_unavailable_handler.php?id=" + productId;
-                }
-            })
-            .catch(error => {
-                console.error('Error checking status:', error);
-                alert('An error occurred while checking the product status.');
-            });
-    }
-
-    function confirmMarkAvailable(productId) {
-        if (confirm("Are you sure you want to mark this product as available?")) {
-            fetch('../../handlers/mark_available_handler.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId
                     })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) location.reload();
+                        else alert('Error: ' + data.error);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while marking products as unavailable.');
+                    });
+            }
+        })
+        .catch(error => {
+            console.error('Error checking status:', error);
+            alert('An error occurred while checking product statuses.');
+        });
+}
+
+function confirmMarkUnavailable(productId) {
+    fetch('../../handlers/check_status_handler.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                product_ids: [productId]
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data[0] && data[0].status === 'unavailable') {
+                alert('This product is already unavailable.');
+                return;
+            }
+            if (confirm("Are you sure you want to mark this product as unavailable?")) {
+                window.location.href = "../../handlers/mark_unavailable_handler.php?id=" + productId;
+            }
+        })
+        .catch(error => {
+            console.error('Error checking status:', error);
+            alert('An error occurred while checking the product status.');
+        });
+}
+
+function confirmMarkAvailable(productId) {
+    if (confirm("Are you sure you want to mark this product as available?")) {
+        fetch('../../handlers/mark_available_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: productId
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                    else alert('Error: ' + data.error);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while marking the product as available.');
-                });
-        }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert('Error: ' + data.error);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while marking the product as available.');
+            });
     }
+}
 
-    function confirmDeleteCategory(id) {
-        if (confirm("Are you sure you want to delete the category '" + id +
-                "'? This will also delete all related products.")) {
-            window.location.href = "../../handlers/deletecategory_handler.php?id=" + encodeURIComponent(id);
-        }
+function confirmDeleteCategory(id) {
+    if (confirm("Are you sure you want to delete the category '" + id +
+            "'? This will also delete all related products.")) {
+        window.location.href = "../../handlers/deletecategory_handler.php?id=" + encodeURIComponent(id);
     }
+}
 
-    function loadEditModal(product) {
-        document.querySelector("#editProductModal input[name='product_id']").value = product.product_id;
-        document.querySelector("#editProductModal input[name='product_name']").value = product.product_name;
-        document.querySelector("#editProductModal input[name='quantity']").value = product.quantity;
-        document.querySelector("#editProductModal input[name='price']").value = product.price;
-        document.querySelector("#editProductModal select[name='unitofmeasurement']").value = product.unitofmeasurement ||
-            '';
-        document.querySelector("#editProductModal select[name='category_id']").value = product.category_id || '';
-        document.querySelector("#editProductModal select[name='supplier_id']").value = product.supplier_id || '';
+function loadEditModal(product) {
+    document.querySelector("#editProductModal input[name='product_id']").value = product.product_id;
+    document.querySelector("#editProductModal input[name='product_name']").value = product.product_name;
+    document.querySelector("#editProductModal input[name='quantity']").value = product.quantity;
+    document.querySelector("#editProductModal input[name='price']").value = product.price;
+    document.querySelector("#editProductModal select[name='unitofmeasurement']").value = product.unitofmeasurement ||
+        '';
+    document.querySelector("#editProductModal select[name='category_id']").value = product.category_id || '';
+    document.querySelector("#editProductModal select[name='supplier_id']").value = product.supplier_id || '';
+}
+
+function loadEditCategory(categoryId, categoryName) {
+    document.querySelector("#editCategoryModal input[name='category_id']").value = categoryId;
+    document.querySelector("#editCategoryModal input[name='new_category_id']").value = categoryId;
+    document.querySelector("#editCategoryModal input[name='category_name']").value = categoryName;
+}
+
+function searchProducts() {
+    const productId = document.getElementById('searchProductID').value.trim();
+    const categoryId = document.getElementById('searchCategoryID').value.trim();
+    const name = document.getElementById('searchName').value.trim();
+    const price = document.getElementById('searchPrice').value.trim();
+    const status = document.getElementById('searchStatus').value;
+
+    const statusFilter = document.getElementById('statusFilter').value;
+    const orderBy = document.getElementById('orderBy').value;
+
+    let url = '../../resource/layout/web-layout.php?page=products&search=1';
+    const params = [];
+
+    if (productId) params.push(`product_id=${encodeURIComponent(productId)}`);
+    if (categoryId) params.push(`category_id=${encodeURIComponent(categoryId)}`);
+    if (name) params.push(`product_name=${encodeURIComponent(name)}`);
+    if (price) params.push(`price=${encodeURIComponent(price)}`);
+    if (status) params.push(`status=${encodeURIComponent(status)}`);
+    if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
+    if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+
+    if (params.length > 0) url += '&' + params.join('&');
+    window.location.href = url;
+}
+
+function applyTableFilters() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const orderBy = document.getElementById('orderBy').value;
+
+    const productId = document.getElementById('searchProductID').value.trim();
+    const categoryId = document.getElementById('searchCategoryID').value.trim();
+    const name = document.getElementById('searchName').value.trim();
+    const price = document.getElementById('searchPrice').value.trim();
+    const status = document.getElementById('searchStatus').value;
+
+    let url = '../../resource/layout/web-layout.php?page=products';
+    const params = [];
+
+    if (productId || categoryId || name || price || status) params.push('search=1');
+    if (productId) params.push(`product_id=${encodeURIComponent(productId)}`);
+    if (categoryId) params.push(`category_id=${encodeURIComponent(categoryId)}`);
+    if (name) params.push(`product_name=${encodeURIComponent(name)}`);
+    if (price) params.push(`price=${encodeURIComponent(price)}`);
+    if (status) params.push(`status=${encodeURIComponent(status)}`);
+    if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
+    if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+
+    if (params.length > 0) url += '&' + params.join('&');
+    window.location.href = url;
+}
+
+function clearSearch() {
+    document.getElementById('searchProductID').value = '';
+    document.getElementById('searchCategoryID').value = '';
+    document.getElementById('searchName').value = '';
+    document.getElementById('searchPrice').value = '';
+    document.getElementById('searchStatus').value = '';
+
+    const statusFilter = document.getElementById('statusFilter').value;
+    const orderBy = document.getElementById('orderBy').value;
+
+    let url = '../../resource/layout/web-layout.php?page=products';
+    const params = [];
+
+    if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
+    if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
+
+    if (params.length > 0) url += '&' + params.join('&');
+    window.location.href = url;
+}
+
+setTimeout(function() {
+    let alert = document.querySelector(".floating-alert");
+    if (alert) {
+        alert.style.opacity = "0";
+        setTimeout(() => alert.remove(), 500);
     }
-
-    function loadEditCategory(categoryId, categoryName) {
-        document.querySelector("#editCategoryModal input[name='category_id']").value = categoryId;
-        document.querySelector("#editCategoryModal input[name='new_category_id']").value = categoryId;
-        document.querySelector("#editCategoryModal input[name='category_name']").value = categoryName;
-    }
-
-    function searchProducts() {
-        const productId = document.getElementById('searchProductID').value.trim();
-        const categoryId = document.getElementById('searchCategoryID').value.trim();
-        const name = document.getElementById('searchName').value.trim();
-        const price = document.getElementById('searchPrice').value.trim();
-        const status = document.getElementById('searchStatus').value;
-
-        const statusFilter = document.getElementById('statusFilter').value;
-        const orderBy = document.getElementById('orderBy').value;
-
-        let url = '../../resource/layout/web-layout.php?page=products&search=1';
-        const params = [];
-
-        if (productId) params.push(`product_id=${encodeURIComponent(productId)}`);
-        if (categoryId) params.push(`category_id=${encodeURIComponent(categoryId)}`);
-        if (name) params.push(`product_name=${encodeURIComponent(name)}`);
-        if (price) params.push(`price=${encodeURIComponent(price)}`);
-        if (status) params.push(`status=${encodeURIComponent(status)}`);
-        if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
-        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-
-        if (params.length > 0) url += '&' + params.join('&');
-        window.location.href = url;
-    }
-
-    function applyTableFilters() {
-        const statusFilter = document.getElementById('statusFilter').value;
-        const orderBy = document.getElementById('orderBy').value;
-
-        const productId = document.getElementById('searchProductID').value.trim();
-        const categoryId = document.getElementById('searchCategoryID').value.trim();
-        const name = document.getElementById('searchName').value.trim();
-        const price = document.getElementById('searchPrice').value.trim();
-        const status = document.getElementById('searchStatus').value;
-
-        let url = '../../resource/layout/web-layout.php?page=products';
-        const params = [];
-
-        if (productId || categoryId || name || price || status) params.push('search=1');
-        if (productId) params.push(`product_id=${encodeURIComponent(productId)}`);
-        if (categoryId) params.push(`category_id=${encodeURIComponent(categoryId)}`);
-        if (name) params.push(`product_name=${encodeURIComponent(name)}`);
-        if (price) params.push(`price=${encodeURIComponent(price)}`);
-        if (status) params.push(`status=${encodeURIComponent(status)}`);
-        if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
-        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-
-        if (params.length > 0) url += '&' + params.join('&');
-        window.location.href = url;
-    }
-
-    function clearSearch() {
-        document.getElementById('searchProductID').value = '';
-        document.getElementById('searchCategoryID').value = '';
-        document.getElementById('searchName').value = '';
-        document.getElementById('searchPrice').value = '';
-        document.getElementById('searchStatus').value = '';
-
-        const statusFilter = document.getElementById('statusFilter').value;
-        const orderBy = document.getElementById('orderBy').value;
-
-        let url = '../../resource/layout/web-layout.php?page=products';
-        const params = [];
-
-        if (statusFilter) params.push(`status_filter=${encodeURIComponent(statusFilter)}`);
-        if (orderBy) params.push(`order_by=${encodeURIComponent(orderBy)}`);
-
-        if (params.length > 0) url += '&' + params.join('&');
-        window.location.href = url;
-    }
-
-    setTimeout(function() {
-        let alert = document.querySelector(".floating-alert");
-        if (alert) {
-            alert.style.opacity = "0";
-            setTimeout(() => alert.remove(), 500);
-        }
-    }, 4000);
+}, 4000);
 </script>

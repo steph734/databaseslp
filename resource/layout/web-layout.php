@@ -36,11 +36,11 @@ unset($_SESSION['login']);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
-        html,
-        body {
-            overflow-x: hidden;
-            font-size: 14px !important;
-        }
+    html,
+    body {
+        overflow-x: hidden;
+        font-size: 14px !important;
+    }
     </style>
 </head>
 
@@ -60,20 +60,20 @@ unset($_SESSION['login']);
     ?>
 
     <?php if (isset($_SESSION['success'])) : ?>
-        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
-            style="width: 290px !important;">
-            <?= $_SESSION['success']; ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <?php unset($_SESSION['success']); ?>
+    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert"
+        style="width: 290px !important;">
+        <?= $_SESSION['success']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['error'])) : ?>
-        <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
-            style="width: 290px !important;">
-            <?= $_SESSION['error']; ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <?php unset($_SESSION['error']); ?>
+    <div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert"
+        style="width: 290px !important;">
+        <?= $_SESSION['error']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 </body>
 
