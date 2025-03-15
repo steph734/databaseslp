@@ -13,11 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $updatedById = $_SESSION['admin_id'] ?? null; // Fetch admin_id from session
 
     // Check if all required fields are provided, including admin_id
-    if (!$customerId || empty($name) || empty($contact) || empty($address) || !$customerType || !$updatedById) {
-        $_SESSION['error'] = "All fields are required, or you are not logged in as an admin.";
-        header("Location: ../resource/layout/web-layout.php?page=customer");
-        exit();
-    }
+    // if (!$customerId || empty($name) || empty($contact) || empty($address) || !$customerType || !$updatedById) {
+    //     $_SESSION['error'] = "All fields are required, or you are not logged in as an admin.";
+    //     header("Location: ../resource/layout/web-layout.php?page=customer");
+    //     exit();
+    // }
 
     try {
         // Prepare the SQL statement

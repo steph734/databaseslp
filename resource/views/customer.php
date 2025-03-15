@@ -16,10 +16,12 @@ if (isset($_SESSION['search_results'])) {
                      i.createdate,
                      i.updatedbyid,
                      i.updatedate,
-                     m.membership_id
+                     GROUP_CONCAT(m.membership_id SEPARATOR ', ') as membership_ids
               FROM Customer i 
               JOIN customer_type c ON i.type_id = c.type_id
-              LEFT JOIN membership m ON i.customer_id = m.customer_id";
+              LEFT JOIN membership m ON i.customer_id = m.customer_id
+              GROUP BY i.customer_id, i.name, i.contact, i.address, c.type_name, c.type_id, 
+                       i.createdbyid, i.createdate, i.updatedbyid, i.updatedate";
     $result = $conn->query($query);
 }
 ?>
@@ -104,6 +106,7 @@ if (isset($_SESSION['search_results'])) {
                         <th>Contact</th>
                         <th>Address</th>
                         <th>Customer Type</th>
+                        <th>Membership ID(s)</th>
                         <th>Created By ID</th>
                         <th>Create Date</th>
                         <th>Updated By ID</th>
@@ -115,7 +118,7 @@ if (isset($_SESSION['search_results'])) {
                     <?php if ($result && $result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
                             <?php
-                            // Define REGULAR_TYPE_ID to match your database (same as in JS)
+                            // Define REGULAR_TYPE_ID to match your database
                             $REGULAR_TYPE_ID = '2';
                             
                             // If customer type is Regular, override name, contact, and address with '-'
@@ -132,6 +135,7 @@ if (isset($_SESSION['search_results'])) {
                                 <td><?php echo htmlspecialchars($row['contact'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['address'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['type_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['membership_ids'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdbyid'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdate'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['updatedbyid'] ?? '-'); ?></td>
@@ -183,6 +187,11 @@ if (isset($_SESSION['search_results'])) {
                                                         ?>
                                                     </select>
                                                 </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Membership ID(s)</label>
+                                                    <input type="text" name="membership_ids" id="edit_membership_<?php echo $row['customer_id']; ?>" 
+                                                        class="form-control" value="<?php echo htmlspecialchars($row['membership_ids'] ?? ''); ?>" readonly>
+                                                </div>
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-success">Update</button>
                                                     <button type="button" class="btn btn-danger"
@@ -196,7 +205,7 @@ if (isset($_SESSION['search_results'])) {
                         <?php endwhile; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="11" class="text-center">No records found.</td>
+                            <td colspan="12" class="text-center">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -238,6 +247,11 @@ if (isset($_SESSION['search_results'])) {
                                 ?>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Membership ID (optional)</label>
+                            <input type="text" name="membership_ids" id="create_membership" class="form-control" 
+                                placeholder="Enter membership ID(s), e.g., 'M001' or 'M001, M002'">
+                        </div>
                         <div class="modal-footer">
                             <button type="submit" name="submit" class="btn btn-success">Submit</button>
                             <button type="reset" class="btn btn-primary">Clear</button>
@@ -252,9 +266,8 @@ if (isset($_SESSION['search_results'])) {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const REGULAR_TYPE_ID = '2';  // Must match database
-            const MEMBER_TYPE_ID = '1';   // Must match database
 
-            // Toggle fields in modals
+            // Toggle fields in modals based on customer type
             function toggleFields(select, nameInput, contactInput, addressInput) {
                 const isRegular = select.value === REGULAR_TYPE_ID;
                 
@@ -269,37 +282,6 @@ if (isset($_SESSION['search_results'])) {
                 });
             }
 
-            // Validate membership
-            function validateMembership(select, modal) {
-                const warningDiv = modal.querySelector('.membership-warning');
-                
-                if (select.value === MEMBER_TYPE_ID) {
-                    fetch('../../handlers/check_membership.php')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.hasMembership) {
-                                if (!warningDiv) {
-                                    const warning = document.createElement('div');
-                                    warning.className = 'membership-warning text-danger';
-                                    warning.textContent = 'No membership found - will default to Regular';
-                                    select.parentElement.appendChild(warning);
-                                }
-                                select.value = REGULAR_TYPE_ID;
-                                toggleFields(select, 
-                                    modal.querySelector('input[name="name"]'),
-                                    modal.querySelector('input[name="contact"]'),
-                                    modal.querySelector('input[name="address"]')
-                                );
-                            } else if (warningDiv) {
-                                warningDiv.remove();
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                } else if (warningDiv) {
-                    warningDiv.remove();
-                }
-            }
-
             // Setup modal behavior
             function setupModal(modal) {
                 const select = modal.querySelector('select[name="customertype"]');
@@ -310,12 +292,10 @@ if (isset($_SESSION['search_results'])) {
                 if (select && nameInput && contactInput && addressInput) {
                     modal.addEventListener('shown.bs.modal', () => {
                         toggleFields(select, nameInput, contactInput, addressInput);
-                        validateMembership(select, modal);
                     });
                     
                     select.addEventListener('change', () => {
                         toggleFields(select, nameInput, contactInput, addressInput);
-                        validateMembership(select, modal);
                     });
 
                     const resetButton = modal.querySelector('button[type="reset"]');
@@ -323,7 +303,6 @@ if (isset($_SESSION['search_results'])) {
                         resetButton.addEventListener('click', () => {
                             setTimeout(() => {
                                 toggleFields(select, nameInput, contactInput, addressInput);
-                                validateMembership(select, modal);
                             }, 0);
                         });
                     }
@@ -367,7 +346,7 @@ if (isset($_SESSION['search_results'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            location.reload(); // Refresh page after successful deletion
+                            location.reload();
                         } else {
                             alert('Error deleting customers: ' + data.error);
                         }
@@ -395,7 +374,7 @@ if (isset($_SESSION['search_results'])) {
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                location.reload(); // Refresh page after successful deletion
+                                location.reload();
                             } else {
                                 alert('Error deleting customer: ' + data.error);
                             }
