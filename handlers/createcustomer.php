@@ -2,56 +2,54 @@
 session_start();
 include '../database/database.php';
 
-// Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
-    // Sanitize and validate input data
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
-    $contact = filter_input(INPUT_POST, 'contact', FILTER_SANITIZE_STRING);
-    $address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
-    $customerType = filter_input(INPUT_POST, 'customertype', FILTER_VALIDATE_INT);
-    $createdById = $_SESSION['admin_id'] ?? null; // Fetch admin_id from session
+// Define MEMBER_TYPE_ID (adjust based on your database)
+define('MEMBER_TYPE_ID', 1); // Assuming 'Member' type_id is 1
 
-    // Check if all required fields are provided, including admin_id
-//     if (empty($name) || empty($contact) || empty($address) || !$customerType || !$createdById) {
-//         $_SESSION['error'] = "All fields are required, or you are not logged in as an admin.";
-//         header("Location: ../resource/layout/web-layout.php?page=customer");
-//         exit();
-//   }
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name = $_POST['name'] ?? '';
+    $contact = $_POST['contact'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $customertype = $_POST['customertype'] ?? '';
+    $membership_ids = $_POST['membership_ids'] ?? '';
+    $createdbyid = $_SESSION['admin_id'] ?? 0; // Adjust based on your session logic
+    $createdate = date('Y-m-d H:i:s');
 
-
-
-    try {
-        // Prepare the SQL statement
-        // Including updatedbyid and updatedate initialized with createdbyid and NOW()
-        $query = "INSERT INTO Customer (name, contact, address, type_id, createdbyid, createdate, updatedbyid, updatedate) 
-                  VALUES (?, ?, ?, ?, ?, NOW(), ?, NOW())";
-        
-        $stmt = $conn->prepare($query);
-        
-        // Bind parameters (updatedbyid is set to the same as createdbyid initially)
-        $stmt->bind_param("sssiii", $name, $contact, $address, $customerType, $createdById, $createdById);
-        
-        // Execute the statement
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Customer created successfully!";
-        } else {
-            $_SESSION['error'] = "Failed to create customer. Please try again.";
-        }
-        
-        $stmt->close();
-    } catch (Exception $e) {
-        $_SESSION['error'] = "An error occurred: " . $e->getMessage();
+    // Override customertype to "Member" if membership_ids is provided
+    if (!empty($membership_ids)) {
+        $customertype = MEMBER_TYPE_ID;
     }
-    
-    // Close the database connection
-    $conn->close();
-    
-    // Redirect back to the customer page
-    header("Location: ../resource/layout/web-layout.php?page=customer");
-    exit();
+
+    // Insert into Customer table
+    $sql = "INSERT INTO Customer (name, contact, address, type_id, createdbyid, createdate) 
+            VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssiss", $name, $contact, $address, $customertype, $createdbyid, $createdate);
+
+    if ($stmt->execute()) {
+        $customer_id = $conn->insert_id;
+
+        // Insert membership IDs if provided
+        if (!empty($membership_ids)) {
+            $ids = array_filter(array_map('trim', explode(',', $membership_ids))); // Split by comma and clean
+            foreach ($ids as $id) {
+                $sql = "INSERT INTO membership (customer_id, membership_id) VALUES (?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("is", $customer_id, $id);
+                $stmt->execute();
+            }
+        }
+
+        header("Location: ../resource/layout/web-layout.php?page=customer" );
+        exit();
+    } else {
+        // Return error (you might want to redirect with an error message)
+        die("Error creating customer: " . $conn->error);
+    }
 } else {
-    // If accessed directly without POST, redirect to customer page
-    header("Location: ../resource/layout/web-layout.php?page=customer");
-    exit();
+    // Invalid request method
+    http_response_code(405);
+    die("Method Not Allowed");
 }
+
+$conn->close();
 ?>

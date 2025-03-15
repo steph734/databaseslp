@@ -6,7 +6,6 @@ if (isset($_SESSION['search_results'])) {
     $result = $_SESSION['search_results'];
     unset($_SESSION['search_results']);
 } else {
-    // Join Customer with Customer_Type and Membership to check membership status
     $query = "SELECT i.customer_id, 
                      i.name,
                      i.contact,
@@ -17,26 +16,13 @@ if (isset($_SESSION['search_results'])) {
                      i.createdate,
                      i.updatedbyid,
                      i.updatedate,
-                     m.membership_id
+                     GROUP_CONCAT(m.membership_id SEPARATOR ', ') as membership_ids
               FROM Customer i 
               JOIN customer_type c ON i.type_id = c.type_id
-              LEFT JOIN membership m ON i.customer_id = m.customer_id";
+              LEFT JOIN membership m ON i.customer_id = m.customer_id
+              GROUP BY i.customer_id, i.name, i.contact, i.address, c.type_name, c.type_id, 
+                       i.createdbyid, i.createdate, i.updatedbyid, i.updatedate";
     $result = $conn->query($query);
-
-    // Automatically update customer type to "Member" if they have a membership
-    if ($result && $result->num_rows > 0) {
-        $member_type_id = 2; // Replace with your actual "Member" type_id
-        while ($row = $result->fetch_assoc()) {
-            if (!is_null($row['membership_id'])) { // If customer is in membership table
-                $update_query = "UPDATE Customer SET type_id = ? WHERE customer_id = ? AND type_id != ?";
-                $stmt = $conn->prepare($update_query);
-                $stmt->bind_param("isi", $member_type_id, $row['customer_id'], $member_type_id);
-                $stmt->execute();
-            }
-        }
-        // Re-run the query to reflect updates
-        $result = $conn->query($query);
-    }
 }
 ?>
 
@@ -108,17 +94,19 @@ if (isset($_SESSION['search_results'])) {
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#create">
                     CREATE <i class="fa-solid fa-plus"></i>
                 </button>
+                <button class="btn btn-danger" id="delete-selected">DELETE SELECTED</button>
             </div>
 
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th><input type="checkbox"></th>
+                        <th><input type="checkbox" id="select-all"></th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Contact</th>
                         <th>Address</th>
                         <th>Customer Type</th>
+                        <th>Membership ID(s)</th>
                         <th>Created By ID</th>
                         <th>Create Date</th>
                         <th>Updated By ID</th>
@@ -129,13 +117,28 @@ if (isset($_SESSION['search_results'])) {
                 <tbody>
                     <?php if ($result && $result->num_rows > 0) : ?>
                         <?php while ($row = $result->fetch_assoc()) : ?>
+                            <?php
+                            // Define REGULAR_TYPE_ID to match your database
+                            $REGULAR_TYPE_ID = '2';
+                            
+                            // If customer type is Regular, override name, contact, and address with '-'
+                            if ($row['type_id'] == $REGULAR_TYPE_ID) {
+                                $row['name'] = '-';
+                                $row['contact'] = '-';
+                                $row['address'] = '-';
+                            }
+
+                            // If customer has membership, display "Member" as type_name
+                            $display_type_name = !empty($row['membership_ids']) ? 'Member' : $row['type_name'];
+                            ?>
                             <tr>
-                                <td><input type="checkbox"></td>
+                                <td><input type="checkbox" class="select-row" value="<?php echo htmlspecialchars($row['customer_id']); ?>"></td>
                                 <td><?php echo htmlspecialchars($row['customer_id']); ?></td>
-                                <td><?php echo htmlspecialchars($row['name']?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['contact']?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['address']?? '-'); ?></td>
-                                <td><?php echo htmlspecialchars($row['type_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['name'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['contact'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($row['address'] ?? '-'); ?></td>
+                                <td><?php echo htmlspecialchars($display_type_name); ?></td>
+                                <td><?php echo htmlspecialchars($row['membership_ids'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdbyid'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['createdate'] ?? '-'); ?></td>
                                 <td><?php echo htmlspecialchars($row['updatedbyid'] ?? '-'); ?></td>
@@ -143,32 +146,9 @@ if (isset($_SESSION['search_results'])) {
                                 <td>
                                     <button class="btn btn-warning" data-bs-toggle="modal"
                                         data-bs-target="#edit<?php echo $row['customer_id']; ?>">Edit</button>
-                                    <button class="btn btn-danger" data-bs-toggle="modal"
-                                        data-bs-target="#delete<?php echo $row['customer_id']; ?>">Delete</button>
+                                    <button class="btn btn-danger delete-row" data-customer-id="<?php echo htmlspecialchars($row['customer_id']); ?>">Delete</button>
                                 </td>
                             </tr>
-
-                            <!-- Delete Modal -->
-                            <div class="modal fade" id="delete<?php echo $row['customer_id']; ?>" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Delete Customer</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p>Are you sure you want to delete this customer?</p>
-                                            <form action="../../handlers/deletecustomer.php" method="POST">
-                                                <input type="hidden" name="customer_id" value="<?php echo $row['customer_id']; ?>">
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                                <button type="button" class="btn btn-secondary"
-                                                    data-bs-dismiss="modal">Close</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Edit Modal -->
                             <div class="modal fade" id="edit<?php echo $row['customer_id']; ?>" tabindex="-1" aria-hidden="true">
@@ -209,6 +189,14 @@ if (isset($_SESSION['search_results'])) {
                                                         }
                                                         ?>
                                                     </select>
+                                                    <?php if (!empty($row['membership_ids'])) : ?>
+                                                        <small class="form-text text-muted">Displayed as "Member" due to active membership.</small>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Membership ID(s)</label>
+                                                    <input type="text" name="membership_ids" id="edit_membership_<?php echo $row['customer_id']; ?>" 
+                                                        class="form-control" value="<?php echo htmlspecialchars($row['membership_ids'] ?? ''); ?>" readonly>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-success">Update</button>
@@ -223,7 +211,7 @@ if (isset($_SESSION['search_results'])) {
                         <?php endwhile; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="11" class="text-center">No records found.</td>
+                            <td colspan="12" class="text-center">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -264,6 +252,12 @@ if (isset($_SESSION['search_results'])) {
                                 }
                                 ?>
                             </select>
+                            <small class="form-text text-muted">Will display as "Member" if a membership ID is provided.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Membership ID (optional)</label>
+                            <input type="text" name="membership_ids" id="create_membership" class="form-control" 
+                                placeholder="Enter membership ID(s), e.g., 'M001' or 'M001, M002'">
                         </div>
                         <div class="modal-footer">
                             <button type="submit" name="submit" class="btn btn-success">Submit</button>
@@ -277,58 +271,71 @@ if (isset($_SESSION['search_results'])) {
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    function toggleFields(select, nameInput, contactInput, addressInput) {
-        const REGULAR_CUSTOMER_ID = '2'; // Adjust based on your "Regular" type_id
-        const MEMBER_CUSTOMER_ID = '1'; // Adjust based on your "Member" type_id
+       document.addEventListener('DOMContentLoaded', function() {
+    const REGULAR_TYPE_ID = '2';  // Must match database
+
+    // Toggle fields in modals based on customer type
+    function toggleFields(select, nameInput, contactInput, addressInput, membershipInput) {
+        const isRegular = select.value === REGULAR_TYPE_ID;
         
-        const isRegularCustomer = select.value === REGULAR_CUSTOMER_ID;
+        // Toggle name, contact, and address fields
+        nameInput.disabled = isRegular;
+        contactInput.disabled = isRegular;
+        addressInput.disabled = isRegular;
         
-        // Enable fields for Member, disable for Regular
-        nameInput.disabled = isRegularCustomer;
-        contactInput.disabled = isRegularCustomer;
-        addressInput.disabled = isRegularCustomer;
-        
-        // Add visual feedback
         [nameInput, contactInput, addressInput].forEach(input => {
-            input.classList.toggle('disabled-field', isRegularCustomer);
-            input.title = isRegularCustomer ? 'Disabled for Regular customers' : '';
+            input.classList.toggle('disabled-field', isRegular);
+            input.title = isRegular ? 'Disabled for Regular customers' : '';
+            if (isRegular) input.value = ''; // Clear fields for regular
         });
+
+        // Handle membership_ids field
+        if (membershipInput) {
+            membershipInput.disabled = isRegular;
+            membershipInput.classList.toggle('disabled-field', isRegular);
+            membershipInput.title = isRegular ? 'Membership not applicable for Regular customers' : '';
+            if (isRegular) {
+                membershipInput.dataset.originalValue = membershipInput.value; // Store original value
+                membershipInput.value = ''; // Clear membership_ids for regular
+            } else if (membershipInput.dataset.originalValue && !membershipInput.value) {
+                membershipInput.value = membershipInput.dataset.originalValue; // Restore if switching back
+            }
+        }
     }
 
+    // Setup modal behavior
     function setupModal(modal) {
         const select = modal.querySelector('select[name="customertype"]');
         const nameInput = modal.querySelector('input[name="name"]');
         const contactInput = modal.querySelector('input[name="contact"]');
         const addressInput = modal.querySelector('input[name="address"]');
+        const membershipInput = modal.querySelector('input[name="membership_ids"]');
 
-        if (select && nameInput && contactInput && addressInput) {
-            // Set initial state when modal opens
+        if (select && nameInput && contactInput && addressInput && membershipInput) {
             modal.addEventListener('shown.bs.modal', () => {
-                toggleFields(select, nameInput, contactInput, addressInput);
+                toggleFields(select, nameInput, contactInput, addressInput, membershipInput);
             });
             
-            // Update when customer type changes
             select.addEventListener('change', () => {
-                toggleFields(select, nameInput, contactInput, addressInput);
+                toggleFields(select, nameInput, contactInput, addressInput, membershipInput);
             });
 
-            // Handle reset button in Create modal
             const resetButton = modal.querySelector('button[type="reset"]');
             if (resetButton) {
                 resetButton.addEventListener('click', () => {
-                    setTimeout(() => toggleFields(select, nameInput, contactInput, addressInput), 0);
+                    setTimeout(() => {
+                        toggleFields(select, nameInput, contactInput, addressInput, membershipInput);
+                    }, 0);
                 });
             }
         }
     }
 
-    // Setup all edit modals
     document.querySelectorAll('.modal[id^="edit"]').forEach(setupModal);
-    
-    // Setup create modal
     const createModal = document.getElementById('create');
     if (createModal) setupModal(createModal);
+
+    // ... (rest of your existing script remains unchanged)
 });
     </script>
 </body>

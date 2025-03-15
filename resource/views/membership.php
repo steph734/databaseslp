@@ -6,7 +6,7 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    // Query for ALL customers (Customer tab)
+    // Query for ALL customers (Customer tab - kept for potential future use)
     if (isset($_SESSION['search_results'])) {
         $all_customer_result = $_SESSION['search_results'];
         unset($_SESSION['search_results']);
@@ -19,7 +19,7 @@ try {
         $all_customer_result = $conn->query($all_customer_query);
     }
 
-    // Query for member customers only (Member tab dropdown)
+    // Query for member customers only (used for dropdown and filtered customer tab)
     $member_customer_query = "SELECT i.customer_id, i.name, i.contact, i.address, 
                             c.type_name, c.type_id, i.createdbyid, i.createdate,
                             i.updatedbyid, i.updatedate
@@ -199,7 +199,7 @@ try {
             cursor: pointer;
         }
         .status-active { color: #28a745; }
-        .status-inactive { color:  #808080; }
+        .status-inactive { color: #808080; }
         .status-blocked { color: #dc3545; }
         .ui-autocomplete {
             background: white;
@@ -229,8 +229,8 @@ try {
         </header>
 
         <div class="tabs" role="tablist">
-           
-            <span data-tab="memberships" role="tab" aria-selected="false" tabindex="0">Member</span>
+            <span data-tab="memberships" role="tab" aria-selected="true" tabindex="0" class="active">Member</span>
+            
         </div>
         <hr>
 
@@ -252,8 +252,8 @@ try {
                         <option value="inactive">Inactive</option>
                         <option value="blocked">Blocked</option>
                     </select>
-                    <input type="date" name="start_date" max="<?php echo date('Y-m-d'); ?>">
-                    <input type="date" name="renewal_date" min="<?php echo date('Y-m-d'); ?>">
+                    <input type="date" id="startDate" name="start_date" max="<?php echo date('Y-m-d'); ?>">
+                    <input type="date" id="renewalDate" name="renewal_date" min="<?php echo date('Y-m-d'); ?>">
                     <button type="submit" class="btn-save">Save</button>
                 </form>
             </div>
@@ -308,7 +308,7 @@ try {
             </div>
         </div>
 
-        <!-- Customers Content -->
+        <!-- Customers Content (Filtered to Members Only) -->
         <div id="customers-content" style="display: none;" role="tabpanel">
             <div class="header-supplier">
                 <button class="btn-add" data-bs-toggle="modal" data-bs-target="#createCustomer">
@@ -317,9 +317,9 @@ try {
             </div>
 
             <div class="card-container">
-                <?php if ($all_customer_result && $all_customer_result->num_rows > 0): ?>
-                    <?php $all_customer_result->data_seek(0); ?>
-                    <?php while ($row = $all_customer_result->fetch_assoc()): ?>
+                <?php if ($member_customer_result && $member_customer_result->num_rows > 0): ?>
+                    <?php $member_customer_result->data_seek(0); ?>
+                    <?php while ($row = $member_customer_result->fetch_assoc()): ?>
                         <div class="customer-card">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h3>#<?php echo htmlspecialchars($row['customer_id']); ?></h3>
@@ -358,7 +358,7 @@ try {
                         </div>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <p>No customers found.</p>
+                    <p>No member customers found.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -391,7 +391,7 @@ try {
                             <select class="form-control" id="editStatus" name="status" required>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
-                                <option value="pending">Blocked</option>
+                                <option value="blocked">Blocked</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -486,6 +486,17 @@ try {
             document.getElementById('customers-content').style.display = 
                 this.dataset.tab === 'customers' ? 'block' : 'none';
         });
+    });
+
+    // Automatically set renewal date to 1 year from start date
+    document.getElementById('startDate').addEventListener('change', function() {
+        const startDate = new Date(this.value);
+        const renewalDate = new Date(startDate);
+        renewalDate.setFullYear(startDate.getFullYear() + 1);
+        
+        // Format the date as YYYY-MM-DD
+        const formattedRenewalDate = renewalDate.toISOString().split('T')[0];
+        document.getElementById('renewalDate').value = formattedRenewalDate;
     });
 
     $(document).ready(function() {
