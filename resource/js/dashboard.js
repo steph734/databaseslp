@@ -1,3 +1,25 @@
+// Log data for debugging
+console.log(
+  "monthlySales:",
+  typeof monthlySales !== "undefined" ? monthlySales : "Not defined"
+);
+console.log(
+  "stockLabels:",
+  typeof stockLabels !== "undefined" ? stockLabels : "Not defined"
+);
+console.log(
+  "stockData:",
+  typeof stockData !== "undefined" ? stockData : "Not defined"
+);
+console.log(
+  "productLabels:",
+  typeof productLabels !== "undefined" ? productLabels : "Not defined"
+);
+console.log(
+  "productData:",
+  typeof productData !== "undefined" ? productData : "Not defined"
+);
+
 // Sales Trend Chart (Line Chart)
 const ctx1 = document.getElementById("salesChart").getContext("2d");
 new Chart(ctx1, {
@@ -20,13 +42,24 @@ new Chart(ctx1, {
     datasets: [
       {
         label: "Monthly Sales (₱)",
-        data: monthlySales,
+        data:
+          typeof monthlySales !== "undefined" && monthlySales.length
+            ? monthlySales
+            : Array(12).fill(0),
         borderColor: "blue",
         borderWidth: 2,
         fill: false,
         tension: 0.1,
       },
     ],
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
   },
 });
 
@@ -35,10 +68,16 @@ const ctx2 = document.getElementById("stockChart").getContext("2d");
 new Chart(ctx2, {
   type: "pie",
   data: {
-    labels: stockLabels,
+    labels:
+      typeof stockLabels !== "undefined" && stockLabels.length
+        ? stockLabels
+        : ["No Data"],
     datasets: [
       {
-        data: stockData,
+        data:
+          typeof stockData !== "undefined" && stockData.length
+            ? stockData
+            : [1],
         backgroundColor: [
           "rgb(52, 102, 165)",
           "rgb(234, 128, 60)",
@@ -49,6 +88,9 @@ new Chart(ctx2, {
       },
     ],
   },
+  options: {
+    responsive: true,
+  },
 });
 
 // Top Selling Products (Bar Chart)
@@ -56,11 +98,17 @@ const ctx3 = document.getElementById("topProductsChart").getContext("2d");
 new Chart(ctx3, {
   type: "bar",
   data: {
-    labels: productLabels,
+    labels:
+      typeof productLabels !== "undefined" && productLabels.length
+        ? productLabels
+        : ["No Data"],
     datasets: [
       {
         label: "Units Sold",
-        data: productData,
+        data:
+          typeof productData !== "undefined" && productData.length
+            ? productData
+            : [0],
         backgroundColor: "rgb(52, 102, 165)",
       },
     ],

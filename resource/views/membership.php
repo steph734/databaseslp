@@ -1,7 +1,7 @@
 <?php
 try {
     require_once '../../database/database.php';
-    
+
     if (!$conn) {
         throw new Exception("Database connection failed");
     }
@@ -39,7 +39,6 @@ try {
     $membership_stmt = $conn->prepare($membership_query);
     $membership_stmt->execute();
     $membership_result = $membership_stmt->get_result();
-
 } catch (Exception $e) {
     error_log("Database error: " . $e->getMessage());
     http_response_code(500);
@@ -49,175 +48,217 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membership & Customer Management</title>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style>
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .membership-card, .customer-card {
-            position: relative;
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #34502b;
-            padding: 20px;
-            transition: 0.3s;
-            min-height: 200px;
-        }
-        .info-toggle {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: transparent;
-            border: none;
-            font-size: 16px;
-            color: #007bff;
-            cursor: pointer;
-        }
-        .membership-info, .customer-info {
-            display: none;
-            position: absolute;
-            top: 35px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            color: #555;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            text-align: left;
-            width: 180px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .membership-card:hover, .customer-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-        .membership-card h3, .customer-card h3 {
-            margin-bottom: 10px;
-            color: #34502b;
-        }
-        .details p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #555;
-        }
-        .actions {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-edit {
-            background: white;
-            color: #ffc107;
-            border: 1px solid #ffc107;
-        }
-        .btn-edit:hover {
-            background: #ffc107;
-            color: white;
-        }
-        .btn-delete {
-            background: white;
-            color: rgba(255, 0, 25, 0.37);
-            border: 1px solid rgba(255, 0, 25, 0.37);
-        }
-        .btn-delete:hover {
-            background: rgb(255, 0, 25);
-            color: white;
-        }
-        .add-form {
-            display: none;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .add-form input, .add-form select {
-            width: 100%;
-            margin-top: 10px;
-            padding: 8px;
-        }
-        .btn-save {
-            background-color: #34502b;
-            margin-top: 20px;
-            padding: 10px;
-            width: 100px;
-            transition: all 0.2s ease-in-out;
-        }
-        .btn-save:hover {
-            color: #34502b;
-            background-color: white;
-            border: 1px solid #34502b;
-        }
-        .btn-add {
-            background: #34502b;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease-in-out;
-        }
-        .btn-add:hover {
-            transform: translateY(-3px);
-        }
-        .tabs {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        .tabs span {
-            cursor: pointer;
-            color: #000;
-        }
-        .tabs span.active {
-            border-bottom: 2px solid #000;
-        }
-        .status-dropdown {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            font-weight: bold;
-            background: white;
-            width: 120px;
-            cursor: pointer;
-        }
-        .status-active { color: #28a745; }
-        .status-inactive { color: #808080; }
-        .status-blocked { color: #dc3545; }
-        .ui-autocomplete {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        .ui-menu-item {
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .ui-menu-item:hover {
-            background: #f0f0f0;
-        }
+    .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .membership-card,
+    .customer-card {
+        position: relative;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #34502b;
+        padding: 20px;
+        transition: 0.3s;
+        min-height: 200px;
+    }
+
+    .info-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: transparent;
+        border: none;
+        font-size: 16px;
+        color: #007bff;
+        cursor: pointer;
+    }
+
+    .membership-info,
+    .customer-info {
+        display: none;
+        position: absolute;
+        top: 35px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        color: #555;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        text-align: left;
+        width: 180px;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .membership-card:hover,
+    .customer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .membership-card h3,
+    .customer-card h3 {
+        margin-bottom: 10px;
+        color: #34502b;
+    }
+
+    .details p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-edit {
+        background: white;
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+
+    .btn-edit:hover {
+        background: #ffc107;
+        color: white;
+    }
+
+    .btn-delete {
+        background: white;
+        color: rgba(255, 0, 25, 0.37);
+        border: 1px solid rgba(255, 0, 25, 0.37);
+    }
+
+    .btn-delete:hover {
+        background: rgb(255, 0, 25);
+        color: white;
+    }
+
+    .add-form {
+        display: none;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .add-form input,
+    .add-form select {
+        width: 100%;
+        margin-top: 10px;
+        padding: 8px;
+    }
+
+    .btn-save {
+        background-color: #34502b;
+        margin-top: 20px;
+        color: white;
+        padding: 10px;
+        width: 100px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-save:hover {
+        color: #34502b;
+        background-color: white;
+        border: 1px solid #34502b;
+    }
+
+    .btn-add {
+        background: #34502b;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-3px);
+    }
+
+    .tabs {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .tabs span {
+        cursor: pointer;
+        color: #000;
+    }
+
+    .tabs span.active {
+        border-bottom: 2px solid #000;
+    }
+
+    .status-dropdown {
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        font-weight: bold;
+        background: white;
+        width: 120px;
+        cursor: pointer;
+    }
+
+    .status-active {
+        color: #28a745;
+    }
+
+    .status-inactive {
+        color: #808080;
+    }
+
+    .status-blocked {
+        color: #dc3545;
+    }
+
+    .ui-autocomplete {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .ui-menu-item {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .ui-menu-item:hover {
+        background: #f0f0f0;
+    }
     </style>
 </head>
+
 <body>
     <div class="main-content">
         <header>
@@ -230,7 +271,7 @@ try {
 
         <div class="tabs" role="tablist">
             <span data-tab="memberships" role="tab" aria-selected="true" tabindex="0" class="active">Member</span>
-            
+
         </div>
         <hr>
 
@@ -260,50 +301,51 @@ try {
 
             <div class="card-container">
                 <?php if ($membership_result->num_rows === 0): ?>
-                    <p>No members found.</p>
+                <p>No members found.</p>
                 <?php else: ?>
-                    <?php while ($row = $membership_result->fetch_assoc()): ?>
-                        <div class="membership-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h3>#<?php echo htmlspecialchars($row['membership_id']); ?></h3>
-                                <select class="status-dropdown status-<?php echo strtolower($row['status']); ?>"
-                                        onchange="updateMembershipStatus(<?php echo $row['membership_id']; ?>, this.value)">
-                                    <?php
+                <?php while ($row = $membership_result->fetch_assoc()): ?>
+                <div class="membership-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>#<?php echo htmlspecialchars($row['membership_id']); ?></h3>
+                        <select class="status-dropdown status-<?php echo strtolower($row['status']); ?>"
+                            onchange="updateMembershipStatus(<?php echo $row['membership_id']; ?>, this.value)">
+                            <?php
                                     $statuses = ['active', 'inactive', 'blocked'];
                                     foreach ($statuses as $status) {
                                         $selected = $row['status'] === $status ? 'selected' : '';
                                         echo "<option value='$status' $selected class='status-$status'>" . ucfirst($status) . "</option>";
                                     }
                                     ?>
-                                </select>
-                            </div>
-                            <button class="info-toggle" onclick="toggleInfo(this)">
-                                <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
-                            </button>
-                            <div class="membership-info">
-                                <p><strong>Created by:</strong> <?php echo htmlspecialchars($row['createdbyid'] ?? 'N/A'); ?></p>
-                                <p><strong>Created:</strong> <?php echo htmlspecialchars($row['createdate']); ?></p>
-                                <p><strong>Updated by:</strong> <?php echo htmlspecialchars($row['updatedbyid'] ?? 'N/A'); ?></p>
-                                <p><strong>Updated:</strong> <?php echo htmlspecialchars($row['updatedate'] ?? 'N/A'); ?></p>
-                            </div>
-                            <div class="details">
-                                <p><strong>Customer:</strong> <?php echo htmlspecialchars($row['customer_name']); ?></p>
-                                <p><strong>CID:</strong> <?php echo htmlspecialchars($row['customer_id']); ?></p>
-                                <p><strong>Start:</strong> <?php echo htmlspecialchars($row['start_date']); ?></p>
-                                <p><strong>Renew:</strong> <?php echo htmlspecialchars($row['renewal_date']); ?></p>
-                            </div>
-                            <div class="actions">
-                                <button class="btn btn-edit" 
-                                        onclick="loadEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button class="btn btn-delete" 
-                                        onclick="confirmDelete(<?php echo $row['membership_id']; ?>)">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <button class="info-toggle" onclick="toggleInfo(this)">
+                        <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
+                    </button>
+                    <div class="membership-info">
+                        <p><strong>Created by:</strong> <?php echo htmlspecialchars($row['createdbyid'] ?? 'N/A'); ?>
+                        </p>
+                        <p><strong>Created:</strong> <?php echo htmlspecialchars($row['createdate']); ?></p>
+                        <p><strong>Updated by:</strong> <?php echo htmlspecialchars($row['updatedbyid'] ?? 'N/A'); ?>
+                        </p>
+                        <p><strong>Updated:</strong> <?php echo htmlspecialchars($row['updatedate'] ?? 'N/A'); ?></p>
+                    </div>
+                    <div class="details">
+                        <p><strong>Customer:</strong> <?php echo htmlspecialchars($row['customer_name']); ?></p>
+                        <p><strong>CID:</strong> <?php echo htmlspecialchars($row['customer_id']); ?></p>
+                        <p><strong>Start:</strong> <?php echo htmlspecialchars($row['start_date']); ?></p>
+                        <p><strong>Renew:</strong> <?php echo htmlspecialchars($row['renewal_date']); ?></p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-edit"
+                            onclick="loadEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-delete" onclick="confirmDelete(<?php echo $row['membership_id']; ?>)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <?php endwhile; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -318,47 +360,49 @@ try {
 
             <div class="card-container">
                 <?php if ($member_customer_result && $member_customer_result->num_rows > 0): ?>
-                    <?php $member_customer_result->data_seek(0); ?>
-                    <?php while ($row = $member_customer_result->fetch_assoc()): ?>
-                        <div class="customer-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h3>#<?php echo htmlspecialchars($row['customer_id']); ?></h3>
-                            </div>
-                            <button class="info-toggle" onclick="toggleInfo(this)">
-                                <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
-                            </button>
-                            <div class="customer-info">
-                                <p><strong>Created by:</strong> <?php echo htmlspecialchars($row['createdbyid'] ?? 'N/A'); ?></p>
-                                <p><strong>Created:</strong> <?php echo htmlspecialchars($row['createdate'] ?? 'N/A'); ?></p>
-                                <p><strong>Updated by:</strong> <?php echo htmlspecialchars($row['updatedbyid'] ?? 'N/A'); ?></p>
-                                <p><strong>Updated:</strong> <?php echo htmlspecialchars($row['updatedate'] ?? 'N/A'); ?></p>
-                            </div>
-                            <div class="details">
-                                <p><strong>Name:</strong> <?php echo htmlspecialchars($row['name']); ?></p>
-                                <p><strong>Contact:</strong> <?php echo htmlspecialchars($row['contact']); ?></p>
-                                <p><strong>Address:</strong> <?php echo htmlspecialchars($row['address']); ?></p>
-                                <p><strong>Type:</strong> <?php echo htmlspecialchars($row['type_name']); ?></p>
-                            </div>
-                            <div class="actions">
-                                <button class="btn btn-edit" data-bs-toggle="modal"
-                                        data-bs-target="#editCustomer<?php echo $row['customer_id']; ?>">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button class="btn btn-delete" data-bs-toggle="modal"
-                                        data-bs-target="#deleteCustomer<?php echo $row['customer_id']; ?>">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="modal fade" id="editCustomer<?php echo $row['customer_id']; ?>" tabindex="-1">
-                            <!-- Add your edit modal content here -->
-                        </div>
-                        <div class="modal fade" id="deleteCustomer<?php echo $row['customer_id']; ?>" tabindex="-1">
-                            <!-- Add your delete modal content here -->
-                        </div>
-                    <?php endwhile; ?>
+                <?php $member_customer_result->data_seek(0); ?>
+                <?php while ($row = $member_customer_result->fetch_assoc()): ?>
+                <div class="customer-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>#<?php echo htmlspecialchars($row['customer_id']); ?></h3>
+                    </div>
+                    <button class="info-toggle" onclick="toggleInfo(this)">
+                        <i class="fa fa-circle-info" style="color:rgba(0, 0, 0, 0.87);"></i>
+                    </button>
+                    <div class="customer-info">
+                        <p><strong>Created by:</strong> <?php echo htmlspecialchars($row['createdbyid'] ?? 'N/A'); ?>
+                        </p>
+                        <p><strong>Created:</strong> <?php echo htmlspecialchars($row['createdate'] ?? 'N/A'); ?></p>
+                        <p><strong>Updated by:</strong> <?php echo htmlspecialchars($row['updatedbyid'] ?? 'N/A'); ?>
+                        </p>
+                        <p><strong>Updated:</strong> <?php echo htmlspecialchars($row['updatedate'] ?? 'N/A'); ?></p>
+                    </div>
+                    <div class="details">
+                        <p><strong>Name:</strong> <?php echo htmlspecialchars($row['name']); ?></p>
+                        <p><strong>Contact:</strong> <?php echo htmlspecialchars($row['contact']); ?></p>
+                        <p><strong>Address:</strong> <?php echo htmlspecialchars($row['address']); ?></p>
+                        <p><strong>Type:</strong> <?php echo htmlspecialchars($row['type_name']); ?></p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-edit" data-bs-toggle="modal"
+                            data-bs-target="#editCustomer<?php echo $row['customer_id']; ?>">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn btn-delete" data-bs-toggle="modal"
+                            data-bs-target="#deleteCustomer<?php echo $row['customer_id']; ?>">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal fade" id="editCustomer<?php echo $row['customer_id']; ?>" tabindex="-1">
+                    <!-- Add your edit modal content here -->
+                </div>
+                <div class="modal fade" id="deleteCustomer<?php echo $row['customer_id']; ?>" tabindex="-1">
+                    <!-- Add your delete modal content here -->
+                </div>
+                <?php endwhile; ?>
                 <?php else: ?>
-                    <p>No member customers found.</p>
+                <p>No member customers found.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -429,8 +473,8 @@ try {
         var form = document.getElementById("addMemberForm");
         var button = document.querySelector(".btn-add");
         form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
-        button.innerHTML = form.style.display === "block" ? 
-            '<i class="fa fa-times"></i> Close' : 
+        button.innerHTML = form.style.display === "block" ?
+            '<i class="fa fa-times"></i> Close' :
             '<i class="fa fa-add"></i> Add Member';
     }
 
@@ -455,9 +499,10 @@ try {
     }
 
     function updateMembershipStatus(membershipId, newStatus) {
-        const dropdown = document.querySelector(`select[onchange="updateMembershipStatus(${membershipId}, this.value)"]`);
+        const dropdown = document.querySelector(
+            `select[onchange="updateMembershipStatus(${membershipId}, this.value)"]`);
         dropdown.className = `status-dropdown status-${newStatus}`;
-        
+
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "../../handlers/update_membership_status.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -471,7 +516,7 @@ try {
         dropdown.dataset.oldValue = dropdown.value;
         xhr.send(`membership_id=${membershipId}&status=${newStatus}`);
     }
-                    
+
     document.querySelectorAll('.tabs span').forEach(tab => {
         tab.addEventListener('click', function() {
             document.querySelectorAll('.tabs span').forEach(t => {
@@ -480,10 +525,10 @@ try {
             });
             this.classList.add('active');
             this.setAttribute('aria-selected', 'true');
-            
-            document.getElementById('memberships-content').style.display = 
+
+            document.getElementById('memberships-content').style.display =
                 this.dataset.tab === 'memberships' ? 'block' : 'none';
-            document.getElementById('customers-content').style.display = 
+            document.getElementById('customers-content').style.display =
                 this.dataset.tab === 'customers' ? 'block' : 'none';
         });
     });
@@ -493,7 +538,7 @@ try {
         const startDate = new Date(this.value);
         const renewalDate = new Date(startDate);
         renewalDate.setFullYear(startDate.getFullYear() + 1);
-        
+
         // Format the date as YYYY-MM-DD
         const formattedRenewalDate = renewalDate.toISOString().split('T')[0];
         document.getElementById('renewalDate').value = formattedRenewalDate;
@@ -505,7 +550,9 @@ try {
                 $.ajax({
                     url: '../../handlers/get_customers.php',
                     method: 'POST',
-                    data: { term: request.term },
+                    data: {
+                        term: request.term
+                    },
                     dataType: 'json',
                     success: function(data) {
                         response(data);
@@ -517,4 +564,5 @@ try {
     });
     </script>
 </body>
+
 </html>

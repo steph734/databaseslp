@@ -1,7 +1,7 @@
 <?php
 include '../../database/database.php';
 
-$username = ucfirst($_SESSION['username']);
+$username = ucfirst($_SESSION['username'] ?? 'Guest'); // Fallback if username not set
 $login = isset($_SESSION['login']) ? $_SESSION['login'] : '';
 unset($_SESSION['login']);
 
@@ -122,6 +122,13 @@ $returns = getReturnsStats($conn);
 $monthlySales = getMonthlySales($conn);
 $stockLevels = getStockLevels($conn);
 $topProducts = getTopProducts($conn);
+
+// Debug output to verify data
+// echo "<pre>";
+// echo "Monthly Sales: " . print_r($monthlySales, true) . "\n";
+// echo "Stock Levels: " . print_r($stockLevels, true) . "\n";
+// echo "Top Products: " . print_r($topProducts, true) . "\n";
+// echo "</pre>";
 ?>
 
 <div class="main-content">
@@ -269,9 +276,19 @@ $topProducts = getTopProducts($conn);
     </div>
 </div>
 
-<!-- Make sure to include Chart.js before your custom script -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+<!-- Define JavaScript variables before dashboard.js -->
+<script>
+// Pass PHP data to JavaScript with fallbacks
+const monthlySales = <?php echo json_encode($monthlySales) ?: '[]'; ?>;
+const stockLabels = <?php echo json_encode($stockLevels['labels']) ?: '["No Data"]'; ?>;
+const stockData = <?php echo json_encode($stockLevels['data']) ?: '[0]'; ?>;
+const productLabels = <?php echo json_encode($topProducts['labels']) ?: '["No Data"]'; ?>;
+const productData = <?php echo json_encode($topProducts['data']) ?: '[0]'; ?>;
+</script>
+<!-- Load dashboard.js after variables are defined -->
 <script src="../js/dashboard.js"></script>
+<!-- Alert fade-out script -->
 <script>
 setTimeout(function() {
     let alert = document.querySelector(".floating-alert");
@@ -280,13 +297,6 @@ setTimeout(function() {
         setTimeout(() => alert.remove(), 500);
     }
 }, 4000);
-
-// Pass PHP data to JavaScript
-const monthlySales = <?php echo json_encode($monthlySales); ?>;
-const stockLabels = <?php echo json_encode($stockLevels['labels']); ?>;
-const stockData = <?php echo json_encode($stockLevels['data']); ?>;
-const productLabels = <?php echo json_encode($topProducts['labels']); ?>;
-const productData = <?php echo json_encode($topProducts['data']); ?>;
 </script>
 
 <style>
