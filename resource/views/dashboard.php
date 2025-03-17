@@ -1,9 +1,11 @@
 <?php
+
 include '../../database/database.php';
 
 $username = ucfirst($_SESSION['username'] ?? 'Guest'); // Fallback if username not set
 $login = isset($_SESSION['login']) ? $_SESSION['login'] : '';
-unset($_SESSION['login']);
+// Only unset login after displaying alert to allow persistence for this page load
+
 
 // Total Sales
 function getSalesData($conn)
@@ -123,8 +125,9 @@ $monthlySales = getMonthlySales($conn);
 $stockLevels = getStockLevels($conn);
 $topProducts = getTopProducts($conn);
 
-// Debug output to verify data
+// Debug output (uncomment to verify data)
 // echo "<pre>";
+// echo "Login: " . htmlspecialchars($login) . "\n";
 // echo "Monthly Sales: " . print_r($monthlySales, true) . "\n";
 // echo "Stock Levels: " . print_r($stockLevels, true) . "\n";
 // echo "Top Products: " . print_r($topProducts, true) . "\n";
@@ -133,10 +136,12 @@ $topProducts = getTopProducts($conn);
 
 <div class="main-content">
     <?php if ($login == "valid") : ?>
-    <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
-        Login successfully.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
+            Login successful!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['login']); // Unset after displaying alert 
+        ?>
     <?php endif; ?>
 
     <header>
@@ -276,37 +281,46 @@ $topProducts = getTopProducts($conn);
     </div>
 </div>
 
-
 <!-- Define JavaScript variables before dashboard.js -->
 <script>
-// Pass PHP data to JavaScript with fallbacks
-const monthlySales = <?php echo json_encode($monthlySales) ?: '[]'; ?>;
-const stockLabels = <?php echo json_encode($stockLevels['labels']) ?: '["No Data"]'; ?>;
-const stockData = <?php echo json_encode($stockLevels['data']) ?: '[0]'; ?>;
-const productLabels = <?php echo json_encode($topProducts['labels']) ?: '["No Data"]'; ?>;
-const productData = <?php echo json_encode($topProducts['data']) ?: '[0]'; ?>;
+    // Pass PHP data to JavaScript with fallbacks
+    const monthlySales = <?php echo json_encode($monthlySales) ?: '[]'; ?>;
+    const stockLabels = <?php echo json_encode($stockLevels['labels']) ?: '["No Data"]'; ?>;
+    const stockData = <?php echo json_encode($stockLevels['data']) ?: '[0]'; ?>;
+    const productLabels = <?php echo json_encode($topProducts['labels']) ?: '["No Data"]'; ?>;
+    const productData = <?php echo json_encode($topProducts['data']) ?: '[0]'; ?>;
 </script>
 <!-- Load dashboard.js after variables are defined -->
 <script src="../js/dashboard.js"></script>
 <!-- Alert fade-out script -->
 <script>
-setTimeout(function() {
-    let alert = document.querySelector(".floating-alert");
-    if (alert) {
-        alert.style.opacity = "0";
-        setTimeout(() => alert.remove(), 500);
-    }
-}, 4000);
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+            let alert = document.querySelector(".floating-alert");
+            if (alert) {
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 4000);
+    });
 </script>
 
 <style>
-.clickable-card {
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+    .floating-alert {
+        transition: opacity 0.5s ease;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
 
-.clickable-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .clickable-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 </style>

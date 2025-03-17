@@ -1,13 +1,30 @@
 <?php
 include '../../database/database.php';
 
+
 // Ensure the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../resource/login.php");
+    header("Location: ../login.php");
     exit();
 }
 
 $admin_id = $_SESSION['admin_id'];
+
+// Handle deactivation request
+if (isset($_POST['deactivate']) && $_POST['deactivate'] == "1") {
+    $deactivate_query = "UPDATE admin SET status = 'inactive' WHERE admin_id = ?";
+    $stmt = $conn->prepare($deactivate_query);
+    $stmt->bind_param("i", $admin_id);
+    if ($stmt->execute()) {
+        // Log out the admin after deactivation
+        session_destroy();
+        header("Location: ../login.php?message=Account deactivated successfully");
+        exit();
+    } else {
+        $_SESSION['error'] = "Failed to deactivate account. Please try again.";
+    }
+    $stmt->close();
+}
 
 // Fetch admin details
 $query = "SELECT admin_id, first_name, middle_name, last_name, username, email, phonenumber, role 
@@ -22,7 +39,7 @@ $stmt->close();
 
 if (!$admin) {
     $_SESSION['error'] = "Admin not found.";
-    header("Location: ../resource/layout/web-layout?page=profileadmin");
+    header("Location: ../resource/layout/web-layout.php?page=profileadmin");
     exit();
 }
 ?>
@@ -107,6 +124,7 @@ if (!$admin) {
             z-index: 1050;
             width: auto !important;
             padding-right: 2.5rem !important;
+            transition: opacity 0.5s ease;
         }
 
         .alert-content {
@@ -209,10 +227,10 @@ if (!$admin) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure do you want to deactivate your account? This action will make your account inactive.
+                    Are you sure you want to deactivate your account? This action will make your account inactive.
                 </div>
                 <div class="modal-footer">
-                    <form action="../../handlers/deactivate_account_handler.php" method="POST">
+                    <form action="" method="POST">
                         <input type="hidden" name="deactivate" value="1">
                         <button type="submit" class="btn btn-danger">Yes, Deactivate</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
